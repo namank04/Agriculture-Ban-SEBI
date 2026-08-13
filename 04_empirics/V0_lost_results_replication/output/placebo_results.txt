@@ -1,0 +1,7 @@
+PLACEBO (fake ban 2019-12-20, data < 2021-12-20): beta=-0.0667 (-6.5%), p=0.3443
+  pass rule: ~zero and insignificant; a 'significant effect' here means the design finds effects where none can exist.
+  lead_18_13: beta=+0.0401, p=0.7071
+  lead_12_7: beta=+0.1334, p=0.1843
+  lead_6_2: beta=+0.0696, p=0.1653
+JOINT LEAD TEST (3 half-year lead bins = 0): stat=2.67, p=0.4453
+  pre-registered rule: rejection -> DiD dead, synthetic control primary.

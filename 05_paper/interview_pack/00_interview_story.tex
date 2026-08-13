@@ -1,0 +1,258 @@
+% =====================================================================
+% 00_interview_story.tex - THE interview story, keyed to the three FINAL
+% CV bullets (July 2026). Read this first; 01/02/03 are the deep dives.
+% Compile: pdflatex 00_interview_story.tex
+% =====================================================================
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{framed}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{4pt}
+
+\newenvironment{say}{\begin{framed}\noindent\textbf{Say it like this.}\ \itshape}{\end{framed}}
+\newcommand{\Q}[1]{\smallskip\noindent\textbf{Probe: #1}\\}
+
+\title{\textbf{My Interview Story}\\[4pt]\large The 2021 Agri-Derivatives Ban Evaluation - keyed to my CV bullets}
+\author{}\date{July 2026}
+
+\begin{document}
+\maketitle
+
+% =====================================================================
+\section{The story in two minutes (spoken)}
+
+\begin{say}
+In December 2021 India banned futures trading in seven food commodities - wheat, chana,
+mustard, soybean, paddy, moong, and crude palm oil - on the theory that speculation was
+driving up food prices. My project asks the evaluation question: did the ban actually
+deliver calmer prices, and what did it cost?
+
+There was no ready dataset, so I built one. I pulled about 5.7 million daily mandi price
+records through a rate-limited government-data API - 40 requests an hour, so I wrote a
+resumable downloader that reads the rate-limit headers and sleeps to the reset window -
+plus every palm-oil futures contract from the exchange's own endpoint, and SEBI's monthly
+bulletins for participant data. From that I built a commodity-by-district-by-month
+realized-volatility panel: about 172{,}000 cells across 16 commodities.
+
+The design is banned versus still-trading commodities, before versus after:
+difference-in-differences, plus synthetic control and synthetic DiD, with falsification
+tests I fixed in advance - a fake ban placed in 2019 where nothing happened, and a
+pre-trend test.
+
+Two things happened that taught me more than the headline. First, my initial estimates
+failed my own placebo test - the design ``found'' an effect at the fake 2019 date. Instead
+of softening the test I chased the failure, and it led to a measurement bug: my price
+series carried weekend prices forward while my volatility measure annualised by trading
+days. I filtered to trading days, rebuilt everything, and the falsification battery
+flipped to passing. Second, the comparison group turned out to drive the answer: against
+industrial and spice crops the ban looked like a 20 percent volatility drop, borderline
+significant - but those are not food staples. When I added comparable food crops - barley,
+maize, jowar, bajra - the estimate halved to about minus 10 percent and lost significance.
+
+So my honest conclusion: the feared volatility rise is refuted; the calming effect is
+modest, statistically insignificant in aggregate, and concentrated in chana - the cleanest
+commodity. Wheat's apparent decline vanishes under proper controls; it was export bans and
+stock limits, not the futures ban. And the cost side is real but not where people think:
+hedgers were only about 1.4 percent of turnover pre-ban, while my integration tests show
+banned commodities' spot markets became measurably less efficient - so the ban cost price
+discovery, not hedging.
+\end{say}
+
+\noindent\textbf{The 30-second version:} I built a 5.7M-row panel to test whether India's
+2021 futures ban calmed spot prices. It refutes the feared volatility rise - the effect is
+about minus 10 percent, insignificant, concentrated in chana. My own placebo test caught a
+data bug, and swapping to proper food-crop controls halved the estimate - the two things I
+am proudest of, because both times the checks beat the convenient answer.
+
+% =====================================================================
+\section{Bullet 1 - the causal estimate}
+
+\noindent\emph{``Estimated the causal impact of the 2021 derivatives suspension using
+DiD and Synthetic Control/Synthetic DiD on a 5.7M-row district-level mandi panel,
+refuting the hypothesized volatility rise.''}
+
+\paragraph{The receipts.} Outcome: $\ln$(30-day realized volatility of daily log returns,
+annualised, trading days only), monthly, commodity x district. Estimation sample:
+146{,}507 observations, 2{,}244 commodity-district units, 14 commodity clusters
+(5 treated: chana, mustard, wheat, soybean, moong; 9 donors: castor, guar seed, cotton,
+jeera, turmeric, barley, maize, jowar, bajra). Paddy excluded (price-support censoring:
+40.3\% exactly-flat returns); mislabelled guar series replaced by the verified guar-seed
+series (correlation with futures 0.99 vs 0.04). Treatment dates per commodity (chana
+2021-08-16, mustard 2021-10-08, rest 2021-12-20).
+\begin{itemize}[leftmargin=1.6em,itemsep=1pt]
+  \item DiD: $\hat\beta=-0.103 \Rightarrow -9.8\%$; few-cluster $p=0.145$ (cluster-robust
+        $t$, $G{-}1$ df), wild bootstrap $p=0.153$ - \emph{not significant}.
+  \item Synthetic DiD pooled: $-19.1\%$, placebo SE valid with 9 donors, $z=-1.88$
+        (borderline). Per commodity: chana $-38.7\%$ ($z=-2.05$, the one significant
+        case); wheat $+0.4\%$ ($\approx$ zero); mustard $-15.2$, soybean $-26.1$, moong
+        $-11.5$ (all insignificant).
+  \item Synthetic control: chana $-37.3\%$ at the placebo floor ($p=0.100$, floor $=1/10$
+        with 9 donors); others weak ($p=0.3$-$0.6$).
+  \item Leave-one-out: sign survives every drop ($-7.4\%$ to $-15.2\%$); ex-wheat
+        $-15.2\%$ ($p\approx0.003$, significant); ex-chana $-7.4\%$ - the signal is
+        chana-concentrated. Filters: $-8.7\%$ to $-10.0\%$.
+\end{itemize}
+
+\Q{``You refuted a rise but your estimate is insignificant - so you found nothing?''}
+No - the claim under test was a specific positive: volatility rose 8-10\%. My estimate is
+opposite in sign and the falsification battery is clean, so that claim is dead. What I do
+NOT claim is a significant calming effect: with five treated commodities the honest
+few-cluster inference is coarse, and I report it that way. The strong positive evidence is
+commodity-specific: chana.
+
+\Q{``Why cluster at the commodity level with 2{,}244 units?''}
+Treatment is assigned at the commodity level - districts within a commodity are not
+independent draws of the policy. Clustering anywhere finer would fake precision; I also
+report the wild-cluster bootstrap because even 14 clusters is few.
+
+\Q{``Do your three estimators really agree independently?''}
+No, and I say so: they share one panel and one treated set, and the SDID unit weights come
+out near-uniform, so SDID collapses toward the DiD. I read them as one comparison
+re-weighted - corroboration of sign, not three independent confirmations.
+
+\Q{``Endogeneity - the ban responded to high prices?''}
+Exactly the right worry: post-ban calming could be mean reversion from the run-up that
+triggered the ban. The placebo and pre-trend tests reduce that worry (both clean on the
+final panel), but I frame the result as quasi-causal - ``associated with'' - and the
+donor-sensitivity result shows how much the counterfactual matters.
+
+% =====================================================================
+\section{Bullet 2 - price discovery distortions}
+
+\noindent\emph{``Evaluated price discovery distortions using ICSS-GARCH(1,1) volatility
+modeling and cross-mandi cointegration analysis, finding no volatility-regime break at
+the ban but significantly reduced post-ban spot-market integration and efficiency.''}
+
+\paragraph{The receipts.}
+\begin{itemize}[leftmargin=1.6em,itemsep=1pt]
+  \item \textbf{ICSS-GARCH:} naive pre/post GARCH splits are biased if a variance break is
+        mis-dated, so I detect breaks first (ICSS), then fit GARCH(1,1) within regimes.
+        On fat-tailed mandi returns the textbook detector over-fires (31-38 ``breaks'' per
+        series), so I use the heteroskedasticity-robust variant - which finds at most one
+        break per series and \emph{none near the suspension date} (chana's only break:
+        September 2018, about 761 trading days before its ban). So no evidence the ban
+        shifted the volatility regime.
+  \item \textbf{Cointegration:} per commodity, top-8 mandis by coverage (rule fixed before
+        results), all 28 pairs, Engle-Granger at 5\%, before vs after. Share of
+        cointegrated pairs: banned $-0.16$ vs comparison $+0.06$ - a difference of
+        $-0.22$ (one-sided $p\approx0.07$). Price-gap half-life rose $+1.4$ days for
+        banned commodities. Comparisons \emph{improved} over the same years (the e-NAM
+        expansion), so the banned-commodity deterioration is, if anything, understated.
+\end{itemize}
+
+\Q{``Why not futures-spot basis, the standard price-discovery object?''}
+Because it cannot exist here: banned commodities have no futures after December 2021, so a
+post-ban basis is undefined. Anyone reporting one is reporting something mislabelled. That
+is exactly why I measure price discovery through what remains observable - spot-market
+efficiency and cross-market integration.
+
+\Q{``An early GARCH run showed chana persistence falling 0.99 to 0.78 - what happened?''}
+That number was the calendar-grid artifact wearing a costume: fake weekend zero-returns
+mimic regime change. On clean data it is roughly flat (0.55 to 0.69). I retired it - a
+good example of a dramatic number dying under a data fix.
+
+\Q{``Did you pretest for unit roots before Engle-Granger?''}
+No - I assume log mandi prices are I(1), which is standard and plausible, but I flag the
+missing ADF/KPSS pretest as a refinement. Also honest: only 4 clean banned vs 5 comparison
+commodities, so $p\approx0.07$ is suggestive, not decisive.
+
+% =====================================================================
+\section{Bullet 3 - validation and the two corrections}
+
+\noindent\emph{``Validated identification via placebo-date falsification, pre-trend tests,
+and wild-cluster bootstrap inference, diagnosing a calendar-grid data artifact and
+counterfactual sensitivity that halved the estimate, $-20.7\%$ to $-9.8\%$.''}
+
+\paragraph{The receipts.}
+\begin{itemize}[leftmargin=1.6em,itemsep=1pt]
+  \item \textbf{Placebo:} fake ban at 2019-12-20 on pre-ban data. First corrected run:
+        $-13.6\%$, $p=0.046$ - a FAIL that would have retired the design under my
+        pre-registered rules. Final panel: $-6.5\%$, $p=0.344$ (bootstrap $0.433$) - clean.
+  \item \textbf{Pre-trends:} event-study leads in three half-year bins (binned because 17
+        individual leads exceed what a 14-cluster covariance can test); joint $p=0.445$,
+        no bin individually significant.
+  \item \textbf{Wild-cluster bootstrap:} Rademacher signs per commodity, null imposed,
+        $B=999$, $p=(1+\#\{|t^*|\ge|t|\})/(B+1)$ - the honest few-cluster inference.
+  \item \textbf{The artifact:} price series behaved as 7-day calendar grids (weekend rows
+        carrying Friday's price; 28\% of one series' rows were weekend dates) while
+        realized volatility annualised by $\sqrt{252}$ trading days - a units mismatch
+        contaminating every volatility number. Weekday filter, full rebuild; the
+        falsification battery flipped from failing to passing.
+  \item \textbf{Counterfactual sensitivity:} industrial/spice donors gave $-20.7\%$
+        (few-cluster $p\approx0.026$, bootstrap $0.046$); adding food-cereal donors -
+        the economically right comparison for food staples - halved it to $-9.8\%$,
+        insignificant. Wheat collapsed to $\approx0$, confirming its decline was the
+        export-ban/stock-limit bundle, not the futures ban.
+\end{itemize}
+
+\Q{``Why advertise that your estimate halved? Doesn't that undercut you?''}
+It is the most informative thing I found: the estimate answers to the quality of its
+counterfactual. Reporting $-20.7\%$ against industrial crops would have been publishable
+and wrong-ish; the food-donor number is smaller and honest. I would rather carry a modest
+number I can defend than a large one I cannot.
+
+\Q{``Walk me through catching the artifact.''}
+(Use the two-minute story's middle paragraph; the trigger was the failing placebo, the
+diagnosis was the weekend rows plus $\sqrt{252}$, the cure was the weekday filter, and the
+proof is that only the falsification tests moved - the design itself was sound.)
+
+\Q{``What would you do next?''}
+Finish the oilseed donors (groundnut, sesamum, sunflower - the right comparators for
+mustard/soybean, download in progress); Rambachan-Roth pre-trend sensitivity;
+Callaway-Sant'Anna for staggered adoption; a bootstrap confidence interval; and the
+price-discovery module properly once the exchange grants the pre-ban futures data.
+
+% =====================================================================
+\section{Cross-bullet traps (fast answers)}
+
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{``Only five treated commodities.''} Irreducible - the policy banned seven,
+        two are unusable for spot volatility (palm oil has no mandi spot; paddy is
+        MSP-censored). Every inference choice - clustering, $G{-}1$ df, wild bootstrap,
+        in-space placebos - exists because of it.
+  \item \textbf{``Why is paddy out but wheat in?''} Paddy: 40.3\% exactly-flat daily
+        returns - a government-administered price has no market volatility to measure.
+        Wheat (19.7\%) stays as a flagged robustness case - and under proper donors its
+        effect is $\approx0$ anyway, which I report.
+  \item \textbf{``Spillovers?''} If trading migrated into donor commodities, controls are
+        not purely untreated. I did not test migration (specified, blocked on futures
+        data) - a stated limitation, not a hidden one.
+  \item \textbf{``The guar story?''} Benchmark-validation catch: the series labelled
+        ``guar'' correlated 0.04 with guar futures - it mixed in guar gum, a processed
+        product ten times the price. The true guar-seed series (0.99) replaced it. Moral:
+        validate every series against an independent benchmark.
+  \item \textbf{``Who lost from the ban?''} Not hedgers directly - they were $\approx1.4\%$
+        of turnover (SEBI participant data, the year pre-ban; 42\% proprietary, 57\%
+        client). The measurable loss is informational: efficiency and integration.
+  \item \textbf{``Is the ban good policy then?''} My evidence: it did not destabilise spot
+        prices, delivered at most modest calming (chana), and degraded price discovery.
+        Stability was not disproven; it was not cheap either. I keep the welfare verdict
+        out of the volatility estimate.
+\end{itemize}
+
+% =====================================================================
+\section{Numbers card (memorise these)}
+
+\begin{center}\small
+\begin{tabular}{ll}
+\toprule
+Panel & 5.74M raw rows; 172{,}381 cells; 16 commodities; est.\ N 146{,}507 / 2{,}244 units / 14 clusters \\
+DiD & $-9.8\%$ ($\beta=-0.103$); $p$: 0.145 (CR1), 0.153 (bootstrap) \\
+SDID & pooled $-19.1\%$ ($z=-1.88$); chana $-38.7\%$ ($z=-2.05$); wheat $+0.4\%$ \\
+SCM & chana $-37.3\%$ ($p=0.100$, floor $1/10$) \\
+Leave-one-out & ex-wheat $-15.2\%$ ($p\approx0.003$); ex-chana $-7.4\%$ \\
+Placebo / pre-trends & $-6.5\%$, $p=0.344/0.433$; joint leads $p=0.445$ \\
+Earlier stages & grid data $-16.4\%$ ($p=.029$, placebo FAILED); clean-core $-20.7\%$ ($p\approx.026/.046$) \\
+ICSS & no break near ban; chana's one break 2018-09-14 ($\sim$761 trading days pre-ban) \\
+Integration & coint-share diff $-0.22$ (MWU $p\approx0.069$); half-life $+1.4$ days \\
+Composition & hedgers 1.4\%; proprietary 42\%; client 57\% (NCDEX agri, 2020-21) \\
+Dates & ban 2021-12-20 (chana 2021-08-16, mustard 2021-10-08); extended to 2027-03 \\
+MSP censoring & paddy 40.3\% flat (dropped); wheat 19.7\% (flagged) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}

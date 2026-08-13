@@ -1,0 +1,7 @@
+commodity,treat_date,att_lnrv,att_pct,pre_rmse,rmse_ratio,placebo_p,n_pre,n_post,msp_flag,weights
+chana,2021-08-16,-0.026,-2.6,0.4175,1.02,0.857,54,50,False,jeera:0.172; barley:0.559; maize:0.149; groundnut:0.12
+mustard,2021-10-08,-0.3989,-32.9,0.6535,0.97,0.929,56,48,False,cotton:0.644; barley:0.356
+wheat,2021-12-20,-0.529,-41.1,0.7073,1.03,0.929,58,46,True,cotton:0.709; barley:0.291
+paddy,2021-12-20,-0.0983,-9.4,0.3887,1.2,0.571,58,46,True,cotton:0.506; barley:0.211; maize:0.107; bajra:0.176
+soybean,2021-12-20,-0.0831,-8.0,0.4899,1.35,0.429,58,46,False,castor:0.149; guarseed413:0.046; cotton:0.384; barley:0.044; bajra:0.378
+moong,2021-12-20,-0.0665,-6.4,0.2353,1.43,0.286,58,46,False,castor:0.012; turmeric:0.111; barley:0.21; bajra:0.219; groundnut:0.189; sesamum:0.036; sunflower:0.215

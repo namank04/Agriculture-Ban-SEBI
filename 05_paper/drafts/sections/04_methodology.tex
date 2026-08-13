@@ -1,0 +1,218 @@
+\section{Identification and Methods}
+\label{sec:methodology}
+
+This section sets out the empirical strategy for the central question (C1): whether
+the suspension changed the \emph{spot} realized volatility of the affected commodities,
+relative to a credible counterfactual. We treat the exercise as a policy
+\emph{evaluation} rather than as the estimation of a structural parameter: the
+suspension was not randomly assigned, and we are explicit throughout about the
+selection problem it creates. We deploy several estimators that fail under different,
+and in places complementary, assumptions; we are careful, however, \emph{not} to rest
+the identification claim on their agreement, because they share one panel and the same
+five treated/five donor commodities, so that any agreement is largely mechanical rather
+than independent corroboration. What credibility the point estimate has comes instead
+from its stability to leaving out any single treated commodity and from the
+falsification battery, both reported in Section~\ref{sec:results}. We first describe the outcome
+and the panel; then the difference-in-differences (DiD) baseline; then the
+synthetic-control family that supersedes it as the primary design; then the inference
+machinery appropriate to a setting with very few treated clusters; then the
+volatility-dynamics (GARCH) arm of the secondary question (C2); and finally the
+pre-registration that disciplines these choices.
+
+\subsection{Outcome, panel, and treatment timing}
+
+The outcome is the log of the 30-day realized volatility of daily log spot returns,
+annualized using $\sqrt{252}$ trading days, evaluated monthly: $y_{it} = \ln(\mathrm{rv30})$.
+Realized volatility is computed from district-level mandi modal spot prices
+(MoA Agmarknet, re-served through the CEDA Data Portal API; see Section~\ref{sec:data}),
+spanning 2017-01 to 2025-10. We construct two analytical levels: a national
+(district-median) series used for headline figures and per-commodity synthetic
+controls, and a district panel (commodity $\times$ district $\times$ month, with on the
+order of 1{,}994 commodity-district units assembled; the headline DiD is estimated on
+$104{,}491$ observations across $1{,}570$ units after listwise deletion and the
+within-window exclusions) used for the panel estimators and to escape the few-cluster
+trap discussed below. Robustness twins replace the 30-day window with a
+60-day window.
+
+A measurement detail is load-bearing. The raw mandi series behave as seven-day
+calendar grids---prices are carried across non-trading days---so that annualizing with
+$\sqrt{252}$ trading days mismatches the units and injects spurious zero-return blocks.
+We therefore restrict every series to weekdays before computing returns and realized
+volatility. As documented in Section~\ref{sec:results}, this correction materially
+changes the falsification picture; the entire analysis is run on the trading-day-clean
+series.
+
+Treatment is assigned at the \emph{commodity} level, so all inference is clustered by
+commodity and never over-credits the district count. We use \emph{per-commodity
+(staggered) treatment dates} taken from the policy ledger: chana on 2021-08-16,
+mustard on 2021-10-08, and wheat, soybean, moong (and CPO) on 2021-12-20.\footnote{The
+December 2021 SEBI directions to the exchanges were dated 19~December with the press
+release on 20~December; we date the December cohort to 2021-12-20.} A commodity already
+suspended may not serve as a donor for a later episode.
+
+Two commodities receive special handling, both pre-registered. \emph{Paddy is dropped}
+from the primary analysis: $40.3\%$ of its daily spot returns are exactly flat because
+FCI/state MSP procurement pins the price at the support level for long stretches, so its
+realized volatility is a mechanical censoring artifact rather than market volatility.
+\emph{Wheat is retained but MSP-flagged} ($19.7\%$ flat returns); as a core commodity it
+is kept and read as a robustness check rather than dropped. \emph{CPO has no mandi spot
+series} and is therefore routed out of the spot-volatility track entirely (to the
+domestic--international spread arm, H4). The primary treated set is thus
+\{chana, wheat, soybean, moong, mustard\}.
+
+The donor pool follows the pre-registered ``Option B'': a clean, screened core of
+non-banned industrials and spices---\{castor, guarseed413, cotton, jeera, turmeric\}---augmented
+by non-banned food/oilseed staples (barley, maize, jowar, bajra, ragi, groundnut,
+sesamum, sunflower) that restore the food-inflation/MSP channel on which chana and
+wheat load. Donors must lie in the same or an adjacent commodity group where possible,
+remain traded and liquid through the ban, and carry no own treatment inside the
+estimation window. We use the clean guar underlying \texttt{guarseed413} (correlation
+$0.99$ with the futures) and exclude the gum-contaminated \texttt{guar id~75}
+(correlation $0.04$); cotton's August 2022 unit-break is confined to the futures track.
+
+\subsection{Difference-in-differences baseline}
+
+The two-way fixed-effects baseline is
+\begin{equation}
+y_{it} \;=\; \alpha_i + \lambda_t + \beta\,(\text{banned}_i \times \text{post}_t) + X_{it}'\gamma + \varepsilon_{it},
+\label{eq:did}
+\end{equation}
+with unit fixed effects $\alpha_i$, month fixed effects $\lambda_t$, and standard errors
+clustered at the commodity level. The coefficient of interest is $\beta$, reported as the
+proportional effect $e^{\beta}-1$. We stress that this specification is the \emph{foil},
+not the headline. Its identifying assumption---parallel trends in log volatility---is
+exactly what the suspension's selection-on-the-2021-run-up threatens: the literature on
+selection on a transitory, mean-reverting shock \citep{Ashenfelter1978, ChabeFerret} shows
+that DiD will attribute the subsequent reversion to the policy. We therefore subject
+Equation~\eqref{eq:did} to the falsification battery in Section~\ref{ssec:inference} and
+read it only alongside the synthetic-control family, while noting that the family shares
+the same panel and donor set, so its agreement is corroboration of a weak, non-independent
+kind.
+
+\subsection{The synthetic-control family as the primary design}
+
+Because the binding constraint is policy endogeneity together with few treated and few
+clean control commodities, the primary design is the \emph{synthetic-control (SC) family},
+run as several members rather than as a single estimator. The common logic is that, by
+matching the treated commodity's \emph{actual} pre-ban volatility path---including the 2021
+run-up that selected it for treatment---an SC estimator absorbs the very pre-trend that
+biases DiD. We deploy three members of the family.
+
+\paragraph{(i) Abadie synthetic control (commodity level).}
+For each treated commodity we construct a synthetic counterfactual as a convex combination
+of donor commodities, with weights $w \ge 0$, $\sum w = 1$, fitted to the pre-treatment
+district-median $\ln(\mathrm{rv30})$ path \citep{Abadie2010, AbadieReview}. The treatment
+effect is the post-period gap between the treated path and its synthetic. This is the
+estimator most exposed to overfitting a noisy volatility target \citep{AbadieVives}, which
+is why it is triangulated rather than reported alone.
+
+\paragraph{(ii) District-unit synthetic control.}
+To multiply the effective number of comparisons and exploit cross-sectional variation, we
+also fit one synthetic counterfactual per treated \emph{district} unit, drawing donors from
+the corresponding non-treated district series. This is the route out of the few-cluster
+trap and is the design on which the in-space placebo distribution is richest; with the clean
+core of five donors the placebo floor is coarse, which is the explicit motivation for
+widening the donor pool with food staples.
+
+\paragraph{(iii) Synthetic difference-in-differences.}
+Synthetic DiD \citep{Arkhangelsky2021} combines unit weights (as in SC) with \emph{time}
+weights that down-weight anomalous pre-periods. The time weights are the cleanest available
+answer to the 2021 food-inflation run-up: they discount the very months on which the policy
+was selected, while the unit weights match the cross-sectional level. We report a pooled
+estimate and per-commodity estimates.
+
+These estimators rest on different assumptions---convex-hull spanning and good pre-fit
+(Abadie SC), the same plus disaggregated comparisons (district-unit SC), and a latent
+factor structure with informative time weights (Synthetic DiD)---and the DiD baseline rests
+on parallel trends. \citet{FermanPinto} make the honest caveat explicit: synthetic control
+\emph{reduces but does not eliminate} selection bias under confounding. We therefore do not
+claim that any one of these estimators is unbiased. We also do not lean on the fact that these
+estimators agree on the sign and rough magnitude: because they share one panel, one outcome,
+and the same five treated and five donor commodities---and because the Synthetic DiD unit
+weights turn out close to uniform, so the design collapses toward the DiD---their agreement is
+largely mechanical, one comparison re-weighted rather than several independent confirmations.
+We report it for completeness but treat the leave-one-commodity-out stability of the point
+estimate and the falsification battery, not the across-estimator agreement, as what credibility
+the design carries at this cluster count.
+
+\subsection{Inference with few treated clusters}
+\label{ssec:inference}
+
+With only five treated commodity clusters, conventional asymptotic standard errors are not
+trustworthy and we layer three forms of inference.
+
+\paragraph{Wild-cluster bootstrap.}
+For the DiD coefficient in Equation~\eqref{eq:did} we report a wild-cluster (Webb six-point)
+bootstrap clustered by commodity \citep{CameronGelbachMiller, MacKinnonWebb}, alongside the
+analytic clustered $p$-value, and headline the bootstrap value as the more defensible quantity.
+
+\paragraph{In-space placebos.}
+For the SC family we treat each donor (or donor district) as if it were fake-treated on the
+true date, recompute the gap, and locate the treated unit's effect (or pre/post RMSE ratio)
+in the resulting placebo distribution \citep{Abadie2010}. With a small donor pool the attainable
+placebo $p$-value floor is mechanically coarse (on the order of $1/6$ with the clean core),
+which is why widening the donor pool is the decisive significance lever rather than a cosmetic step.
+
+\paragraph{Placebo-date and pre-trend falsification.}
+Two pre-registered death-tests guard against mistaking mean reversion for a policy effect.
+First, a \emph{placebo-date} test re-runs the entire design with a fake suspension at
+December 2019, using pre-ban data only: a design that ``finds'' an effect where none can
+exist is disqualified. Second, a \emph{joint pre-trend} (event-study leads) test asks whether
+the treated and counterfactual paths were already diverging before the suspension. Under the
+pre-registered rules, a failed pre-trend test kills the DiD regardless of significance, and a
+large placebo effect demotes the DiD magnitude in favour of the SC family. As reported in
+Section~\ref{sec:results}, both tests clear their formal thresholds on the
+trading-day-clean, paddy-dropped data---a reversal of their pre-fix behaviour that we
+document transparently---but each only \emph{marginally}: the placebo still recovers
+$56\%$ of the headline and the joint pre-trend null masks a significant most-recent
+lead bin, so we read this as a marginal pass, not a clean exoneration.
+
+\subsection{Volatility dynamics (C2): ICSS-within-regime GARCH}
+\label{ssec:garch}
+
+The secondary question (C2) concerns whether volatility \emph{dynamics}---persistence and
+the level of conditional variance---shifted around the suspension. The naive design here, a
+GARCH(1,1) with a ban step-dummy comparing pre- versus post-suspension persistence, is doubly
+invalid in this setting. \citet{Hillebrand} and \citet{Lamoureux1990} show that an
+\emph{unmodelled} variance-level break biases estimated GARCH persistence $(\alpha+\beta)$
+upward toward unity, so a single level shift can masquerade as a persistence change; and the
+break date is itself selected on the outcome. We therefore adopt the disciplined baseline of
+\emph{ICSS-then-within-regime} estimation: we first date breaks in the unconditional variance
+using the Inclán--Tiao algorithm with the HAC-corrected Sansó--Aragó--Carrión statistic
+\citep{InclanTiao, Sanso}, then estimate GARCH \emph{within} regimes, and test whether any
+variance break in fact sits at the suspension date rather than elsewhere (the variance-process
+analogue of the C1 placebo). As reported in Section~\ref{sec:results}, this procedure finds no
+variance break near the suspension on the affected series, and the district-median chana GARCH
+is degenerate (persistence pinned near unity); we therefore lean on the C1 spot-volatility
+estimators rather than on GARCH for the volatility verdict. The futures--spot basis arm of C2
+is internally impossible as originally stated---no post-suspension futures exist for the affected
+commodities---and is reframed as a domestic-versus-international spread (future work, H4), blocked
+on vendor futures data.
+
+\subsection{Pre-registration}
+
+To prevent the specification from being reverse-engineered from the answer, the primary C1
+design and the robustness curve were frozen before the synthetic-control results were
+estimated (\texttt{preregistration\_c1.md}). The pre-registration locks the outcome and its
+trading-day construction, the district-panel level and commodity-level clustering, the treated
+set (paddy dropped, wheat MSP-flagged, CPO routed out), the per-commodity staggered dates, the
+donor roster and exclusion windows from the policy ledger, the estimator family, and---crucially---the
+pass/fail rules: ``ban raised volatility'' is supported only if the SC gap is positive in a
+defensible band and the treated RMSE ratio lies in the top tail of the placebo distribution; a
+negative gap that beats the placebos is reported as the suspension being \emph{associated with
+lower} spot volatility, descriptively, without over-causalising; and the headline point estimate
+is reported with its leave-one-commodity-out band and honest few-cluster inference, never as a
+clean across-estimator ``convergence.'' The robustness (specification)
+curve spans $\pm\{30,60\}$-day realized volatility $\times$ \{drop paddy / keep flagged\}
+$\times$ \{core / core+food donors\} $\times$ \{per-commodity dates / single December 2021 date\}.
+
+\subsection{Interpretation}
+
+We read the resulting estimate as quasi-causal and descriptive: the suspension is
+\emph{associated with} a change in spot realized volatility, with endogeneity reduced---the
+placebo-date and pre-trend tests clear their thresholds, if only marginally---but not eliminated. The known limitations are stated
+plainly: few treated clusters (five to six commodities); MSP censoring in the affected food
+staples; the absence of any post-suspension futures for the affected commodities; and a donor
+pool whose food-staple, district-level expansion is in progress and which, once complete, is
+expected to sharpen both the twins and the placebo inference. (Full citations are collected in
+\texttt{references.md}.)

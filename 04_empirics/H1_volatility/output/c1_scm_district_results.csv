@@ -1,0 +1,6 @@
+commodity,treat_date,n_districts,mean_att_lnrv,mean_att_pct,median_att_pct,mean_att_pct_avg,pct_districts_negative,mean_pre_rmse,n_placebo_donors,placebo_p,msp_flag
+chana,2021-08-16,216,-0.6113,-45.7,-33.7,-26.9,77.3,0.7796,9,0.1,False
+mustard,2021-10-08,187,-0.6297,-46.7,-38.4,-25.9,82.4,0.8647,9,0.1,False
+wheat,2021-12-20,247,-0.6217,-46.3,-42.7,-32.9,83.0,0.9838,9,0.1,True
+soybean,2021-12-20,105,-0.3281,-28.0,-32.0,-20.5,81.9,0.5222,9,0.3,False
+moong,2021-12-20,154,-0.2639,-23.2,-7.8,-3.5,54.5,0.6631,9,0.3,False

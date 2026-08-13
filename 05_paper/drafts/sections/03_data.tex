@@ -1,0 +1,150 @@
+\section{Data and Measurement}
+\label{sec:data}
+
+This section describes the price data underlying the analysis, the construction of the
+realized-volatility outcome, a calendar-grid correction that materially affects inference, the
+choice of donor (control) commodities, and the principled exclusions we impose before estimation.
+We also state the data limitations honestly: there are no post-suspension futures for the banned
+commodities, and the district-level food-staple donor pool is still being assembled at the time of
+writing.
+
+\subsection{Source: CEDA / MoA Agmarknet mandi spot prices}
+
+Our primary data are daily wholesale (\emph{mandi}) spot prices for agricultural commodities,
+sourced through the Centre for Economic Data and Analysis (CEDA) Data Portal API, which re-serves
+the official Agmarknet price archive of India's Ministry of Agriculture and Farmers' Welfare (MoA).
+Throughout we cite both the proximate provider (CEDA) and the originating authority (MoA
+Agmarknet); the API delivers cleaned, documented, programmatically retrievable series that we
+validate against the public Agmarknet portal. The reported price is the daily modal (most-frequent)
+transaction price by market, the standard Agmarknet spot concept used in the related literature on
+the suspension (e.g., Aggarwal, Chatterjee \& Sehgal 2023). The CEDA API enforces a hard rate limit
+(40 requests/hour), so the disaggregated district pull is run as a paced, resumable job rather than
+a single bulk download.
+
+The sample spans 2017-01-02 through 2025-10-30 at daily frequency. We retrieve data at two levels of
+aggregation: (i) a national series per commodity, used for headline charts only, and (ii) a
+district-level panel, which is the basis for all estimation. The full district pull comprises on the
+order of 5.74 million market-day observations across roughly 1{,}994 commodity--district units.
+
+We deliberately use spot (mandi) prices rather than futures for the volatility analysis. The
+suspension by construction halted futures trading in the banned commodities, so a post-period
+futures series for the treated group does not exist (Section~\ref{subsec:limits}); spot prices,
+however, are quoted continuously across the entire window for both treated and control commodities,
+making them the only series on which a pre/post, treated/control comparison is even defined. Crude
+palm oil (CPO) is the exception among the banned set: it has no representative mandi spot series and
+is therefore routed out of the spot-volatility track entirely (toward the domestic--international
+spread analysis discussed under~H4), not included among the treated units here.
+
+\subsection{The district panel}
+
+From the daily district-level prices we construct a monthly panel of realized volatility indexed by
+commodity $\times$ district $\times$ month. The assembled panel contains $130{,}143$
+commodity--district--month observations over 2017-02 through 2025-10, spanning $1{,}994$
+commodity--district units; after listwise deletion of rows with missing leads/lags and the
+within-window exclusions, the \emph{headline DiD is estimated on} $104{,}491$ observations across
+$1{,}570$ commodity--district units (the figure reported in Table~\ref{tab:robustness}).
+Working at the district level is a deliberate
+identification choice. Treatment is assigned at the \emph{commodity} level by the regulator, so the
+panel has only a handful of distinct treated clusters (five, after the exclusions below); the
+district disaggregation supplies genuine cross-sectional variation and statistical power for
+panel and synthetic-control estimators, while we continue to \emph{cluster all inference at the
+commodity level} so as never to over-credit the district count as if it were independent
+information. National-mean series are reserved for descriptive charts only: they are not robust (a
+single $\sim$\,\rupee14.3M guar outlier distorts the national mean, which is why district series are
+built as medians) and reduce to a coarse few-versus-few comparison.
+
+\subsection{The realized-volatility measure}
+
+Our outcome is monthly realized volatility computed from daily spot returns. For each
+commodity--district series we form daily log returns, compute the 30-day rolling standard deviation
+of those returns, and annualize by the conventional $\sqrt{252}$ trading-day factor; we then sample
+this series monthly. The estimation outcome is the natural log of this 30-day annualized realized
+volatility, $\ln(\mathrm{rv30})$, which stabilizes the variance and gives the regression
+coefficients a percentage-change interpretation. Pre-registered robustness twins use a 60-day window
+in place of the 30-day window, and a Parkinson high--low estimator where OHLC spot data are
+available.
+
+\subsection{The trading-day (calendar-grid) correction and why it matters}
+
+A subtle but consequential data-handling issue concerns the calendar on which returns are computed.
+The raw mandi series, as delivered, behaved as a 7-day calendar grid: weekend dates carried prices
+forward, so the series contained Saturday and Sunday observations even though no trading occurs on
+those days. Computing daily returns on that 7-day grid and then annualizing with the
+\emph{trading-day} factor $\sqrt{252}$ is a units mismatch---the return interval and the
+annualization constant assume different calendars. The fix is to restrict every series to weekdays
+(Monday--Friday) \emph{before} forming returns and realized volatility, so that the return spacing
+and the $\sqrt{252}$ annualization are consistent.
+
+This correction is not cosmetic; it changes the qualitative verdict of the falsification battery.
+On the uncorrected (calendar-grid) data the naive difference-in-differences design \emph{failed} its
+integrity checks: a fake-ban placebo dated to December~2019 spuriously ``found'' an effect
+($p \approx 0.046$), and the joint pre-trend lead test \emph{rejected} parallel trends
+($p \approx 0.033$). On those grounds the design looked dead. After the weekday filter, dropping
+MSP-censored paddy, and expanding the donor pool toward non-banned food commodities, the same
+diagnostics are much cleaner: the December-2019 placebo is small and insignificant
+($-6.5\%$; analytic $p \approx 0.344$, wild-cluster bootstrap $p \approx 0.433$), and the joint
+pre-trend test no longer rejects parallel trends ($p \approx 0.445$). The current headline estimate
+is correspondingly more conservative than the earlier clean-core run: the aggregate DiD is about
+$-9.8\%$ with few-cluster inference above conventional significance thresholds. The lesson we draw,
+and report, is that a mechanical calendar artifact had been driving the apparent failure of the
+design, while donor choice materially affects the aggregate magnitude; the corrected food-donor
+series are the basis for everything that follows.
+
+\subsection{Donor (control) commodities: Option~B}
+
+Synthetic-control and difference-in-differences estimators require untreated commodities to build the
+counterfactual. Following the precedent set by the related suspension literature (Aggarwal,
+Chatterjee \& Sehgal 2023; Gaurav \& Pandey 2024), donors must satisfy three criteria: they should
+belong to the same or an adjacent commodity group where possible, they must have remained traded and
+liquid through the suspension, and they must carry no own treatment (no commodity-specific policy
+shock) within the estimation window.
+
+We adopt what we label the ``Option~B'' donor pool. The clean, screened core, already in hand, is
+\{castor, guarseed413, cotton, jeera, turmeric\}. To this core we are adding non-banned food and
+oilseed staples---barley, maize, jowar, bajra, ragi, groundnut, sesamum, and sunflower---which
+restore the food-inflation / MSP channel that the treated cereals and oilseeds (chana, wheat,
+mustard) load on, and which the industrial/spice core does not span. The clean five are sufficient to
+produce point estimates today; the food staples are being incorporated into the district panel to
+sharpen inference (see below). Policy-ledger exclusion windows are applied before estimation---for
+example, cotton's August-2022 unit break is confined to the futures track and does not contaminate
+the spot donor series.
+
+\subsection{Principled exclusions}
+
+Three data-quality exclusions are imposed before estimation, each pre-registered.
+
+\paragraph{Paddy dropped (MSP censoring).}
+Paddy is dropped from the primary analysis because its spot price is effectively
+\emph{censored} by minimum-support-price (MSP) procurement. Government procurement (FCI / state
+agencies) pins the paddy price at the support level for extended stretches: $40.3\%$ of paddy's daily
+spot returns are \emph{exactly} flat, against $1$--$6\%$ for clean, market-traded commodities.
+Realized volatility computed on an administratively pinned price is a mechanical artifact of the
+support regime, not a measure of market volatility, so paddy cannot inform a volatility-effect
+estimate and is excluded. Wheat is also MSP-exposed ($19.7\%$ flat returns) but is one of the three
+core commodities of interest; we therefore \emph{retain} wheat with an explicit MSP flag and read its
+result as a robustness check rather than as a clean treated unit.
+
+\paragraph{Guar identifier fix.}
+The guar control required a vendor-identifier correction. The guar series under identifier~75 is
+gum-contaminated and correlates only $0.04$ with the corresponding futures underlying; the clean guar
+underlying (\texttt{guarseed413}, identifier~413) correlates $0.99$ and is the series we use as the
+control. Identifier~75 is dropped.
+
+\subsection{Data limitations}
+\label{subsec:limits}
+
+We are explicit about what the data cannot do. First, \emph{there are no post-suspension futures for
+the banned commodities}: the suspension itself halted that trading, so any analysis requiring a
+post-period banned-commodity futures series---most importantly a conventional futures--spot basis---is
+infeasible as originally posed. Of the seven banned commodities, only CPO (traded on MCX) yields any
+post-suspension banned-futures data; the six NCDEX-traded banned futures are unavailable. This is a
+binding data limitation, not a modeling choice, and it is the reason the basis arm is reframed toward
+a domestic-versus-international spread rather than a domestic futures--spot basis. Second, the
+district-level pull of the food-staple donors is still in progress; the current estimates rest on the
+clean industrial/spice core, and incorporating the food donors at the district level is the explicit
+route to widening the donor pool and sharpening the few-treated-cluster inference. Finally, inference
+remains coarse---roughly five treated commodity clusters---and the wheat result must be read against
+its MSP exposure. We therefore frame the headline as a point estimate whose credibility rests on its
+stability to leaving out any single treated commodity, not on the across-estimator agreement (which,
+sharing one panel and five treated/five donor commodities, is largely mechanical), and as a
+quasi-causal / descriptive association rather than a fully identified causal effect.

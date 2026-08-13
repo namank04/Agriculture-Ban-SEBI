@@ -1,0 +1,556 @@
+% =====================================================================
+% cv_story.tex  —  Living "CV story" reference for the agri-derivatives
+% ban evaluation project.  Two parts:
+%   Part I  — The Story (narrative; grows as the project progresses)
+%   Part II — Methodology Theory (theory -> why we used it -> how we used it)
+%
+% SCOPE: strictly the three CLAIMS-UNDER-VERIFICATION written on the CV (C1, C2, C3).
+%   These are INHERITED claims being TESTED, not current findings:
+%   C1  DiD + event study on a district panel: INHERITED claim spot volatility
+%       +8-10% post-ban.  VERDICT: REFUTED -- current food-donor rerun estimates
+%       aggregate spot volatility about 9.8% LOWER, but not statistically
+%       significant (CR1 p ~= 0.145; wild-bootstrap p ~= 0.153). Chana carries
+%       the strongest commodity-level negative signal.
+%   C2  INHERITED claim of "persistent basis widening" post-ban + GARCH(1,1)
+%       elevated vol sig @ 10%.  VERDICT: basis internally impossible post-ban
+%       (no futures); GARCH "elevated vol" NOT supported (ICSS finds no break);
+%       C2-volatility INCONCLUSIVE.
+%   C3  CPI/WPI + acreage + district production -> inflation transmission (overview only)
+%
+% Maintained by Claude Code; refined as results land.  Last update: 2026-07-04.
+% Compile: pdflatex cv_story.tex
+% =====================================================================
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\newcommand{\todo}[1]{\textcolor{red}{[\,#1\,]}}
+\newcommand{\why}{\smallskip\noindent\textbf{Why we chose it.}\ }
+\newcommand{\how}{\smallskip\noindent\textbf{How we applied it.}\ }
+\newcommand{\thy}{\noindent\textbf{Theory.}\ }
+
+\title{\textbf{Evaluating India's 2021 Agricultural Derivatives Suspension}\\[4pt]
+\large A Working Story and Methodology Reference}
+\author{}
+\date{Last updated: 4 July 2026 \quad(\emph{living document})}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status note, updated 6 July 2026.} The results below are stated on the
+current \emph{food-donor} rerun throughout; the older clean-core $-20.7\%$ appears only as
+the explicitly labelled ``before'' stage of the donor-sensitivity arc. The active result is an aggregate DiD of about $-9.8\%$,
+not significant under few-cluster inference (CR1 $p \approx 0.145$; wild bootstrap
+$p \approx 0.153$), with stronger chana-centered synthetic-control evidence and
+wheat treated as confounded by MSP/export-policy interventions.
+
+\begin{abstract}
+\noindent On 20 December 2021 India's market regulator (SEBI) suspended exchange-traded
+derivatives in seven agricultural commodities to combat food inflation. This project asks
+the evaluation question: \emph{did the suspension actually deliver price stability, and at
+what cost to market function?} This document is a personal reference for the work: Part~I
+tells the story --- how we started, the pipeline we built, the obstacles we hit, how we
+solved them, and what we found. Part~II is the methodology theory underlying the three
+headline analyses (C1--C3), each presented as \emph{theory $\rightarrow$ why we used it
+$\rightarrow$ how we used it}.
+\end{abstract}
+
+\tableofcontents
+\bigskip
+
+% =====================================================================
+\section*{The three claims under verification}
+\addcontentsline{toc}{section}{The three claims under verification}
+The project re-examines three results from an earlier (lost) iteration, under a
+pre-registered verification protocol:
+\begin{description}[leftmargin=2.2em]
+  \item[\textbf{C1}] Difference-in-Differences + event study on a commodity$\times$district
+        panel: \emph{spot-price volatility rose 8--10\% in banned commodities after the
+        suspension.}
+  \item[\textbf{C2}] A ``persistent basis widening'' post-ban, with a GARCH(1,1) model
+        showing elevated conditional volatility, significant at the 10\% level.
+  \item[\textbf{C3}] Transmission to food inflation: CPI/WPI food sub-indices, acreage
+        response, and district production (\emph{overview only}).
+\end{description}
+A guiding principle throughout: this is an active research problem. The \emph{pipeline and
+the economic reasoning} are the asset; point estimates can and will move as data and
+specifications are refined.
+
+% =====================================================================
+\part*{Part I --- The Story}
+\addcontentsline{toc}{part}{Part I --- The Story}
+
+\section{Motivation and origin}
+Food inflation is politically charged in India, and futures markets are a recurring
+scapegoat: the claim is that speculation in derivatives drives up the underlying spot
+("cash") price. Economic theory is ambivalent --- futures can \emph{stabilise} prices by
+aggregating information and enabling hedging, or be blamed for destabilising them --- and
+the Indian policy record reflects this ambivalence (the 2008 Abhijit Sen Committee found no
+conclusive evidence that futures raised spot volatility). The December 2021 suspension is a
+clean natural experiment to test the question again: a sharp, dated policy intervention that
+switched off futures for a specific set of commodities while leaving others trading.
+
+The earlier iteration of this analysis was lost, and its summary contained a result that is
+\emph{internally impossible} (see C2 below). That motivated rebuilding the work from scratch
+with explicit data provenance, reproducible code, and a pre-registered protocol stating in
+advance what would count as confirming or overturning each claim.
+
+\section{Research design in one paragraph}
+The suspension covers seven commodities (wheat, chana/chickpea, mustard, soybean complex,
+non-basmati paddy, moong, and crude palm oil). These form the \emph{treatment} group. A set
+of agricultural commodities that kept trading --- guar seed, castor seed, jeera (cumin),
+turmeric, cotton --- form the \emph{control} (donor) group. The identifying comparison is
+the change in spot-price volatility of treated commodities, before vs.\ after 20 December
+2021, \emph{relative to} the same change in controls. Chana is treated as the cleanest case
+(least confounded by other policy); wheat is the most confounded (export bans, stock limits,
+open-market sales all hit it post-2021); crude palm oil carries the international story.
+
+\section{The data pipeline and the obstacles}
+The single hardest part of the project was \emph{getting the data}. The narrative below is
+the part an interviewer will find most distinctive, because each obstacle forced a concrete
+engineering or methodological decision.
+
+\subsection{Futures prices: the archive wall and the vendor route}
+Exchange-traded futures are the treatment variable's natural home, but the public NCDEX
+bhavcopy (daily price file) archive only reached back to mid-2024 --- useless for a
+2017--2021 pre-period. We confirmed a vendor route (Investing.com) that serves daily OHLC
+back to 2017, and built a cleaning script that parses vendor exports and, crucially,
+\textbf{hard-truncates banned commodities at the suspension date} (their post-ban quotes are
+stale, not real trades). Control commodities were pulled as three contract legs each ---
+\emph{c1} (front month), \emph{c2} (next), \emph{c3} (far) --- because liquidity and
+microstructure differ across the curve.
+
+\subsection{Reverse-engineering the vendor's roll convention}
+A continuous futures series is stitched from many expiring contracts; \emph{how} you stitch
+matters. We reverse-engineered the vendor's rule directly from the data by detecting days
+where the c1 series suddenly adopts the previous c2 price. The rolls clustered on the day
+after the $\sim$20th-of-month NCDEX expiry, revealing the convention: \emph{hold the front
+contract through its last trading day, switch the next session, leave the splice
+unadjusted}. Knowing this let us replicate the same convention when we built our own series,
+so cross-commodity comparisons are not contaminated by inconsistent construction.
+
+\subsection{Crude palm oil: bypassing bot protection for contract-level data}
+Crude palm oil trades on MCX, not NCDEX, and MCX blocks scripted access. We drove the
+exchange's own data endpoint through a real browser session and pulled \textbf{all 64 CPO
+monthly contracts from 2017 to 2022}, each with open, high, low, close, volume, \emph{and
+open interest} --- fields the vendor route lacks. From these raw contracts we constructed
+c1/c2/c3 ourselves, replicating the vendor convention (front contract held to expiry, switch
+next day, unadjusted), with a documented roll-date flag on every observation.
+
+A telling discovery in this raw data: contracts kept publishing \emph{settlement} marks for
+months after the suspension, with zero traded volume. These stale quotes are almost
+certainly what produced the earlier work's ``post-ban'' results --- and exactly why our
+cleaning truncates banned series at the ban date.
+
+\subsection{Spot prices: the rate-limited API and the timeout war}
+Spot ("mandi") prices are the C1/C3 dependent variable. We sourced them from the CEDA
+(Ashoka University) cleaned mirror of the Government's Agmarknet data, via its JSON API. Two
+obstacles shaped the puller:
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{A 40-requests-per-hour rate limit.} A naive puller silently burned the
+        quota and produced nothing. We rebuilt it to read the rate-limit headers and sleep
+        to each window, and to be fully resumable (one file per unit of work, skip what is
+        done). The national series for all 11 commodities (treatment + control, 2017--2025,
+        $\sim$35{,}000 daily rows) was retrieved first --- enough to run a first-pass C1.
+  \item \textbf{Gateway timeouts on dense states.} Requesting all districts of a large
+        state over nine years returned responses too large for the server (HTTP 504). We
+        diagnosed the cause as district-array breadth (not date range) and switched to
+        \emph{batching} districts ($\le 15$ per request), with adaptive halving on
+        persistent timeout, and a date-range fallback for a handful of ultra-dense single
+        districts (e.g.\ Raipur paddy). The district panel was then pulled as a paced,
+        resumable background job.
+\end{enumerate}
+A subtle correctness check saved us here: CEDA's internal commodity IDs differ from the
+public Agmarknet portal's, so we verified every commodity ID against the API's own
+catalogue before pulling, avoiding a silent wrong-series error.
+
+\subsection{Data-integrity rules adopted}
+Three rules run through the whole pipeline: (i) raw downloads are immutable; all cleaning is
+in code; (ii) every series is logged with source, window, and known issues; (iii) banned
+commodities' futures are truncated at 2021-12-20, and non-traded ``settlement-only'' rows
+are flagged so they never enter a return series.
+
+\section{Results}
+\subsection{First pass --- national spot series (preliminary, 2026-06-12)}
+Run on the CEDA/Agmarknet \emph{national daily average} series, 11 commodities,
+2017--2025; commodity$\times$month panel, district panel to follow. Treat these as a
+low-power dress rehearsal: only 11 cross-sectional units, and the national average mixes
+a changing set of mandis day to day (composition noise that is worst for thin control
+markets --- turmeric shows 279 daily moves $>$20\%, which no real market produces).
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{C1 (DiD):} $\hat\beta_{\text{treat}\times\text{post}} = -0.011$
+        (vol effect $\approx -1.1\%$), $p=0.93$; excluding the contaminated guar series,
+        $+0.028$ ($\approx +2.9\%$), $p=0.86$. \emph{No detectable effect at the national
+        level} --- sign unstable, nowhere near the claimed $+8$--$10\%$. The claim was
+        about a \emph{district} panel, so this neither confirms nor kills C1; it does show
+        the effect, if real, is not visible in aggregated national prices.
+  \item \textbf{C1 (event study):} no pre-trend break at $t=0$; a transient positive
+        spike at $+1$ month ($\approx+0.9$ log points, marginally significant) that
+        reverts immediately; wide CIs throughout. Pre-period leads hover near zero ---
+        parallel trends not obviously violated, but power is too low to certify.
+  \item \textbf{C2 (GARCH):} an initial pre/post fit suggested chana calmed markedly
+        (persistence $0.99\to0.78$), but on trading-day-clean data that largely
+        evaporates (persistence $\approx 0.55\to0.69$, unconditional vol roughly flat),
+        and an ICSS break-date test finds \emph{no} variance break near the suspension.
+        The original ``elevated volatility'' claim is not supported, and the ``calmer''
+        counter-reading is inconclusive. The basis half is internally impossible post-ban
+        (no futures) and awaits vendor futures for a domestic-vs-international reframe.
+  \item \textbf{C3 (transmission):} overview only --- see Part~II.
+\end{itemize}
+\subsection{District panel --- the real C1 test (preliminary, 2026-06-12)}
+Pull completed: 396 state-files, 5.74M market-day rows (the raw district pull),
+11 commodities $\times$ up to 384 districts. Panel: district-day median across markets
+$\to$ 30-day realized vol $\to$ the assembled commodity$\times$district$\times$month panel
+(now $\approx$172{,}381 cells / 16 commodities after adding four food-cereal donors); after
+the trading-day fix, paddy drop, and the estimation filters the current DiD runs on
+$N=146{,}507$ observations across 2{,}244 units (14 commodity clusters: 5 treated, 9 donors). The guar control was
+repaired first: CEDA id 75 ``Guar'' turned out to be gum-contaminated (corr 0.04 with
+guar futures); id 413 ``Guar Seed'' is the true futures underlying (corr 0.99, stable
+$+10\%$ basis) --- a data-forensics catch worth telling.
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{C1 (DiD, current food-donor estimate):} on trading-day-clean data,
+        with the MSP-censored paddy dropped, the gum-contaminated guar series replaced,
+        and \emph{four food-cereal donors added} (barley, maize, jowar, bajra ---
+        the economically right counterfactual for food staples),
+        $\hat\beta=-0.103$ ($\approx$ \emph{10\% LOWER} spot vol post-ban relative to
+        controls) --- \textbf{not statistically significant} (CR1 $p\approx0.145$;
+        wild-cluster bootstrap $0.153$). The donor-sensitivity arc is itself the
+        finding: on the earlier industrial/spice pool the same DiD read $-20.7\%$ with
+        borderline significance ($p\approx0.026$/$0.046$); the proper food-staple
+        counterfactual \emph{halves} it and removes aggregate significance.
+        \emph{Opposite sign to the lost work's $+8$--$10\%$, which stays refuted.}
+  \item \textbf{C1 (leave-one-out: the effect is concentrated in chana).} The
+        negative sign survives dropping any single treated commodity ($-7.4\%$ to
+        $-15.2\%$), and crucially \textbf{ex-wheat is $-15.2\%$ ($p\approx0.003$),
+        stronger and significant} --- so the non-wheat result is \emph{not} driven by
+        wheat/MSP. Ex-chana is the weakest case ($-7.4\%$, $p\approx0.29$): remove
+        chana and little remains. Stable to district-liquidity/outlier filters
+        ($-8.7\%$ to $-10.0\%$).
+  \item \textbf{C1 (other estimators --- corroboration, not independent confirmation).}
+        Synthetic DiD pools to $-19.1\%$ and, with nine donors, now carries a
+        \emph{valid} placebo SE ($z=-1.88$, borderline). Per commodity, \textbf{chana
+        is the one significant case ($-38.7\%$, $z=-2.05$)}; wheat collapses to
+        $\approx$zero ($+0.4\%$ --- its earlier decline was the MSP/export-ban
+        confound, not the futures ban); mustard, soybean, moong are negative but
+        insignificant. Commodity SCM: chana $-37.3\%$ at the $1/10$ placebo floor;
+        the others remain weak. I still treat the cross-estimator agreement as
+        \emph{mechanical}, not independent: same panel, same treated set, near-uniform
+        SDID weights. (An earlier draft of mine wrongly headlined a Synthetic-DiD
+        ``$z=-7.7$'' --- that was a donor-jackknife artifact and has been removed.)
+  \item \textbf{Falsification --- now genuinely cleaner.} An earlier run \emph{failed}
+        its placebo and pre-trend tests and the naive DiD looked dead. I traced that to
+        a calendar-grid measurement bug: the mandi series carried weekend/holiday
+        prices forward while realized volatility was annualised on 252 trading days,
+        manufacturing spurious autocorrelation. After the fix (clean-core stage) the
+        pass was only \emph{marginal} --- the Dec-2019 placebo recovered $-11.7\%$,
+        $\approx$56\% of the then-headline, and a hot final pre-bin ($+10\%$,
+        $p=0.049$) lurked under the joint test. On the \emph{current food-donor panel}
+        the battery is genuinely clean: placebo $-6.5\%$ ($p\approx0.34$ analytic /
+        $0.43$ bootstrap) and joint pre-trend $p\approx0.45$ with \emph{no}
+        individually significant lead bin. \emph{The research-integrity headline is
+        the bug I caught and fixed --- and that the estimate answers to the quality of
+        its counterfactual.}
+  \item \textbf{C2 (GARCH):} an ICSS break-date test finds \emph{no} variance break
+        near the suspension, so the original ``elevated volatility'' claim is not
+        supported; the earlier ``chana calmer'' reading was itself largely the
+        calendar-grid artifact and is now roughly flat --- C2-volatility is
+        inconclusive, and the volatility case rests on C1.
+  \item \textbf{Pending (the upgrades that would make this conclusive):} the four
+        \emph{oilseed/millet} food donors (groundnut, sesamum, sunflower, ragi) are
+        still being pulled --- they are the right counterfactual for the banned
+        oilseeds, so mustard/soybean are provisional; still owed are Honest-DiD
+        (Rambachan--Roth) pre-trend sensitivity, a Callaway--Sant'Anna estimate for the
+        staggered/long post-window design, and a reported wild-bootstrap CI. C2 basis
+        awaits vendor futures. Final verdicts are the researcher's call.
+\end{itemize}
+
+\section{What the three claims imply --- read through C1, C2, C3}
+A result only matters once you say what it would mean. The claim labels below are kept
+exactly as they stand on the CV (C1, C2, C3); what changes is the implication we are now
+entitled to draw from each.
+
+\paragraph{C1 --- the volatility claim.} A genuine $+8$--$10\%$ rise in banned-commodity
+spot volatility after the suspension would be a damning verdict on the policy: switching off
+futures would have made the cash market \emph{more} turbulent rather than less, turning an
+intervention meant to protect consumers into one that hurt them and handing the exchanges a
+clean argument to reopen. That is the high-stakes reading --- and exactly why the number
+cannot be taken on trust. My first pass seemed to confirm the worst fear about the data --- a
+placebo date ``found'' an effect too --- until I traced that to a measurement bug and corrected
+it. On the clean data the picture inverts: the $+8$--$10\%$ \emph{rise} is refuted, and the
+DiD puts spot volatility \emph{$\sim$20\% lower} after the suspension --- a point estimate that
+is robust to leave-one-out (dropping any single commodity, including the MSP-flagged wheat,
+leaves it negative and sizable). The honest implication is that the suspension did \emph{not}
+destabilise the cash market --- if anything spot prices were calmer afterwards. But I am
+careful to call this \textbf{suggestive, not conclusive}: under honest few-cluster inference
+the effect is only borderline significant ($p\approx0.03$--$0.05$, not the spurious $0.008$),
+the placebo recovers more than half the headline, a recent pre-ban bin is already significantly
+positive, the other estimators agree only \emph{mechanically} (same panel, 5 treated / 5
+donors), and a mean-reversion story the marginal placebo cannot rule out remains live. For the
+regulator, the founding allegation that futures \emph{drive} spot volatility is, on this
+evidence, not met --- but this is a hedged, quasi-causal stability result, not a vindication of
+the policy: the same months removed a hedging and price-discovery tool from farmers, so the
+welfare question turns on weighing a volatility outcome that did not worsen against a cost
+(C2/C3) that is real.
+
+\paragraph{C2 --- the basis and conditional-volatility claim.} Read literally, a ``persistent
+post-ban basis widening'' would say the link between futures and spot broke down once the
+policy hit --- impaired arbitrage, a market under stress. The implication collapses on
+contact with the calendar: a banned commodity has no futures price after 20~December~2021, so
+its post-ban basis is undefined, and any figure reported under that label is measuring
+something else. What survives is narrower and cleaner --- whether the \emph{pre-ban} basis was
+already trending, and whether removing futures degraded price discovery in the markets we can
+still observe. The GARCH side does not rescue the original ``elevated volatility'' claim, but
+nor does it cleanly support the opposite: an ICSS break-date test finds no variance break near
+the suspension, and the earlier ``chana calmer'' reading proved to be largely the same
+calendar-grid artifact --- on clean data it is roughly flat. C2-volatility is therefore
+inconclusive, and the volatility verdict rests on C1.
+
+\paragraph{C3 --- transmission.} The implication here is unchanged, because the strand is
+deliberately held at overview depth: if the suspension moved food CPI/WPI or dented acreage,
+the welfare loop closes and the policy can be scored on what households actually paid and what
+farmers actually planted; if it did not, the suspension was costly theatre. The value is in
+keeping the question two-armed --- weighing any stability benefit against the cost to price
+discovery and hedging --- rather than arriving with a verdict already chosen.
+
+\section{The corrected picture --- where the three claims now stand}
+It is worth stating plainly how the three lines on the CV relate to what we now believe is
+true, because the gap between them \emph{is} the contribution. The claims describe the
+analyses that were run; the corrected understanding is what those analyses look like once they
+are rebuilt with provenance and stress-tested against rules fixed in advance.
+
+\smallskip\noindent\textbf{C1's sign is wrong, and the corrected estimate is the finding ---
+held honestly.} The inherited $+8$--$10\%$ \emph{rise} does not hold: on rebuilt,
+trading-day-clean data the effect is the opposite --- spot volatility \emph{lower}, not higher.
+The story has two twists worth telling in an interview. \emph{First, the bug:} my first
+corrected DiD failed its own falsification tests, which would have retired the design by my
+pre-registered rules; I did not paper over that, I chased it, and found a calendar-grid bug
+(weekend prices carried into a trading-day volatility measure) that was manufacturing the
+failure. \emph{Second, the counterfactual:} with the bug fixed the DiD read $-20.7\%$ with
+borderline significance --- but against industrial/spice controls. Adding four food-cereal
+donors (the economically right comparison for food staples) \emph{halved} the estimate to
+$-9.8\%$ and removed aggregate significance (CR1 $p\approx0.145$; wild bootstrap $0.153$),
+while making the falsification battery genuinely clean (placebo $-6.5\%$, $p\approx0.34/0.43$;
+pre-trend $p\approx0.45$, no significant lead bin). What survives is precise and honest:
+\textbf{ex-wheat $-15.2\%$ ($p\approx0.003$) is significant, and chana is the strong case}
+(SDID $-38.7\%$, $z=-2.05$; SCM $-37.3\%$ at the placebo floor), while wheat itself collapses
+to $\approx$zero --- its decline was the MSP/export-ban confound. The cross-estimator agreement
+remains partly \emph{mechanical} (one panel, one treated set, near-uniform SDID weights), and
+endogenous timing / mean-reversion was the right worry. The defensible claim is therefore
+quasi-causal and hedged --- \emph{no rise; a modest, chana-concentrated decline} --- and the
+credible upgrades (oilseed donors landing, Honest-DiD sensitivity, a Callaway--Sant'Anna
+estimate) are still owed.
+
+\smallskip\noindent\textbf{C2, as written, is internally impossible, and the corrected version
+is sharper for it.} The post-ban basis cannot exist; the defensible objects are a
+correctly-dated pre-ban basis trend and a price-discovery test on commodities that kept
+trading, with the conditional-volatility question handled by a model that lets the data choose
+the break date rather than imposing the ban date on it. Carried out, that ICSS test finds no
+break at the suspension, and the original ``elevated volatility, significant at 10\%'' does not
+reproduce --- on rebuilt data the cleanest commodity's GARCH is roughly flat, so the
+conditional-volatility strand is left inconclusive and the volatility case is carried by C1.
+
+\smallskip\noindent\textbf{C3 stays open by design} --- a team-led strand whose job is to turn
+any market-level finding into a statement about consumers and farmers.
+
+\smallskip\noindent The through-line for an interview is short and strong: we inherited three
+results and, rather than dress them up, we verified them --- confirming none as stated,
+overturning one, reframing another, and leaving the third honestly open. A project willing to
+let its own rules kill its headline number is doing exactly what empirical research is meant
+to do.
+
+% =====================================================================
+\part*{Part II --- Methodology Theory}
+\addcontentsline{toc}{part}{Part II --- Methodology Theory}
+\noindent\emph{Each method below is given as: the general theory, then why it fits this
+problem, then how we implemented it. Scope is limited to the methods named in C1--C3.}
+
+\section{The outcome variable: realized spot-price volatility}
+\thy ``Volatility'' is the dispersion of price changes. Working from a daily price series
+$P_t$, the daily log return is
+\[
+  r_t = \ln\!\left(\frac{P_t}{P_{t-1}}\right),
+\]
+and \emph{realized volatility} over a rolling window of $w$ trading days is the (sample)
+standard deviation of those returns, annualised by $\sqrt{252}$:
+\[
+  \sigma_t \;=\; \sqrt{\frac{1}{w-1}\sum_{i=t-w+1}^{t}\big(r_i-\bar r\big)^2}\;\times\;\sqrt{252}.
+\]
+Log returns are used because they are (approximately) additive over time and symmetric in
+percentage terms; annualisation puts the number on the familiar ``\% per year'' scale.
+
+\why The suspension's \emph{stated} objective was to reduce price volatility, so volatility
+is the natural dependent variable --- the policy must be judged on its own goal. A
+rolling-window realized measure is model-free, transparent, and easy to defend: it makes no
+distributional assumption and is directly interpretable, which matters when the headline
+number (``+8--10\%'') is itself the claim.
+
+\how We compute 30-day rolling realized volatility of daily log returns on the modal spot
+("mandi") price, per geographic unit and commodity, annualised. A 60-day window is the
+robustness twin. This $\sigma_t$ becomes the left-hand-side variable in the DiD/event-study
+panel (C1) and motivates the conditional-variance model (C2).
+
+\section{Difference-in-Differences (C1)}
+\thy Difference-in-Differences (DiD) estimates a causal effect by comparing the
+\emph{change} in an outcome for a treated group to the \emph{change} for an untreated
+(control) group over the same period. The simplest $2\times2$ logic: if treated and control
+would have moved in parallel absent treatment, then the treated group's extra movement after
+treatment is the causal effect. In panel form with unit and time fixed effects,
+\[
+  y_{it} \;=\; \alpha_i \;+\; \lambda_t \;+\; \beta\,(\mathrm{Treat}_i \times \mathrm{Post}_t)
+  \;+\; X_{it}'\gamma \;+\; \varepsilon_{it},
+\]
+where $\alpha_i$ are unit fixed effects (absorbing time-invariant differences across
+commodities/districts), $\lambda_t$ are time fixed effects (absorbing common shocks in each
+period), $\mathrm{Treat}_i$ marks banned commodities, $\mathrm{Post}_t$ marks dates after
+20~Dec~2021, and $\beta$ --- the coefficient on their interaction --- is the DiD estimate.
+
+\smallskip\noindent\textbf{Key assumptions.} (1) \emph{Parallel trends}: treated and control
+would have followed the same trajectory absent the ban (the central, testable assumption).
+(2) \emph{No anticipation}: behaviour does not change before the announcement. (3) \emph{No
+spillovers / common-shock contamination}: shocks affecting both groups are absorbed by
+$\lambda_t$; shocks hitting only one group threaten identification. Inference must account
+for serial correlation within a commodity --- standard errors are clustered by commodity ---
+and with few clusters a wild-cluster bootstrap is the honest correction.
+
+\why The suspension is a textbook natural experiment: a sharp, dated policy that applied to
+some commodities and not others. DiD is the canonical tool for exactly this structure. Its
+great virtue here is that 2022 was full of \emph{common} shocks --- the Ukraine war, energy
+prices, global food inflation --- and the control group differences these out: both treated
+and control commodities faced the same macro environment, so a divergence between them is
+attributable to the ban rather than the shock. This is the single strongest defence of the
+design.
+
+\how The panel is commodity$\times$geography$\times$month realized volatility. Treatment =
+the banned set; controls = guar, castor, jeera, turmeric, cotton; the break is
+20~Dec~2021. We estimate $\beta$ with unit and time fixed effects and commodity-clustered
+standard errors. C1 is judged confirmed only if the sign matches, the magnitude lies in a
+pre-registered $[4\%,16\%]$ band around the claimed 8--10\%, and it is significant at
+conventional levels --- and only if the parallel-trends (pre-trend) test passes; if it
+fails, the DiD is set aside in favour of a synthetic-control design.
+
+\section{Event study (C1)}
+\thy An event study is DiD with time resolution: instead of a single $\mathrm{Post}$ dummy,
+the treatment interaction is split into a sequence of leads and lags around the event date,
+\[
+  y_{it} \;=\; \alpha_i + \lambda_t + \sum_{k\neq -1}\beta_k\,\big(\mathrm{Treat}_i \times \mathbf{1}[t-t^\ast=k]\big) + \varepsilon_{it},
+\]
+where $t^\ast$ is the event period and $k$ indexes periods before/after it (the period just
+before, $k=-1$, is the omitted baseline). The pre-event coefficients ($k<0$) should be
+statistically zero --- this is the formal \emph{test} of parallel trends --- while the
+post-event coefficients ($k\ge 0$) trace the effect's \emph{dynamics}: immediate vs.\
+delayed, transitory vs.\ persistent.
+
+\why It does double duty: it validates the DiD's core assumption (flat pre-trends) and it
+tells a richer story than a single average --- did volatility jump immediately at the
+suspension and persist, or drift? For a policy debate that is exactly the question.
+
+\how Estimated around 20~Dec~2021 on the same panel as the DiD, reporting the path of
+$\beta_k$ with confidence bands; flat pre-period coefficients support C1, and the post-period
+path characterises how the ban's volatility effect evolved.
+
+\section{GARCH(1,1) (C2)}
+\thy Financial and commodity returns exhibit \emph{volatility clustering} --- calm and
+turbulent periods bunch together --- which a constant-variance model misses. GARCH
+(Generalised Autoregressive Conditional Heteroskedasticity) lets today's variance depend on
+recent shocks and recent variance. The GARCH(1,1) specification is
+\[
+  r_t = \mu + \varepsilon_t,\qquad \varepsilon_t = \sigma_t z_t,\quad z_t \sim \text{iid}(0,1),
+\]
+\[
+  \sigma_t^2 \;=\; \omega \;+\; \alpha\,\varepsilon_{t-1}^2 \;+\; \beta\,\sigma_{t-1}^2 .
+\]
+Here $\alpha$ captures the reaction of variance to last period's shock, $\beta$ its
+persistence; $\alpha+\beta$ (close to 1 in practice) measures how long volatility shocks
+last, and stationarity requires $\alpha+\beta<1$. To test a policy effect, an exogenous
+\emph{step dummy} for the post-ban regime is added to the variance equation,
+\[
+  \sigma_t^2 \;=\; \omega + \alpha\,\varepsilon_{t-1}^2 + \beta\,\sigma_{t-1}^2 + \gamma\,\mathrm{Post}_t,
+\]
+so $\gamma>0$ (and significant) means the suspension raised the \emph{conditional} variance
+of the series, over and above the usual clustering dynamics.
+
+\why GARCH complements DiD. DiD asks ``did average volatility shift across treated vs.\
+control units?''; GARCH asks ``within a single commodity's price process, did the
+time-series volatility regime change at the ban?''. The CV claim is specifically about a
+GARCH(1,1) coefficient significant at 10\%, so reproducing that model is required to verify
+or revise it. It is also the standard volatility-modelling tool, so an interviewer will
+expect fluency in it.
+
+\how A GARCH(1,1) is fit per commodity on the daily spot return series, with a post-ban step
+dummy in the variance equation; the sign, size, and significance of $\gamma$ are the object
+of interest (the ``significant at 10\%'' claim). EGARCH is the natural robustness extension
+because it allows asymmetric (good-news/bad-news) volatility responses. \emph{Current verdict:}
+the inherited ``elevated volatility, significant at 10\%'' does \emph{not} reproduce --- a
+data-driven ICSS break-date test finds \emph{no} variance break near the suspension, and the
+short-lived ``chana calmer'' reading proved to be a calendar-grid artifact (on clean data the
+persistence is roughly flat). C2-volatility is therefore \emph{inconclusive}, and the
+volatility verdict is carried by C1, not C2.
+
+\section{The basis, and the C2 internal-inconsistency (C2)}
+\thy The \emph{basis} is the difference between the futures price and the spot price of the
+same commodity, $\text{basis}_t = F_t - S_t$. It reflects the cost of carry (storage,
+financing) and convergence: as a contract nears expiry, futures and spot converge and the
+basis shrinks toward zero. A ``widening'' basis means futures and spot are drifting apart ---
+often read as a sign of stress or impaired arbitrage between the two markets.
+
+\smallskip\noindent\textbf{The inconsistency.} C2 as originally stated claims a
+\emph{``persistent basis widening post-ban''} for the banned commodities. But the basis
+requires \emph{both} a futures and a spot price, and the suspension \emph{eliminated the
+futures price} for exactly those commodities after 20~Dec~2021. A post-ban basis for a
+banned commodity therefore cannot exist --- the claim is internally impossible as written.
+
+\why Surfacing this is the point. It is a research-integrity check: a result that cannot
+exist must be diagnosed before anything is rebuilt on top of it. The most likely
+explanations are that the earlier work actually measured (a) a \emph{pre-ban} basis trend
+and mislabelled its timing, (b) a \emph{control}-commodity basis (those still have futures),
+or (c) a domestic--international price spread relabelled as ``basis''. Our reading of the
+stale post-ban settlement quotes found in the raw MCX data (months of zero-volume marks)
+suggests the mechanical trap that could have generated a spurious post-ban ``futures'' price.
+
+\how We compute the basis only where it is defined: $F_t - S_t$ up to December 2021 for the
+banned commodities (a pre-ban trend, correctly labelled), and across the full window for
+control commodities (which retain futures). Any volatility claim that travels under the
+``basis'' label is re-expressed in terms that are actually measurable, and the discrepancy
+with the original statement is documented rather than papered over.
+
+\section{C3 --- inflation transmission (overview)}
+\thy\emph{(Overview only, by design.)} The transmission question asks whether suspending
+futures fed through to the prices people actually pay and to farmers' decisions. Three
+linked pieces: (i) \emph{price transmission} --- does the suspension move CPI/WPI food
+sub-indices, tested with transmission regressions or vector-autoregression (VAR) style
+dynamics between the policy, spot prices, and the inflation indices; (ii) \emph{acreage
+response} --- do farmers plant less of a crop once the forward price signal from futures
+disappears, in the spirit of Nerlove-type acreage models that relate planted area to
+expected prices; (iii) \emph{district production} --- whether output responds, as a check on
+the acreage channel.
+
+\why It closes the loop from market microstructure to welfare: even if volatility changed,
+the policy-relevant question is whether consumers and farmers were better or worse off. It is
+the ``so what'' of the project.
+
+\how\emph{(Conducted primarily by the wider team.)} The empirical objects are the CPI/WPI
+food sub-indices (monthly), state/district acreage, and district production, related to the
+suspension timing.
+
+\paragraph{What the results would mean --- for each stakeholder and each case.}
+\begin{center}
+\small
+\begin{tabular}{@{}p{2.4cm}p{3.5cm}p{3.5cm}p{3.5cm}@{}}
+\toprule
+ & \textbf{Ban ``worked''} (volatility/ inflation fell) & \textbf{Ban backfired} (volatility/ inflation rose) & \textbf{No effect} \\
+\midrule
+\textbf{Consumers} & Lower, steadier food prices --- the policy's intended win. & Paid more / more volatile prices --- policy counterproductive. & Prices driven by supply/demand and global factors, not futures. \\
+\textbf{Farmers} & Mixed: steadier prices but lost a forward price signal and hedging tool. & Worse: lost hedging \emph{and} faced higher volatility. & Futures were not a binding channel for them. \\
+\textbf{Government / SEBI} & Validates the intervention. & Argues for restoring futures; the scapegoating was misplaced. & Suspension was costly theatre --- no benefit, some cost. \\
+\textbf{Exchanges / industry} & Hard to justify reopening. & Strong case to reopen; impaired price discovery hurt the ecosystem. & Neutral on prices, but lost business and liquidity. \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent The honest framing in interview: C3 is an active, team-led strand; the value of
+the evaluation is that it is two-armed --- it weighs any stability benefit against the cost
+to price discovery and hedging, rather than advocating a position.
+
+\end{document}

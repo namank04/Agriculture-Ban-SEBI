@@ -1,0 +1,808 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+
+\setlength{\parskip}{0.4em}
+\setlength{\parindent}{0pt}
+
+\providecommand{\rupee}{\textrm{Rs.}}
+
+\newcommand{\intuit}{\smallskip\noindent\textbf{The plain idea.}\ }
+\newcommand{\example}{\smallskip\noindent\textbf{A worked number example.}\ }
+\newcommand{\formula}{\smallskip\noindent\textbf{The equation.}\ }
+\newcommand{\vars}{\smallskip\noindent\textbf{Every term, and what kind of thing it is.}\ }
+\newcommand{\applied}{\smallskip\noindent\textbf{How I used it in my project.}\ }
+\newcommand{\tells}{\smallskip\noindent\textbf{What it tells you.}\ }
+
+\title{\textbf{The Theory and the Maths}\\[4pt]
+\large A from-scratch, plain-language guide to every method behind my evaluation of\\
+India's 2021 agricultural-derivatives suspension}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status note, updated 6 July 2026.} The worked results in this companion are
+stated on the current \emph{food-donor} rerun: aggregate DiD about $-9.8\%$, not statistically
+significant under few-cluster inference (CR1 $p \approx 0.145$; wild bootstrap $p \approx 0.153$),
+SDID $-19.1\%$ ($z=-1.88$), with the strongest negative signal concentrated in chana. The older
+clean-core $-20.7\%$ run appears only as the explicitly labelled ``before'' stage of the
+donor-sensitivity arc (it is part of the story, not the result).
+
+\begin{abstract}
+\noindent This is the maths companion to my internship project, which asks whether India's
+December 2021 suspension of exchange-traded agricultural derivatives actually calmed food
+prices. I teach every quantitative method I used, from the ground up, in plain words. Each
+section follows the same shape: the plain idea, a worked example with real numbers, the
+equation with \emph{every} symbol named and classified (which terms are the data, which are
+the things I estimate, which is the ``dependent'' variable being explained and which are the
+``independent'' variables doing the explaining), and finally exactly how I used it in the
+project and what it told me. You need only a little prior statistics. By the end you should be
+able to read every number in my results and know precisely how it was built.
+\end{abstract}
+
+\tableofcontents
+\bigskip
+
+% =====================================================================
+\section{The setting, in one paragraph}
+
+On 20 December 2021 India's market regulator --- SEBI, the Securities and Exchange Board of
+India --- switched off exchange-traded \emph{derivatives} (financial contracts whose value is
+tied to an underlying commodity; here \emph{futures} --- agreements to buy or sell a crop at a
+price fixed today for delivery on a future date) in seven food commodities, hoping to calm food
+inflation. My job was to measure whether the cash (\emph{spot}) market for those crops became
+calmer or more turbulent afterwards. The crops that were banned (wheat, chana/chickpea, mustard,
+soybean, paddy, moong, crude palm oil) are my \emph{treated} group; a set of crops that kept
+trading (guar seed, castor, jeera/cumin, turmeric, cotton) are my \emph{control} group. Every
+method below exists to answer one question: did switching off futures change how much spot
+prices \emph{jump around}, and can I trust the answer?
+
+\bigskip
+\noindent\textbf{Two words you will need throughout.} A \emph{dependent} variable is the thing
+I am trying to explain (the outcome, what I put on the left of an equation). An
+\emph{independent} variable is something I use to explain it (a driver, what I put on the right).
+A \emph{parameter} is a number I do not observe directly but \emph{estimate} from the data (the
+strength of a relationship). Keeping these three straight --- outcome, driver, estimated number
+--- is most of what reading these equations comes down to.
+
+% =====================================================================
+\section{Returns and realized volatility}
+
+This is the raw material for everything else. Before I can ask whether prices got more
+``jumpy,'' I need a precise number for jumpiness.
+
+\subsection{Daily log returns}
+
+\intuit A \emph{return} is the percentage change in a price from one day to the next. Instead of
+the plain percentage I use the \emph{log return} --- the natural logarithm of the price ratio.
+Two reasons. First, log returns \emph{add up cleanly over time}: the log return over a week is
+just the sum of the seven daily log returns, which plain percentages do not give you. Second,
+they are \emph{symmetric}: a price that rises by a factor and then falls by the same factor
+returns exactly to where it started, because $+x$ and $-x$ in logs cancel, whereas a $+10\%$
+move followed by a $-10\%$ move leaves you slightly poorer in plain percentages.
+
+\example Suppose a mandi (market) price runs over four days:
+\[
+P_0 = 100,\quad P_1 = 110,\quad P_2 = 99,\quad P_3 = 104.
+\]
+The daily log returns are
+\[
+r_1 = \ln\!\Big(\tfrac{110}{100}\Big) = \ln(1.10) \approx +0.0953,\quad
+r_2 = \ln\!\Big(\tfrac{99}{110}\Big) = \ln(0.90) \approx -0.1054,
+\]
+\[
+r_3 = \ln\!\Big(\tfrac{104}{99}\Big) = \ln(1.0505) \approx +0.0493.
+\]
+So roughly $+9.5\%$, then $-10.5\%$, then $+4.9\%$. Notice the day-1 up-move and the day-2
+down-move are almost equal and opposite in logs even though the rupee amounts ($+10$ then $-11$)
+are not --- that symmetry is the point. And the total move from day~0 to day~3 is
+$r_1+r_2+r_3 \approx +0.0392 = \ln(104/100)$: the daily logs simply sum to the whole-period log
+return. They add up.
+
+\formula For a price $P_t$ on day $t$, the daily log return is
+\[
+r_t \;=\; \ln\!\left(\frac{P_t}{P_{t-1}}\right) \;=\; \ln P_t - \ln P_{t-1}.
+\]
+
+\vars
+\begin{itemize}
+\item $P_t$ --- the price today. \emph{Observed data} (an input). Here, a daily mandi price.
+\item $P_{t-1}$ --- the price yesterday. Also observed data.
+\item $r_t$ --- the log return. A \emph{derived} number (computed, not estimated): the output of
+this step. It is unit-free (a pure percentage-like number), so two commodities priced in very
+different rupee amounts become directly comparable.
+\item $\ln$ --- the natural logarithm. A fixed mathematical function, not a variable.
+\end{itemize}
+There is no ``dependent vs independent'' split here yet --- this is just a transformation of the
+raw price into a clean building block. That split appears once I run a regression (Section~3).
+
+\tells $r_t$ is a clean, units-free measure of ``how big was today's price move, in percent.'' A
+string of these returns is what I feed into the volatility calculation next.
+
+\subsection{Realized volatility}
+
+\intuit \emph{Volatility} (how much a price jumps around day to day) is the \emph{spread} of
+those daily returns. If the returns are all tiny and similar, the price is calm; if they swing
+between large positives and large negatives, it is volatile. The standard textbook measure of
+spread is the \emph{standard deviation} --- the typical distance of the returns from their own
+average. ``Realized'' volatility just means I compute it directly from the returns that actually
+happened, assuming no model. I do it over a \emph{rolling window} (e.g.\ the last 30 trading
+days), so the window slides forward each day and I get a fresh reading for every day. Finally I
+\emph{annualise} by multiplying by $\sqrt{252}$ (about 252 trading days in a year) to put the
+number on the familiar ``percent per year'' scale.
+
+\example Take three daily returns: $r = \{+0.02,\ -0.01,\ +0.03\}$ (i.e.\ $+2\%, -1\%, +3\%$).
+Their average is $\bar r = (0.02 - 0.01 + 0.03)/3 = 0.0133$. The squared deviations from that
+average are
+\[
+(0.02-0.0133)^2 = 0.0000444,\quad
+(-0.01-0.0133)^2 = 0.000544,\quad
+(0.03-0.0133)^2 = 0.000278.
+\]
+Summing and dividing by $w-1 = 2$ gives a variance of $0.000433$, so the (daily) standard
+deviation is $\sqrt{0.000433} \approx 0.0208$, about $2.1\%$ per day. Annualised, that is
+$0.0208 \times \sqrt{252} \approx 0.330$, i.e.\ roughly $33\%$ per year. That single number,
+$33\%$, is the realized volatility for this little stretch.
+
+\formula Over a rolling window of $w$ trading days ending at day $t$, realized volatility is
+\[
+\sigma_t \;=\; \sqrt{\frac{1}{w-1}\sum_{i=t-w+1}^{t}\big(r_i - \bar r\big)^2}\;\times\;\sqrt{252}.
+\]
+
+\vars
+\begin{itemize}
+\item $\sigma_t$ --- realized volatility at day $t$. \emph{Derived output}, in percent per year.
+This is the number I care about; later it becomes the \emph{dependent} variable in my regressions.
+\item $r_i$ --- the daily log returns inside the window. Observed (well, derived from prices) inputs.
+\item $\bar r$ --- their average over the window. A derived helper number.
+\item $w$ --- the window length: a \emph{choice} I make, not estimated. I use $w=30$, with $w=60$
+as a robustness check (a longer window = smoother, slower-moving volatility).
+\item $w-1$ --- the divisor (instead of $w$). A small textbook correction so the variance estimate
+is not biased downward; ``one degree of freedom used up'' by estimating $\bar r$.
+\item $\sqrt{252}$ --- the annualisation factor. A fixed constant, converting daily to yearly scale.
+\end{itemize}
+
+\applied I computed $\sigma_t$ this way for every commodity, for every district, for every day,
+from the cleaned spot prices --- then averaged to the month to get one volatility number per
+commodity-district-month. That monthly $\ln\sigma_{it}$ is the \emph{outcome} I carry into the
+difference-in-differences and event-study regressions below. I deliberately kept it
+\emph{model-free} (a plain standard deviation, no distribution assumed) because the whole project
+hinges on a volatility figure, and I did not want a hidden modelling assumption quietly doing the
+work.
+
+\smallskip\noindent\textbf{One honest caveat.} Consecutive 30-day windows share 29 of their 30
+returns, so two neighbouring days' readings are almost the same number by construction. The series
+is therefore mechanically smooth and strongly correlated from day to day. That \emph{overlap} can
+make trends look more real than they are, so I do not over-read the day-by-day path; the 60-day
+window and a non-overlapping monthly version are checks against it.
+
+% =====================================================================
+\section{Difference-in-Differences (DiD)}
+
+This is the core of the volatility analysis: how I try to isolate the ban's effect from
+everything else happening in 2022.
+
+\subsection{The idea: a double difference}
+
+\intuit The naive approach --- compare banned-commodity volatility before the ban to after --- is
+hopeless, because 2022 was chaos for \emph{every} commodity: the Ukraine war, an energy spike, and
+global food inflation all hit at once. If banned-crop volatility rose, was it the ban or the war?
+You cannot tell from a single before/after. The fix is a \emph{control group} of crops that kept
+trading futures, and a \emph{double difference}. First difference: the change in volatility (after
+minus before) for the banned crops. Second difference: the same change for the control crops. The
+DiD estimate is the difference between those two changes. The logic: the controls lived through
+exactly the same 2022, so whatever the war did shows up in \emph{both} groups and \emph{cancels}
+when I subtract. What is left --- the banned crops' \emph{extra} change beyond the controls --- is
+what I attribute to the ban.
+
+\subsection{The $2\times 2$ table}
+
+\example Suppose the (annualised) volatilities are:
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+ & \textbf{Before ban} & \textbf{After ban} & \textbf{Change} \\
+\midrule
+\textbf{Treated} (banned crops) & 40\% & 50\% & $+10$ \\
+\textbf{Control} (still trading) & 30\% & 36\% & $+6$ \\
+\midrule
+ & & \textbf{DiD} & $+10 - (+6) = +4$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Both groups got more volatile (the war hit everyone), but the treated group rose by $10$ points
+and the controls by only $6$. The double difference is $10 - 6 = +4$ percentage points --- the
+slice of the rise I assign to the ban, after differencing out the common shock that pushed both
+groups up. If instead the controls had \emph{also} risen by $10$, the DiD would be $0$: the ban
+added nothing beyond what hit everyone.
+
+\subsection{The panel regression}
+
+\intuit With many commodities, many regions, and many months, I do not literally fill in a
+$2\times2$ table; I run a regression that does the same double difference automatically, using
+\emph{fixed effects} (dummy variables that soak up whole categories of difference).
+
+\formula
+\[
+\ln \sigma_{it} \;=\; \alpha_i \;+\; \lambda_t \;+\; \beta\,\big(\mathrm{Treat}_i \times \mathrm{Post}_t\big) \;+\; \varepsilon_{it}.
+\]
+
+\vars This is the first equation with a true dependent/independent split, so I will be explicit.
+\begin{itemize}
+\item $\ln \sigma_{it}$ --- log realized volatility for unit $i$ (a commodity, or a
+commodity$\times$district) in month $t$. This is the \textbf{dependent variable} --- the outcome,
+the thing I am explaining, on the left-hand side. (I take the log so that the coefficient reads as
+a percentage, and so that proportional changes, not rupee changes, are what matter.)
+\item $\mathrm{Treat}_i$ --- an \textbf{independent variable}; an \emph{indicator} (dummy) equal to
+$1$ for banned crops and $0$ for controls. Property: it is \emph{time-invariant} --- it never
+changes over $t$ (a crop is banned or not, always).
+\item $\mathrm{Post}_t$ --- an \textbf{independent variable}; an indicator equal to $1$ for months
+after 20 December 2021 and $0$ before. Property: it is \emph{common to all units} in a given month.
+\item $\mathrm{Treat}_i \times \mathrm{Post}_t$ --- the \textbf{interaction}: $1$ only for a banned
+crop in a post-ban month. This is the single independent variable I actually care about.
+\item $\beta$ --- a \textbf{parameter} (estimated, not observed): the coefficient on the
+interaction. \emph{This is the DiD estimate} --- the one number the whole regression exists to
+produce. Because the outcome is in logs, $\beta$ reads approximately as a percent \emph{when it is
+small}: $\beta=0.09$ means about $+9\%$. When $\beta$ is not small I convert exactly with
+$e^{\beta}-1$ (so my current estimate $\beta=-0.103$ is a $-9.8\%$ effect; and at the earlier
+clean-core stage $\beta=-0.232$ was a $-20.7\%$ effect, \emph{not} $-23.2\%$).
+\item $\alpha_i$ --- \textbf{unit fixed effects}: one estimated number per unit, absorbing
+\emph{permanent} differences between units (turmeric is just always jumpier than wheat --- that
+constant gap is soaked up and cannot bias me). Property: constant over time within a unit.
+\item $\lambda_t$ --- \textbf{time fixed effects}: one estimated number per month, absorbing
+anything common to all commodities that month. This is literally where the Ukraine-war shock
+differences out. Property: the same for every unit in a given month.
+\item $\varepsilon_{it}$ --- the \textbf{error term}: everything else, unobserved. I do not estimate
+it directly; its behaviour governs the standard errors (Section~3.5).
+\end{itemize}
+
+\smallskip\noindent\emph{Why the standalone $\mathrm{Treat}_i$ and $\mathrm{Post}_t$ terms vanish.}
+They are not written separately because the fixed effects already contain them: $\mathrm{Treat}_i$
+never changes over time, so it sits inside $\alpha_i$; $\mathrm{Post}_t$ is the same for everyone in
+a month, so it sits inside $\lambda_t$. Only the \emph{interaction} survives --- which is exactly
+the term I want.
+
+\applied I ran this twice. On the \emph{national} series (one average price per commodity, 11
+commodities, monthly) and on the much richer \emph{district} panel (commodity$\times$district$\times$
+month: the assembled panel is about $130{,}000$ rows, and after dropping units too sparse to
+estimate a window the headline regression runs on $104{,}491$ observations across $1{,}570$
+commodity-district units). The results are in Section~3.6.
+
+\subsection{The assumption that makes it work}
+
+The whole design rests on \textbf{parallel trends}: \emph{absent the ban, treated and control
+volatility would have moved in parallel.} I do not need them at the same \emph{level} (the unit
+fixed effects $\alpha_i$ handle permanent gaps); I only need the same \emph{trend}. If that holds,
+any divergence after the ban is the ban's footprint. If it fails, the DiD is measuring drift, not
+the policy. The event study (Section~4) is how I test it.
+
+Three further assumptions, stated plainly: \emph{no anticipation} (behaviour does not jump before
+the announcement); that the time fixed effects $\lambda_t$ truly capture the common shock (only
+exact if 2022 hit every commodity \emph{equally} --- a weakness I return to); and \emph{no
+cross-group spillover} (the jargon is SUTVA --- one unit's treatment must not affect another
+unit's outcome). The spillover worry here is concrete: if traders shut out of banned futures
+\emph{migrated} into my control crops' futures, the controls would get more volatile precisely
+\emph{because} of the ban, contaminating the comparison and biasing the DiD toward zero or negative.
+I test that as a separate migration question, and it is one more reason the better-identified design
+later picks control weights from the donors \emph{least} entangled with the treated shock.
+
+\subsection{Why I cluster the standard errors by commodity}
+
+\intuit A \emph{standard error} is the margin of error on $\beta$. Volatility within a single
+commodity is \emph{autocorrelated} --- today's value is statistically tied to yesterday's; a
+turbulent week tends to be followed by another --- so my observations are not independent.
+Pretending they are makes the error bars falsely tiny and the result look more certain than it is.
+\emph{Clustering by commodity} treats each commodity as one correlated blob and produces honest,
+wider error bars.
+
+\smallskip\noindent\emph{The few-clusters caveat.} What governs the reliability of clustered
+standard errors is the number of \emph{clusters}, not the number of observations. I have only about
+11 commodities $=$ 11 clusters --- and just \emph{five} on the treated side --- which is few.
+Crucially this is true \emph{even on the district panel}: $123{,}000$ observations still collapse
+into the same $\approx 11$ commodity blobs, so the district result is no better protected than the
+national one. With so few clusters even the clustered standard errors are not fully reliable, and
+the naive large-sample $p=0.008$ is \emph{over-optimistic} --- I do not treat it as the headline.
+The honest fixes are a cluster-robust t-test with the correct (G$-$1) degrees of freedom, which
+gives $p\approx0.026$, and a \emph{wild-cluster bootstrap} (a resampling correction that holds up
+with few clusters), which gives $p\approx0.046$. Both put the effect right around the
+$0.03$--$0.05$ line: \emph{borderline-significant}, not robustly so. And there is a deeper warning
+specific to my data: all five treated commodities are \emph{larger} than all five controls (about
+an $11\times$ size imbalance), and that is precisely the regime where the wild bootstrap is least
+trustworthy (MacKinnon--Webb). So I report the borderline few-cluster numbers as the honest ones
+and explicitly flag that even they may flatter the result.
+
+\subsection{What I actually found}
+
+\tells On the \emph{national} series the DiD was essentially zero: $\hat\beta = -0.0115$,
+$p = 0.93$ --- no detectable effect, sign unstable, nowhere near the $+8$ to $+10\%$ my very first
+rough estimate had suggested. This is a low-power dress rehearsal (only 11 units), so it neither
+confirms nor kills anything.
+
+On the much richer \emph{district} panel the current DiD --- with four food-cereal donors in the
+control pool --- is $\hat\beta = -0.103$, i.e.\ banned crops' spot volatility about $10\%$
+\emph{lower} after the ban relative to controls ($e^{-0.103}-1 \approx -0.098$), and it is
+\emph{not} statistically significant under honest few-cluster inference ($p\approx0.145$
+cluster-robust t with G$-$1 df; $p\approx0.153$ wild bootstrap). The donor arc matters as much as
+the number: at the earlier clean-core stage (industrial/spice controls only) the same regression
+read $\hat\beta=-0.232$ ($-20.7\%$) with borderline significance ($p\approx0.026/0.046$; the naive
+$p=0.008$ was over-optimistic) --- adding the economically right food controls \emph{halved} the
+estimate. This is the headline spec: it drops the MSP-censored paddy (whose government-pinned
+price makes its ``volatility'' a mechanical artifact --- see the box below) and replaces the
+gum-contaminated guar control (id~75) with the true futures underlying, ``Guar Seed'' (id~413).
+
+\smallskip\noindent\textbf{The check I trust most: leave-one-commodity-out.} An aggregate number
+could be one commodity's story in disguise, so I dropped each banned commodity in turn and
+re-estimated. The negative sign survives every drop ($-7.4\%$ to $-15.2\%$), and the two extreme
+cases are the informative ones. Dropping \emph{wheat} --- the commodity most entangled with the
+government support-price (MSP) machinery, the obvious suspect for a spurious result --- makes the
+effect \emph{stronger and significant} ($-15.2\%$, $p\approx0.003$): the non-wheat result is not
+wheat- or MSP-driven. Dropping \emph{chana} thins the effect to $-7.4\%$ ($p\approx0.29$): the
+aggregate signal is substantially a \emph{chana} signal. It is also stable to district-liquidity
+and outlier filters ($-8.7\%$ to $-10.0\%$). This decomposition --- not a blanket ``robust'' ---
+is what I would actually lead with.
+
+\smallskip\noindent\textbf{Why paddy is dropped (price censoring).} For paddy, $40.3\%$ of daily
+spot returns are \emph{exactly zero} --- versus $1$--$6\%$ for the clean commodities --- because
+FCI/state procurement pins the price at the Minimum Support Price (MSP) for long stretches. Realized
+volatility computed on a government-administered, flat price is a mechanical artifact, not market
+volatility: the series is effectively \emph{censored}, so it cannot inform a volatility-effect
+estimate and I drop it from the primary spec. (Wheat is also MSP-exposed at $19.7\%$ flat, but it is
+a core commodity, so I keep it with an MSP flag and read it as a robustness check, not a clean unit.) A careless reading would shout ``the ban worked, vol fell $21\%$!'' --- but a single DiD
+number means nothing until it survives its own stress tests, and the story of \emph{how} this one
+came to survive them (Sections~4--5) is the part worth telling. The sign-instability across my
+iterations (a first rough $+8$--$10\%$, to roughly zero on the national series, to $-21\%$ on the
+clean district panel) is not a mistake to hide; it is exactly why I leaned on falsification and on a
+panel of estimators rather than trusting any one before/after.
+
+% =====================================================================
+\section{Event study}
+
+\intuit An event study is just DiD \emph{with time resolution}. Instead of one ``after'' dummy that
+averages over the whole post-ban period, I split the treatment effect into a \emph{sequence} of
+dummies --- one for each month (or bin of months) before and after the ban. Plotting these traces
+the banned-vs-control gap month by month, and does two jobs at once. \emph{Job one: it tests
+parallel trends.} The pre-ban coefficients (the ``leads'') should all be statistically zero --- if
+the groups were truly trending together beforehand, no systematic gap should build up before the
+ban. \emph{Job two: it shows the dynamics.} The post-ban coefficients (the ``lags'') trace whether
+volatility jumped immediately and stayed high (a real, persistent effect) or merely drifted (noise).
+
+\example Imagine the estimated treated-vs-control gaps, month by month around the ban:
+\[
+\underbrace{-2:\ +0.01,\quad -1:\ 0\ \text{(baseline)}}_{\text{pre-ban (leads)}},\qquad
+\underbrace{+1:\ +0.09,\quad +2:\ +0.02,\quad +3:\ -0.01}_{\text{post-ban (lags)}}.
+\]
+The pre-ban values sitting near zero would \emph{support} parallel trends; the brief $+0.09$ spike
+at month $+1$ that fades is a transitory blip, not a lasting effect. If instead the pre-ban values
+were drifting upward (say $-2: +0.05$, building toward the ban), that would \emph{fail} the test ---
+the groups were already separating before anything happened.
+
+\formula
+\[
+\ln\sigma_{it} \;=\; \alpha_i + \lambda_t + \sum_{k\neq -1}\beta_k\,\big(\mathrm{Treat}_i \times \mathbf{1}[t - t^\ast = k]\big) + \varepsilon_{it}.
+\]
+
+\vars
+\begin{itemize}
+\item $\ln\sigma_{it},\ \alpha_i,\ \lambda_t,\ \varepsilon_{it}$ --- exactly as in the DiD
+(dependent outcome, unit and time fixed effects, error). Unchanged.
+\item $t^\ast$ --- the ban month: a fixed, known date (December 2021), not estimated.
+\item $k$ --- ``months relative to the ban'': $k<0$ before, $k>0$ after. An index, not a variable.
+\item $\mathbf{1}[t-t^\ast=k]$ --- an \emph{indicator} that is $1$ in exactly the relative month $k$
+and $0$ otherwise. Independent variable.
+\item $\beta_k$ --- a \emph{whole set} of parameters (one per relative month), each the
+treated-vs-control gap in that month. The pre-ban $\beta_k$ ($k<0$) are the parallel-trends test;
+the post-ban $\beta_k$ ($k\ge 0$) are the dynamics.
+\item $k=-1$ --- the omitted baseline (the month just before the ban). Every other $\beta_k$ is
+measured \emph{relative} to it; you must drop one period or the equation is unsolvable (collinear).
+\end{itemize}
+
+\applied I estimated the full set of $\beta_k$ on the district panel and ran a \emph{joint test}:
+``are all the pre-ban leads zero \emph{together}?'' (a single test across many coefficients at once
+--- an $F$-type test). This is a test where I am \emph{rooting for the null}: the null is ``parallel
+trends holds,'' which is the assumption I need, so a small $p$-value here is \emph{bad} news.
+
+\tells This test has a history worth telling. On my \emph{first} corrected run the pre-ban leads
+were \emph{not} flat --- they drifted, and the joint test \emph{rejected} ($p\approx0.03$), which by
+my own pre-registered rules would have retired the DiD. The natural economic story was reverse
+causation: SEBI suspended futures precisely because volatility was already high, so banned crops ran
+hot into the ban and then mean-reverted, and a naive DiD could read that natural cooling as ``the ban
+lowered volatility.'' I took that worry seriously --- but before retiring the design I chased the
+\emph{source} of the drift, and it turned out to be a measurement bug, not economics (Section~5). Once
+I fixed it, the leads flattened: \textbf{the joint pre-trend test no longer rejects ($p = 0.19$).}
+The thing that looked like reverse causation in the leads was largely manufactured by how I had been
+measuring volatility on a calendar grid.
+
+\smallskip\noindent\emph{But the joint test masks something, and I won't hide it.} A joint
+$p=0.19$ means I cannot reject parallel trends \emph{on average over all the leads} --- it does not
+mean every lead is clean. In fact the \emph{most recent} pre-ban bin is still individually
+significant: about $+10\%$ ($p=0.049$). So in the months right before the ban the two groups were
+already starting to diverge. That residual pre-trend is exactly the kind of thing the
+reverse-causation/mean-reversion story predicts, and it is one of the reasons I call the overall
+result suggestive rather than conclusive --- the parallel-trends assumption survives the joint test
+but is not pristine.
+
+% =====================================================================
+\section{The placebo test, and the bug that flipped a dead result alive}
+
+\intuit A placebo test asks: if I run the \emph{identical} analysis at a date where \emph{nothing
+happened}, does it still find an ``effect''? If it does, the method is detecting drift, not the
+policy. I placed a \emph{fake} ban at 20 December 2019 and used \emph{only} pre-ban data (before the
+real December 2021 suspension), so there is no real policy anywhere in the window for it to pick up.
+
+\smallskip\noindent\textbf{The trap to spell out.} This is the one test where I am \emph{rooting for
+the null}. The null hypothesis is ``no effect,'' and on a fake date that is the answer I \emph{want}
+--- a clean method should detect nothing. So here, unlike a normal test, a \emph{small} $p$-value is
+\emph{bad} news: it means my method conjures an effect out of thin air.
+
+\smallskip\noindent\textbf{The bug --- my favourite part of the project.} On my \emph{first}
+corrected run this placebo \emph{failed}: it returned a ``significant'' $-13.6\%$ ($p=0.046$) at a
+fake date, and the joint pre-trend test rejected too --- two independent checks both screaming that
+the design was detecting drift, not the policy. By my pre-registered rules the DiD was dead. Rather
+than bury it, I went looking for \emph{why} a fake date found an effect, and traced it to a
+\emph{calendar-grid measurement bug}. I had laid the mandi spot series on a full calendar (every
+day, weekends and holidays included), and on non-trading days the price simply carried forward
+unchanged. But my realized volatility annualised on $252$ \emph{trading} days. So the carried-forward
+weekend prices injected runs of artificial zero-returns and stale levels, manufacturing
+\emph{spurious autocorrelation} in the volatility series --- exactly the kind of slow, persistent
+drift that makes a placebo light up and pre-trends bend. The fix was unglamorous: filter to weekdays
+(actual trading days) before computing returns, so the $252$-day annualisation matches the grid the
+data actually live on. I also dropped the MSP-censored paddy at the same time. Together those two
+changes cleaned up the falsification battery.
+
+\tells After the fix, the placebo is \emph{no longer significant} --- and it improved in two
+stages worth narrating. At the clean-core stage (industrial/spice donors) it was a \emph{marginal}
+pass: the fake Dec-2019 ban returned $-11.7\%$ ($p = 0.12$ analytic, $0.19$ bootstrap), about 56\%
+of the then-headline $-20.7\%$ --- a warning that part of the ``effect'' could be drift or
+mean-reversion after the pre-ban run-up, with a hot final pre-bin ($+10\%$, $p=0.049$) lurking
+under the joint pre-trend test. On the \emph{current food-donor panel} the battery is genuinely
+clean: the placebo returns $\hat\beta = -0.067$ ($-6.5\%$) with $p = 0.34$ analytic, $0.43$ on the
+bootstrap, and the joint pre-trend test is comfortable ($p = 0.45$) with \emph{no} individually
+significant lead bin left. Notice what happened: with the economically right counterfactual, the
+placebo and the headline shrank \emph{together} ($-6.5\%$ vs.\ $-9.8\%$) --- the drift the old
+placebo was picking up lived in the bad donor pool, not the design. This is still the
+research-integrity story I would tell an interviewer --- my first corrected DiD looked dead, I
+refused to paper over it, I found a measurement bug, then let a better donor pool discipline the
+estimate --- but I am explicit that the surviving aggregate result is \emph{suggestive, not
+conclusive}: it is small ($-9.8\%$) and not significant once the proper food-staple donors are in.
+
+% =====================================================================
+\section{Synthetic control and Synthetic DiD: corroborating the point estimate}
+
+A single DiD point estimate is more believable if other estimators land near it, so alongside the
+DiD I built a panel of comparative-case methods. They do all come out negative, in the same
+$-20$ to $-27\%$ range. But I want to be careful here, because it is tempting --- and wrong --- to
+sell this as ``four independent methods converge.'' For reasons I lay out at the end of the section,
+the agreement is partly \emph{mechanical} (same panel, same five-and-five commodities), the
+synthetic-DiD pooled number has \emph{no valid standard error}, and the classic synthetic controls
+fit poorly. So the honest framing is: these corroborate the \emph{sign and rough magnitude} of the
+DiD point estimate; they are not four independent confirmations of significance.
+
+\subsection{The idea: build the missing twin}
+
+\intuit DiD uses an \emph{equally-weighted} average of the control crops as the counterfactual ---
+``what banned crops would have done absent the ban.'' But maybe no single control is a good stand-in
+for chana, while a \emph{blend} --- say $0.5$ guar $+ 0.3$ jeera $+ 0.2$ castor --- tracks chana's
+pre-ban path almost exactly. \emph{Synthetic control} (Abadie) finds exactly that blend: it picks
+weights on the donor crops so the weighted donor matches the treated crop's \emph{pre-ban}
+volatility as closely as possible, then carries that ``synthetic twin'' forward past the ban. The
+gap between the real treated series and its synthetic twin after the ban is the estimated effect.
+\emph{Synthetic DiD} (Arkhangelsky) is the modern hybrid: it keeps DiD's two-way structure but lets
+\emph{both} the unit weights (which donors) \emph{and} the time weights (which pre-periods) be chosen
+by the data, so it is more robust than either plain DiD or plain synthetic control alone.
+
+\formula In words rather than full notation (the mechanics are weighted least squares with a
+pre-fit constraint): synthetic control chooses donor weights $w_j \ge 0$, $\sum_j w_j = 1$, to
+minimise the pre-ban distance between the treated path and $\sum_j w_j \times (\text{donor }j)$;
+the post-ban treated-minus-synthetic gap is the effect. Synthetic DiD augments the DiD regression
+with those data-chosen unit weights $\hat w_i$ and time weights $\hat\lambda_t$:
+\[
+(\hat\beta^{\text{sdid}}) \;=\; \arg\min \sum_{i,t} \hat w_i\,\hat\lambda_t\,\big(\ln\sigma_{it} - \alpha_i - \lambda_t - \beta\,\mathrm{Treat}_i\!\times\!\mathrm{Post}_t\big)^2.
+\]
+
+\applied I ran all four and report the panel, with the inference stated honestly for each:
+\begin{itemize}
+\item \textbf{Two-way-FE DiD} (the headline, Section~3): $-9.8\%$ on the current food-donor panel;
+\emph{not significant} under few-cluster inference ($p\approx0.145$ cluster-robust t,
+$\approx0.153$ wild bootstrap). Ex-wheat it is $-15.2\%$ ($p\approx0.003$); ex-chana it thins to
+$-7.4\%$ --- the signal is concentrated in chana.
+\item \textbf{Synthetic DiD} (pooled): $-19.1\%$, and with nine donors the placebo SE is now
+\emph{valid}: $z=-1.88$, borderline. (An earlier ``$z=-7.7$'' I had quoted was a donor-jackknife
+\emph{artifact} and I have removed it; at the five-donor stage the pooled SE was undefined
+altogether.) Per commodity, chana is the one significant case ($-38.7\%$, $z=-2.05$); wheat is
+$\approx$zero ($+0.4\%$); mustard, soybean and moong are negative but insignificant.
+\item \textbf{Commodity-level synthetic control} (one synthetic twin per banned crop, on
+district-median paths): chana $-37.3\%$ \emph{at} the placebo floor ($p=0.100$ with nine donors);
+mustard $-28.2$, wheat $-37.8$, soybean $-27.6$ carry weak placebo p's ($0.3$--$0.6$), and moong is
+small ($-8.7\%$). Corroborates chana; weak elsewhere.
+\item \textbf{District-unit synthetic control} (one synthetic per treated district): all treated
+commodities come out negative, strongest for chana/mustard/wheat (each at the $p=0.100$ floor).
+The floor is $1/10$ with nine donors --- better than the old $1/6$, but still \emph{structurally
+unable} to reject at $5\%$; the ``significance'' remains capped by construction.
+\end{itemize}
+
+\tells \textbf{The estimators agree on sign --- banned-commodity spot volatility came out
+\emph{lower}, not higher, the opposite of the going $+8$--$10\%$ hypothesis --- but the aggregate
+effect is modest ($\approx-10\%$ DiD, $-19\%$ SDID) and not robustly significant; the strong,
+consistent signal is chana.} I will not oversell the agreement, and three honest caveats are why.
+\emph{First}, it is partly \emph{mechanical}: DiD, SDID and SCM all use the same panel, outcome and
+treated set, and the SDID unit weights come out roughly uniform, so SDID collapses back toward the
+plain DiD --- one comparison re-weighted, not four independent confirmations. \emph{Second}, the
+inference is genuinely weak outside chana: the pooled SDID $z=-1.88$ is borderline and the SCM
+placebo p's are mostly $0.3$--$0.6$. \emph{Third}, the donor arc is the deepest lesson: swapping the
+industrial/spice pool for food-cereal donors \emph{halved} the headline ($-20.7\% \to -9.8\%$) and
+removed its significance --- the estimate answers to the quality of its counterfactual, and the
+remaining oilseed donors (groundnut, sesamum, sunflower) are still to land, so mustard/soybean are
+provisional. So I frame this as: \emph{the ban did not raise volatility; the aggregate decline is
+suggestive, not conclusive; the defensible positive evidence is chana}.
+
+% =====================================================================
+\section{GARCH(1,1)}
+
+The DiD compares \emph{across} commodities. GARCH instead looks \emph{inside} one commodity's own
+price process over time and asks whether its volatility regime changed at the ban. It is the
+standard tool for modelling how volatility evolves --- and a different kind of test: \emph{no control
+group at all}, just one commodity against its own history.
+
+\subsection{Volatility clustering}
+
+\intuit One robust fact about prices --- stocks, currencies, or chana in a mandi --- is that calm
+and turbulent days come in \emph{clumps}: a wild day tends to be followed by more wild days, a
+sleepy one by more sleepy ones. Markets have ``stormy seasons'' and ``quiet seasons'' that persist
+before flipping. This is \emph{volatility clustering}. A model that assumes one fixed variance for
+the whole sample --- as if every day had identical weather --- misses it entirely. GARCH
+(Generalised Autoregressive Conditional Heteroskedasticity) lets today's variance depend on what
+just happened, so it captures the clustering. ``Conditional'' means today's variance depends on
+recent history; ``heteroskedasticity'' means the variance changes over time instead of staying
+constant.
+
+\subsection{The model}
+
+\formula GARCH(1,1) describes the return $r_t$ and its time-varying variance $\sigma_t^2$:
+\[
+r_t = \mu + \varepsilon_t,\qquad \varepsilon_t = \sigma_t z_t,\quad z_t \sim \text{iid}(0,1),
+\]
+\[
+\sigma_t^2 \;=\; \omega \;+\; \alpha\,\varepsilon_{t-1}^2 \;+\; \beta\,\sigma_{t-1}^2.
+\]
+In words: \emph{today's variance $=$ a baseline constant $+$ a slice of yesterday's squared
+surprise $+$ a slice of yesterday's variance.}
+
+\vars
+\begin{itemize}
+\item $r_t$ --- the daily return. \emph{Observed data}, the input series (here, one commodity's
+daily spot returns). In the first line it is the dependent variable of the ``mean equation.''
+\item $\mu$ --- the average return. A \emph{parameter} (estimated), usually tiny.
+\item $\varepsilon_t$ --- the ``surprise'' or shock: the part of the return not explained by the
+mean ($\varepsilon_t = r_t - \mu$). A \emph{derived, unobserved} quantity.
+\item $z_t$ --- a standardized random innovation, ``iid$(0,1)$'' meaning independent draws with mean
+$0$ and variance $1$. The pure randomness; not estimated.
+\item $\sigma_t^2$ --- the \emph{conditional variance} (today's variance given the past). This is a
+\emph{latent} variable: not directly observed, produced \emph{by} the model. It is the real object
+of interest --- volatility is $\sigma_t = \sqrt{\sigma_t^2}$.
+\item $\omega$ (omega) --- a \emph{parameter}: the small constant \emph{intercept} of the variance
+equation. Property/trap: it is \emph{not} the long-run volatility level itself (a common slip ---
+see below). Constraint: $\omega>0$ so variance stays positive.
+\item $\alpha$ (alpha) --- a \emph{parameter}, the \emph{ARCH term}: the weight on yesterday's
+squared surprise $\varepsilon_{t-1}^2$. High $\alpha$ $=$ a jumpy, news-sensitive series that reacts
+hard to a shock. Constraint: $\alpha \ge 0$.
+\item $\beta$ (beta) --- a \emph{parameter}, the \emph{GARCH term}: the weight on yesterday's
+\emph{variance} $\sigma_{t-1}^2$. High $\beta$ $=$ long memory; once stormy, it stays stormy.
+Constraint: $\beta \ge 0$. (Note: this $\beta$ is unrelated to the DiD's $\beta$ --- same Greek
+letter, different model.)
+\end{itemize}
+
+\subsection{Persistence and the long-run level}
+
+\intuit The key quantity is the sum $\alpha + \beta$, called \emph{persistence}: when a shock hits,
+how long does the elevated volatility last? Near $1$ it decays very slowly (a storm today still
+raises volatility weeks out); lower, and shocks fade fast. The model is only \emph{stationary} ---
+meaning the variance settles to a stable long-run level instead of exploding --- when
+$\alpha + \beta < 1$. That inequality is the central \emph{property} of the parameters. The
+\emph{long-run (unconditional) variance} the series reverts to is
+\[
+\sigma^2_{\text{long-run}} \;=\; \frac{\omega}{1 - \alpha - \beta},
+\]
+which depends on $\omega$ \emph{and} the persistence together --- so $\omega$ alone is not the level.
+
+\example \emph{Half-life intuition.} ``Half-life'' $=$ how many days for a volatility shock to lose
+half its extra height; the formula is $\ln(0.5)/\ln(\text{persistence})$. If persistence $=0.99$,
+half-life $\approx \ln(0.5)/\ln(0.99) \approx 69$ days --- about ten weeks; storms linger. If
+persistence $=0.78$, half-life $\approx \ln(0.5)/\ln(0.78) \approx 2.8$ days --- shocks die in days
+and the market settles quickly. This is the arithmetic that \emph{would} make a drop in persistence
+economically meaningful --- a market going from weeks-long storms to days-long ones. I flag it here
+because an early, dirty fit of my data showed exactly such a drop ($0.99 \to 0.78$) and looked like a
+striking ``market calmed'' result; on the trading-day-clean data it does \emph{not} reproduce (the
+clean persistences are roughly $0.55 \to 0.69$, going the other way, with volatility about flat), so
+I do not lean on it. The arithmetic is sound; the dramatic input numbers were an artifact.
+
+\subsection{Testing the ban: a step dummy}
+
+\formula To ask directly ``did the ban shift the volatility \emph{level}?'', I add a post-ban
+\emph{step dummy} to the variance equation:
+\[
+\sigma_t^2 \;=\; \omega + \alpha\,\varepsilon_{t-1}^2 + \beta\,\sigma_{t-1}^2 + \gamma\,\mathrm{Post}_t.
+\]
+
+\vars
+\begin{itemize}
+\item $\mathrm{Post}_t$ --- an \emph{independent} indicator: $0$ before 20 December 2021, $1$ after.
+A known, fixed switch, not estimated.
+\item $\gamma$ (gamma) --- the \emph{parameter} of interest here: how much the baseline variance
+\emph{steps} at the ban. A positive, significant $\gamma$ $=$ volatility stepped \emph{up} at the
+ban (over and above normal clustering); negative $=$ stepped \emph{down}.
+\item All other terms as above; $\alpha,\beta$ still drive the day-to-day clustering \emph{around}
+the shifted baseline. (In estimation $\mathrm{Post}_t$ enters as an exogenous regressor and I keep
+the implied variance constrained positive.)
+\end{itemize}
+
+\applied I fit GARCH(1,1) per commodity and split the sample at the ban, and I let the \emph{data}
+choose the break date with an ICSS (Iterated Cumulative Sums of Squares) variance-break detector ---
+the honest version of the test, since imposing the ban date is exactly the thing in question. The
+result on clean data is a \emph{null}: the ICSS detector finds \emph{no} variance break near the
+suspension on any series. The cleanest banned staple, \emph{chana}, has roughly flat unconditional
+volatility across the ban (its persistence even nudges \emph{up}, $\approx 0.55 \to 0.69$), and the
+district-median chana fit is close to degenerate (persistence pinned near $1$), so I do not read fine
+movements into it. An early, calendar-dirty fit had suggested a dramatic calming (persistence
+$0.99 \to 0.78$, vol $71\% \to 46\%$); that was the same measurement artifact the DiD placebo exposed,
+and it washes out on trading-day-clean returns.
+
+\tells \textbf{C2-volatility is inconclusive, and the volatility verdict rests on C1.} The original
+``volatility rose, significant at $10\%$'' claim does \emph{not} reproduce --- but neither does a
+clean ``the market calmed'' counter-result hold up inside the GARCH: with no data-chosen break and
+roughly flat conditional volatility, the within-commodity time-series evidence is simply silent. That
+is the honest read, and it is why I lean the whole volatility case on the cross-commodity panel
+(chiefly the leave-one-out-robust DiD point estimate, corroborated in sign by Synthetic DiD and
+synthetic control), rather than on GARCH.
+For completeness, pinning any regime change to the policy would still want a model that lets the data
+choose the break --- a Bai--Perron endogenous structural-break test or a Markov-switching GARCH ---
+but on this data there is no break for it to find.
+
+% =====================================================================
+\section{The basis}
+
+The last concept ties futures and spot together --- and is where one part of the original project
+framing turns out to be internally impossible for the banned crops.
+
+\subsection{Cost of carry and convergence}
+
+\intuit The \emph{basis} is the difference between the futures price and the spot price of the same
+commodity at the same moment. Why are they ever different? \emph{Cost of carry.} If you want chana
+in three months, you can buy a futures contract, or you can buy today and store it --- and storing
+costs warehousing, insurance, and forgone interest. So the futures price for later delivery normally
+sits \emph{above} today's cash price by roughly those carrying costs. That gap is the basis, and a
+positive basis (futures above spot) is called \emph{contango}. Agricultural commodities, though,
+often flip to \emph{backwardation} (futures \emph{below} spot) in a near-term supply squeeze, when
+having the physical crop right now is worth a premium --- that premium is the \emph{convenience
+yield} (the value of holding the actual crop rather than a paper claim; e.g.\ a mill that cannot
+afford to run out). As a futures contract nears delivery, the ``three months of storage'' shrinks
+toward ``zero,'' so the carrying-cost gap shrinks and futures and spot \emph{converge}: the basis
+goes to about zero at expiry. Arbitrage enforces this --- if they did not converge, a trader could
+lock in a near-riskless profit, and that very trading pulls them together.
+
+\formula The basis itself is simply
+\[
+\text{basis}_t \;=\; F_t - S_t,
+\]
+and the fuller \emph{cost-of-carry} relation that explains \emph{why} $F_t$ and $S_t$ differ is
+\[
+F_t \;=\; S_t \, e^{(r + u - y)\,T}.
+\]
+
+\vars
+\begin{itemize}
+\item $S_t$ --- the spot (cash) price now. \emph{Observed data}.
+\item $F_t$ --- the futures price now, for delivery in $T$ years. \emph{Observed data}.
+\item $\text{basis}_t$ --- their difference, $F_t - S_t$. \emph{Derived}. (Some practitioners define
+it spot minus futures --- a pure sign convention; I use futures minus spot.) A \emph{widening} basis
+$=$ futures and spot drifting apart by more than carry justifies, usually read as market stress or
+impaired arbitrage --- the price-discovery link breaking down.
+\item $r$ --- the financing (interest) rate, an annual rate. Pushes $F$ \emph{above} $S$.
+\item $u$ --- the storage cost, an annual rate. Also pushes $F$ \emph{above} $S$.
+\item $y$ --- the convenience yield, an annual rate. Pulls $F$ \emph{below} $S$. The term with no
+equity analogue --- it is why \emph{agricultural} futures behave so differently from the index
+futures a trading desk usually sees. When $y$ is large (a tight physical market), the exponent can go
+negative and futures fall below spot: that is backwardation.
+\item $T$ --- time to delivery, in years. As $T \to 0$ the whole exponent $\to 0$, so $F_t \to S_t$:
+that is convergence at expiry.
+\end{itemize}
+(Equity-index futures are the clean special case where $u=0$ and $y$ is just the dividend yield, so
+they almost never sit in deep backwardation.)
+
+\example Spot chana is $\rupee\,5{,}000$ per quintal today; the three-month futures trades at
+$\rupee\,5{,}150$. The basis is $F_t - S_t = 5{,}150 - 5{,}000 = +150$, i.e.\ $+3\%$ --- contango,
+reflecting about three months of storage and financing. As delivery approaches, that $+150$ should
+shrink toward $0$. If instead the futures were at $\rupee\,4{,}900$, the basis would be $-100$:
+backwardation, signalling a near-term scarcity (a high convenience yield).
+
+\subsection{A note on rollover}
+
+\intuit A futures contract \emph{expires}, so to track a continuous futures price past expiry you
+must \emph{roll}: close the contract about to expire and open the next one out. I keep the
+individual nearby legs (the first-, second-, and third-to-expire contracts, c1/c2/c3) precisely so I
+control this. It matters because rolling is not free: in contango you sell the cheap expiring
+contract and buy the dearer next one and \emph{bleed} that gap (negative roll yield); in
+backwardation you earn it. For my \emph{spot}-volatility outcome rollover does not contaminate
+anything --- the spot mandi series has no contracts to roll. But it would distort any futures-return
+or basis series built from a single naively spliced price, which is why I keep the separate
+c1/c2/c3 legs rather than one blended series.
+
+\subsection{Why a banned commodity has no post-ban basis}
+
+\tells Here is the clean logic point. The basis needs \emph{both} a futures price and a spot price.
+The suspension switched off \emph{futures} for exactly the banned commodities after 20 December 2021.
+After that date there is simply \emph{no futures price to subtract}, so a ``post-ban basis'' for a
+banned commodity is \emph{undefined} --- it cannot exist. Any number reported under that label must
+be measuring something else (most likely stale, zero-volume settlement marks that some contracts
+kept publishing for months after trading stopped --- a trap I guard against by truncating banned
+futures at the ban date). What I \emph{can} honestly measure is the basis only where it is defined:
+the \emph{pre-ban} basis trend for the banned crops (futures were live then), and the
+\emph{full-window} basis for the control crops (which kept trading).
+
+\applied The basis even served as a \emph{data-quality instrument}. My first guar spot series
+correlated only $0.04$ with guar futures and produced a nonsensical basis --- which is how I caught
+that I had grabbed a gum-contaminated series (guar \emph{gum}, a processed product about ten times
+the price of guar \emph{seed}). Switching to the true ``Guar Seed'' underlying restored a $0.99$
+correlation and a sensible, stable basis. A quantity that should track its own futures, but does
+not, is a red flag worth chasing.
+
+% =====================================================================
+\section{How the pieces fit together}
+
+Each method answers a different slice of the same question, and reading them together is what makes
+the project honest:
+\begin{itemize}
+\item \textbf{Realized volatility} turns raw prices into a clean, model-free ``jumpiness'' number ---
+the outcome everything else explains. Getting its calendar grid right (trading days, not weekends
+carried forward) turned out to be load-bearing for the entire result.
+\item \textbf{DiD} compares the change in that number for banned vs.\ still-trading crops, so common
+2022 shocks difference out. The current estimate, with four food-cereal donors in the pool, is
+$-9.8\%$ --- \emph{not significant} under few-cluster inference ($p\approx0.145$ cluster-robust t,
+$\approx0.153$ wild bootstrap). The donor arc is the real lesson: on the earlier industrial/spice
+pool the same DiD read $-20.7\%$ with borderline significance; the economically right counterfactual
+\emph{halved} it. Leave-one-out shows the signal is \emph{concentrated in chana}: ex-wheat is
+$-15.2\%$ ($p\approx0.003$, significant), while ex-chana falls to $-7.4\%$.
+\item \textbf{The event study and placebo} stress-test that estimate. On my first corrected run they
+\emph{failed} (pre-trend $p\approx0.03$, a fake 2019 ban ``significant'' at $-13.6\%$) --- but chasing
+that failure exposed a calendar-grid measurement bug, not reverse causation. With the bug fixed the
+pass was marginal (placebo $-11.7\%$, $\approx$56\% of the then-headline; a hot final pre-bin); on
+the food-donor panel it is genuinely clean --- placebo $-6.5\%$ ($p\approx0.34/0.43$), joint
+pre-trend $p\approx0.45$, no significant lead bin. The design survives the tests that nearly
+retired it, and the tests got cleaner as the counterfactual got better.
+\item \textbf{Synthetic control and Synthetic DiD} build a data-weighted ``twin'' for each banned
+crop. Synthetic DiD pools to $-19.1\%$ and, with nine donors, now has a \emph{valid} placebo SE
+($z=-1.88$, borderline); per commodity, \textbf{chana is the one significant case ($-38.7\%$,
+$z=-2.05$)}, wheat is $\approx$zero ($+0.4\%$ --- its earlier decline was the MSP/export-ban
+confound), and the rest are negative but insignificant. Commodity SCM: chana $-37.3\%$ at the
+$1/10$ placebo floor; others weak. I do \emph{not} read this as ``four independent estimators
+converge'': they share the same panel and treated set, so the agreement is partly mechanical. It
+supports the sign; it does not certify aggregate significance.
+\item \textbf{GARCH(1,1)} looks inside a single commodity over time --- no control group. It neither
+revives the original ``volatility rose'' claim (an ICSS detector finds \emph{no} variance break at
+the ban) nor cleanly supports the opposite (conditional volatility is roughly flat once the calendar
+bug is removed). C2-volatility is therefore inconclusive, and the volatility case rests on the C1
+panel above.
+\item \textbf{The basis} shows why one part of the original framing is internally impossible for
+banned crops, and doubles as a data-quality check.
+\end{itemize}
+The through-line: the going hypothesis was that switching off futures would \emph{raise} spot
+volatility ($+8$--$10\%$); my analysis \emph{refutes} that --- the point estimate is firmly
+negative, around $-20\%$, and robust to dropping any single commodity, including the MSP-flagged
+wheat. But the calibrated claim is deliberately hedged: \emph{suggestive, not conclusive.} The
+significance is borderline under honest few-cluster inference, the placebo recovers about half the
+effect, the estimator agreement is partly mechanical rather than four independent confirmations, the
+SCM fits poorly, the donor pool is weak, and the ban's reactive timing leaves a mean-reversion threat
+the marginal placebo cannot fully rule out. The most interview-worthy moment is not the headline but
+how I earned it --- my first corrected DiD looked dead, I refused to paper over a failing placebo, I
+traced it to a calendar-grid measurement bug, and fixing it flipped a ``dead'' result into a live (if
+borderline) one. A project willing to let its own pre-registered tests nearly kill its headline ---
+and to state plainly where the evidence is still merely suggestive --- is doing what empirical work
+is supposed to do.
+
+\end{document}

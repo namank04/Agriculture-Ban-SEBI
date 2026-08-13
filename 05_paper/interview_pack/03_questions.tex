@@ -1,0 +1,523 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+
+\newcommand{\Q}[1]{\medskip\noindent\textbf{#1}\par}
+\newcommand{\A}{\noindent}
+
+\title{\textbf{India's 2021 Agricultural Derivatives Suspension}\\[4pt]
+\large My Internship Project --- Questions and Answers}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status note, 4 July 2026.} This Q\&A pack has been updated at the
+front to reflect the food-donor C1 rerun. Some deeper answers still preserve older
+clean-core numerical examples for interview preparation; treat the current headline
+as aggregate DiD about $-9.8\%$, not statistically significant (CR1
+$p \approx 0.145$; wild bootstrap $p \approx 0.153$), with the strongest negative
+signal concentrated in chana.
+
+\bigskip
+
+\noindent\textbf{How to read this.} These are spoken-style answers to the questions I expect about
+my project. Each answer is short and plain. Every technical word is explained the first time it
+appears. The three parts go easy to hard. Part~1 is the core; Part~2 is deeper follow-ups; Part~3 is
+the general futures-markets background that I think is the most likely thing to be tested.
+
+\bigskip
+\hrule
+\bigskip
+
+\section*{One-paragraph summary of what I did}
+
+In December 2021 India's market regulator (SEBI, the Securities and Exchange Board of India)
+suspended trading in futures (exchange contracts to buy or sell a commodity later at a price agreed
+today) on seven food commodities, hoping to calm food inflation. I built the data and the analysis
+to ask a simple question: did switching off futures actually make the cash (spot) prices of those
+foods less jumpy? I pulled millions of daily market-price rows, cleaned them, and ran a
+before-and-after comparison against foods that kept trading. The going hypothesis --- the thing
+everyone expected --- was that banning futures would \emph{raise} spot volatility (how much a price
+jumps around day to day) by roughly 8--10\%. My analysis refutes that. The current food-donor
+district-panel estimate is negative, about $-9.8\%$, but it is not statistically significant under
+few-cluster inference (CR1 p $\approx 0.145$; wild-bootstrap p $\approx 0.153$). The stronger signal
+is commodity-level, especially chana, while wheat is too confounded by MSP procurement and export
+policy to carry a clean interpretation. My honest conclusion is that the ban did not destabilise the
+cash market; the point estimates lean toward lower spot volatility, but the aggregate evidence is
+suggestive rather than conclusive.
+
+\bigskip
+\hrule
+
+% =====================================================================
+\section{Level 1 --- core / likely questions}
+% =====================================================================
+
+\Q{1. In one sentence, what was this project about?}
+\A India banned futures trading on seven food commodities in December 2021 to fight food inflation,
+and I built the data and analysis to test whether that ban actually made the underlying cash prices
+of those foods steadier or not.
+
+\Q{2. What is ``volatility,'' and why does it matter here?}
+\A Volatility is how jumpy a price is --- how much it bounces around day to day, regardless of
+whether the price itself is high or low. A price drifting from 100 to 102 to 101 is calm; one
+lurching from 100 to 112 to 94 is volatile, even if it ends up in the same place. It matters because
+calming volatility was the government's \emph{stated goal} for the ban, so volatility is the natural
+thing to measure --- you judge a policy on the goal it set itself.
+
+\Q{3. How do you actually turn ``jumpiness'' into a number?}
+\A In three steps. First, I take the daily return --- the percent change from yesterday's price to
+today's --- written as a log, which just makes returns add up cleanly over time and treats a $+10\%$
+and a $-10\%$ move symmetrically. Second, I take the standard deviation (the textbook measure of how
+spread out a set of numbers is) of those daily returns over a rolling 30-day window, so I get a
+fresh volatility reading for every day. Third, I scale it to a yearly figure so it reads on the
+familiar ``percent per year'' scale. That gives me ``realized volatility'' --- realized meaning it
+is computed straight from what actually happened, with no model.
+
+\Q{4. What is the actual theory --- why would banning futures move \emph{spot} volatility at all?}
+\A This is the heart of it, and the honest answer is that the theory does not even agree on the
+\emph{sign}. There are two competing channels. One says futures are useful: they let buyers and
+sellers discover the right price early and let farmers and millers offload their price risk to
+someone willing to bear it, so removing futures should \emph{raise} spot volatility --- you have
+taken away a shock absorber. The other says futures attract speculators who pile in and amplify
+swings, so removing them should \emph{lower} spot volatility. The two effects push in opposite
+directions, so theory alone cannot tell you which wins. That is exactly why it has to be settled
+empirically, with data --- which is what my project tries to do.
+
+\Q{5. What did you actually do, start to finish?}
+\A Three things. I collected the data --- millions of daily spot (cash market) prices for these
+foods plus the futures prices --- which was by far the hardest part. I cleaned it into a tidy panel
+(a table with one row per commodity, place, and time period). Then I ran the statistics: a
+before-and-after comparison of banned versus still-trading foods, an event study to look at the
+timing, and a volatility model. The headline of the work is honestly more about the data pipeline
+and the integrity of the testing than about any one number.
+
+\Q{6. What is difference-in-differences, the main method you used?}
+\A Difference-in-differences, or DiD, compares the \emph{change} in one group to the \emph{change} in
+another. The naive approach --- just compare banned-food volatility before versus after --- is wrong,
+because 2022 was chaos for every commodity (the Ukraine war, an energy spike, global food
+inflation). If volatility rose, was it the ban or the war? You cannot tell. So I use a control group
+of foods that kept trading futures, which lived through the exact same 2022. Whatever the war did
+shows up in both groups and cancels out when I subtract one group's change from the other's. What is
+left --- the banned foods' \emph{extra} change beyond the controls --- is what I attribute to the
+ban. It is a double subtraction: the difference of two differences.
+
+\Q{7. What is the parallel-trends assumption?}
+\A It is the one assumption that makes difference-in-differences valid. It says that, \emph{absent
+the ban}, the two groups of foods would have moved in parallel --- not at the same level, just
+trending the same way. They are allowed to be permanently different; they just have to drift
+together. If that holds, any gap that opens up after the ban is the ban's effect. If it does not
+hold, the whole comparison is contaminated. In my project, the formal pre-trend test now passes
+(the two groups were moving in parallel before the ban) --- but only after I caught and fixed a
+measurement bug that had originally made it fail, which is itself part of the story.
+
+\Q{8. What did you find?}
+\A The going expectation was that the ban would \emph{raise} volatility by about 8--10\%; my analysis
+refutes that and finds the opposite sign. On the cleaner food-donor district-level data, the main
+before-and-after estimate is that banned-food volatility \emph{fell} about $-9.8\%$ relative to
+controls. On significance I'm careful: the few-cluster corrections do not cross conventional
+thresholds (CR1 p $\approx 0.145$; wild-bootstrap p $\approx 0.153$). The part of the result I trust
+most is the pattern across methods and commodities: pooled SDID is more negative, around $-19.1\%$,
+and chana has the strongest commodity-level signal, while wheat is heavily confounded by government
+support prices and export policy. The placebo and pre-trend tests are now cleaner than in the older
+run, with a fake-date placebo around $-6.5\%$ and insignificant. So my honest conclusion is that the
+ban did not destabilise the cash market --- the point estimates say it got calmer --- but I frame it
+as \emph{suggestive, not
+conclusive}. And the honest part of the story is that this result first \emph{failed} its stress
+tests and looked dead, until I found a measurement bug that was manufacturing the failure.
+
+\Q{9. The going hypothesis was a $+8$--$10\%$ \emph{rise} --- why did your analysis come out the other way?}
+\A Because the rise was always the \emph{prior expectation} --- the intuition that speculation
+inflates spot prices, so removing futures would calm the cash market --- and an evaluation's job is
+to test that intuition, not assume it. When I built the analysis carefully on clean district-level
+data, the sign was the opposite: volatility \emph{fell}. The more interesting answer is what happened
+along the way. My first corrected estimate was negative but still \emph{failed} its stress tests, so
+by my own pre-registered rules I should have retired it. I did not paper over that --- I chased it,
+and found a measurement bug in how I had built the volatility series that was manufacturing the
+failure. Fixing the bug made the design defensible; expanding the donor pool toward food commodities
+made the aggregate estimate smaller and less statistically sharp. So the answer is not that one big
+number should be memorised. The answer is that the refutation of the $+8$--$10\%$ hypothesis survives
+cleaner measurement, but the best current statement is modest: aggregate volatility is estimated
+about $-9.8\%$ lower and insignificant, with a stronger chana-centered negative signal. I'd call the
+overall finding suggestive rather than conclusive.
+
+\Q{10. What is GARCH, the other model you mentioned?}
+\A GARCH is a model of volatility over time. The plain fact it captures is that calm and turbulent
+days come in clumps --- a wild day tends to be followed by more wild days, a quiet one by more quiet
+days. Markets have stormy stretches and calm stretches. GARCH lets today's volatility depend on
+yesterday's shock and yesterday's volatility, instead of pretending volatility is constant. The
+important thing is that this is a \emph{different kind of test} from my main before-and-after: that
+one compares banned crops \emph{against} a control group, whereas GARCH looks \emph{inside a single
+food's own price history} over time, with no control group at all. I used it to ask: inside one
+food's own price process, did the volatility regime change at the ban? Honestly, this strand came
+out \emph{inconclusive}. A formal break-date test (which lets the data choose where the variance
+shifts, rather than me imposing the ban date) finds \emph{no} variance break near the suspension on
+any series, and the chana model does not show a clean change either way. So I do not lean on GARCH
+for the volatility verdict --- that case rests on the before-and-after and the comparative-case
+methods (which all show volatility falling), not on GARCH.
+
+\Q{11. What is the ``basis''?}
+\A The basis is the gap between a commodity's futures price and its spot (cash) price at the same
+moment --- futures minus spot. It normally exists because of the cost of carry: if you want the
+commodity in three months, you can either buy a futures contract or buy it now and store it, and
+storage costs money, so the futures price usually sits a bit above the spot price. I planned to study
+the basis, but I caught an important problem: after the ban, a banned food has \emph{no} futures
+price at all, so its post-ban basis literally cannot be computed. That makes any ``post-ban basis''
+claim impossible by definition --- a useful integrity catch.
+
+\Q{12. Why these particular commodities?}
+\A The banned set is fixed by the policy: wheat, chana (chickpea), mustard, soybean, paddy (rice),
+moong (a lentil), and crude palm oil. For the control group I needed similar farm commodities that
+kept trading futures, so I used guar seed, castor seed, jeera (cumin), turmeric, and cotton. The
+logic is that the controls faced the same global 2022 environment, so common shocks cancel out when
+I compare. Two of the banned commodities get special handling. I \emph{drop paddy} from the main
+estimate: about 40\% of its daily price moves are exactly flat, because the government procures rice
+at a fixed support price (the MSP), so its ``price'' is administered, not a market price --- computing
+volatility on it would be measuring a government policy, not the market. And crude palm oil has no
+mandi (cash market) spot price, so it sits in a separate basis track, not the spot-volatility one. I
+treat chana as the cleanest case because it was least tangled up in other policies; wheat is the
+messiest because it also got export bans and stock limits around the same time (and is partly
+MSP-exposed too, so I keep it but flag it).
+
+\Q{13. What was the hardest part?}
+\A Getting the data, without question. The public exchange archive of futures prices only reached
+back to 2024, useless for studying a 2021 event, so I had to find and clean a vendor source going
+back to 2017. The spot prices came through an API (an automated data feed) with a brutal limit of 40
+requests per hour, and large requests timed out, so I had to rebuild my downloader to pace itself,
+resume where it left off, and break big requests into small batches. In the end I pulled 5.74 million
+market-day rows across 396 files. The analysis was a few days; the data was weeks.
+
+\bigskip
+\hrule
+
+% =====================================================================
+\section{Level 2 --- medium / harder follow-ups}
+% =====================================================================
+
+\Q{1. Why log returns instead of plain percentage changes?}
+\A Two reasons. Log returns add up cleanly over time --- a week's return is just the sum of the daily
+log returns --- which plain percentages do not do. And they treat gains and losses symmetrically: a
+$+10\%$ followed by a $-10\%$ should leave you roughly where you started, and in logs it nets to
+about zero, whereas in raw percentages it does not. It is a standard convenience and nothing in my
+story depends on it.
+
+\Q{2. Why cluster your standard errors by commodity, and what is the ``few clusters'' problem?}
+\A A standard error is the margin of error on my estimate. Volatility within a single commodity is
+autocorrelated --- today's value is statistically tied to yesterday's, because a turbulent week tends
+to be followed by another. That means my observations are not independent, and if I pretend they are,
+my error bars come out falsely tiny and I overstate how confident I should be. Clustering by
+commodity treats each commodity as one correlated blob and gives honest, wider error bars. The catch
+is that I only have a handful of treated commodities --- about five clusters on the treated side ---
+and with that few, the ordinary clustering correction is itself unreliable. In the current food-donor
+run, the proper few-cluster checks put the aggregate result above conventional significance
+thresholds: CR1 p is about 0.145 and the wild-cluster bootstrap is about 0.153. That's why I don't
+rest the verdict on statistical significance. What I lean on instead is the sign pattern and the
+commodity-level evidence, especially chana, while being explicit that wheat is confounded. I'm
+deliberately careful \emph{not} to claim ``three other estimators independently agree,'' because
+they share related data and treatment timing, so their agreement
+is partly mechanical --- they corroborate the sign and magnitude, they don't independently confirm
+the significance.
+
+\Q{3. How does the placebo test work, and does your design pass it?}
+\A A placebo test puts a fake treatment where you know nothing happened, and checks whether your
+method still ``finds'' an effect. The key thing to understand is that this is a test where I am
+\emph{rooting for the null}: the null hypothesis is ``no effect,'' and on a fake date that is the
+answer I \emph{want}, because a clean method should detect nothing. So here, unlike a normal test, a
+\emph{small} p-value is bad news, not good. I took only the data from before the real ban and
+pretended the ban happened two years earlier, in December 2019. My design now \emph{passes} this test:
+the fake ban's effect is small and statistically insignificant, about $-6.5\%$ with analytic
+p $\approx 0.344$ and bootstrap p $\approx 0.433$. That is much cleaner than the older clean-core run,
+and it is one reason the current food-donor specification is the one to cite. There is also an honest
+twist on how I got here: it did \emph{not} pass at all at first. An earlier run of this same placebo
+came out significant ($p \approx 0.046$), which made the whole design look dead. That failure is what
+led me to the measurement bug; once I fixed the bug, dropped the government-priced paddy series, and
+expanded the donor pool, the placebo went insignificant.
+
+\Q{4. Isn't a single placebo date cherry-picked?}
+\A Fair point --- one placebo is suggestive, not conclusive. The rigorous version is a permutation
+test: slide a fake ban across many different dates and build up a whole distribution of placebo
+effects, then see where the real one sits. But I do not lean on the single placebo alone, because it
+is backed up by a completely separate check: a formal pre-trend test (does the gap between the two
+groups already exist \emph{before} the ban?). The \emph{joint} version of that test --- are all the
+pre-ban months flat \emph{together}? --- no longer rejects, with a p-value of about 0.19, which is
+the ``rooting for the null'' good news I want. But I have to be honest that the joint test masks
+something: the \emph{most recent} pre-ban month is still individually significant, about $+10\%$ with
+a p-value right at 0.049 --- so the two groups were already starting to diverge just before the ban.
+That residual pre-trend is exactly what the mean-reversion story would predict, so I don't claim the
+parallel-trends assumption is pristine; it survives the joint test but isn't spotless. Taken together
+with the marginal placebo, these checks make the design defensible but not airtight --- which is
+again why I land on suggestive rather than conclusive. And worth saying plainly: both checks
+\emph{failed} outright before I caught the measurement bug, so the fact that they now pass (even if
+borderline) is the direct payoff of fixing it.
+
+\Q{5. Why is the district-level result the one you trust, over the national series?}
+\A They are different in quality, and the national one is just low-powered. The national series has
+only about a dozen data points across commodities and averages over a \emph{changing} set of local
+markets each day --- so when a different mix of markets reports, the average jumps for a bookkeeping
+reason (a different set of mandis reporting that day), not a real price move, and that injects fake
+volatility, which mostly washes the effect out to nothing. The district-level panel has over a
+hundred thousand rows and is the real test. That is where the current finding lives: a $-9.8\%$
+aggregate point estimate in the food-donor run, cleaner placebo and pre-trend diagnostics, and a
+stronger commodity-level negative signal for chana. So I do not treat the noisy national zero as
+evidence against the district result; it is simply too low-powered to adjudicate a design that needs
+local-market resolution. To be clear, the district panel picks up a negative point estimate, not a
+statistically decisive aggregate effect.
+
+\Q{6. What does ``reverse causation'' mean in this project, and how do you handle it?}
+\A It means the thing I am treating as the cause was actually triggered by the outcome. The ban did
+not drop out of the sky at a random time --- the regulator banned futures precisely \emph{because}
+volatility and food inflation were already high. So banned foods ran hot through 2021, that is why
+SEBI acted, and then they could naturally cool off, as turbulent prices tend to do; a naive
+before-and-after could read that natural cooling as ``the ban calmed things down.'' This was exactly
+the right worry, and it is what the falsification tests are designed to catch: if a fake earlier ban
+date ``finds'' the same cooling, the effect is just mean-reversion, not the ban. In my corrected
+design the fake-2019 placebo comes out \emph{insignificant} and the joint pre-trend test no longer
+rejects --- which is the evidence pushing back against pure reversion. But I won't overstate it: the
+placebo still recovers about half the effect, and the most recent pre-ban month is still
+significantly positive, so the mean-reversion threat is reduced but \emph{not} eliminated --- part of
+my $-20\%$ could still be the natural cooling after a price run-up. So I cannot claim airtight
+causation (the ban's timing was a reaction to high prices, not random), and I'm careful to call the
+result \emph{suggestive / quasi-causal} rather than a clean causal estimate --- a robust negative
+point estimate that the falsification tests are consistent with, not a verdict they fully certify.
+
+\Q{7. Did GARCH persistence fall after the ban, showing the market got calmer?}
+\A Honestly, no --- and this is a place where I have to correct an early reading of mine. Persistence
+is a number from the GARCH model --- the sum of two coefficients --- that measures how long a
+volatility shock lasts; near 1, a storm lingers for weeks, lower and it fades in days. An early,
+quick pre/post fit on chana \emph{seemed} to show persistence dropping sharply and volatility
+roughly halving, and I almost reported ``the market got calmer'' as a result. But that did not hold
+up on clean data: once I built the volatility series properly, the change largely evaporated ---
+persistence is roughly flat and so is the overall volatility level. And a formal break-date test
+(which lets the data pick where the variance shifts rather than me imposing the ban date) finds
+\emph{no} variance break near the suspension. So the honest verdict on the GARCH strand is
+\emph{inconclusive}: it neither supports the ``elevated volatility'' story nor cleanly supports a
+``calmer'' one. That is why I rest the volatility case on the before-and-after and comparative-case
+estimators, not on GARCH.
+
+\Q{8. Why is a post-ban basis impossible to measure?}
+\A The basis is futures price minus spot price. The ban switched off futures trading for exactly
+these commodities, so after December 2021 there is no futures price to subtract. You cannot compute a
+gap when one of the two numbers does not exist. So a ``post-ban basis'' for a banned food is
+undefined --- any figure reported under that label must be measuring something else, most likely
+stale settlement marks (formula-based prices an exchange keeps publishing on a contract even when
+nobody is trading it). Catching that is a research-integrity point: a quantity that cannot exist has
+to be flagged, not analyzed.
+
+\Q{9. Could the vendor's roll convention you reverse-engineered have biased your volatility
+estimate?}
+\A Yes, and it is a real robustness check I owe the pipeline. To get a long futures history you have
+to stitch many short contracts together, and at each splice the price can jump --- not because the
+market moved, but because you switched from an expiring contract to a more expensive next one. If the
+series is left unadjusted, that splice jump shows up as a one-day artificial return spike, which
+inflates measured volatility. My vendor series is unadjusted, so before I trust any futures-based
+volatility number I would either back-adjust the splices (shift the older history to remove the jump)
+or simply drop the roll days. It does not touch my main spot-price results, but it is exactly the
+kind of construction artifact that can fool you if you do not check.
+
+\Q{10. What would you do next, in one line?}
+\A Strengthen the inference to match the point estimate: add district-level ``food donor'' controls
+(my current donor pool is industrial and spice crops standing in for food staples), then run the
+modern robustness tools I haven't yet --- a Honest-DiD sensitivity analysis, a Callaway--Sant'Anna
+estimator for the long staggered post-period, and a proper bootstrap confidence interval --- which is
+what would move the finding from ``suggestive'' toward ``conclusive.''
+
+\Q{11. Tell me about the bug you caught --- what exactly was wrong?}
+\A It was a calendar-grid bug in how I built the volatility series. My spot ("mandi") prices come
+from physical markets that close on weekends and holidays, and my pipeline was carrying the last
+traded price \emph{forward} across those non-trading days --- so a Friday price would sit on the grid
+unchanged through Saturday and Sunday. But I was then annualising the volatility on the standard 252
+trading-day convention. Mixing those two is the error: the carried-forward flat days inject runs of
+zero returns that the math reads as artificial autocorrelation, which contaminated exactly the
+quantities my stress tests depend on --- it made the pre-trend and placebo tests fail. The fix was a
+weekday filter: drop the non-trading days before computing returns, so the calendar of the data
+matches the calendar of the annualisation. The moment I did that --- together with dropping the
+government-priced paddy series --- the placebo went insignificant and the pre-trends turned parallel.
+That is the bit I most want to be asked about, because a measurement bug that I caught and fixed is
+what flipped a ``dead'' result into a live one --- a robust point estimate, even if I'm careful to
+call the overall finding suggestive rather than conclusive.
+
+\Q{12. You keep saying ``four estimators'' --- what are they, and why does that matter?}
+\A The first is the before-and-after (difference-in-differences): currently about $-9.8\%$ in the
+food-donor run, not statistically significant. The second is Synthetic DiD, a newer estimator that
+reweights both units and time periods: the pooled point estimate is around $-19.1\%$ and borderline,
+with chana much stronger than the aggregate. The third is a classic synthetic control at the
+commodity level: chana is about $-37\%$, but inference is limited by the small donor set. The fourth
+is a synthetic control run one treated district at a time, but its placebo can structurally never
+reject at 5\% with so few donors. Now here's where I'd be careful in an interview, because it's
+tempting to oversell this: I do \emph{not} call this ``four independent methods converging.'' They
+share related data, treatment timing, and donor choices, so it is really one research design viewed
+several ways, not four independent verdicts. What it honestly shows is that the \emph{sign} is stable
+across reasonable methods, while the aggregate magnitude and significance are sensitive to donor
+choice.
+
+\bigskip
+\hrule
+
+% =====================================================================
+\section{Futures fundamentals --- general domain (most likely to be asked)}
+% =====================================================================
+
+\Q{1. What is a futures contract?}
+\A A futures contract is a standardized agreement, traded on an exchange, to buy or sell a fixed
+amount of something at a price agreed today, for delivery or settlement on a fixed date in the
+future. The price is locked in now; the exchange of money and goods happens later. People use them
+either to hedge (lock in a price to remove risk --- a farmer guaranteeing a sale price for his
+harvest) or to speculate (bet on the price moving). The key idea is that you commit to a future price
+today.
+
+\Q{2. How do commodity futures differ from equity (stock) futures?}
+\A The biggest difference is what stands behind the contract. A commodity future is tied to a
+physical good --- wheat, oil, gold --- that can actually be delivered, stored, insured, and shipped,
+and that has harvest seasons and storage costs. A stock-index future is tied to a financial number
+and is just settled in cash; there is nothing to store, no harvest, no spoilage. So commodity futures
+carry storage and carrying costs, seasonality, and the possibility of physical delivery, while equity
+futures do not. Also, a stock can pay dividends, which feed into stock-future pricing, whereas a
+commodity pays no dividend --- instead it can have a ``convenience yield'' (defined below), the
+benefit of physically holding the actual good.
+
+\Q{3. What is the cost of carry?}
+\A Cost of carry is what it costs you to hold a physical commodity from now until a future date ---
+mainly storage, insurance, and the interest you give up by tying your money in the good rather than
+the bank. Because of these costs, a futures price for later delivery normally sits a bit \emph{above}
+today's spot price, by roughly the cost of carrying it until then. It is the main reason futures and
+spot prices are not identical.
+
+\Q{4. What is convenience yield?}
+\A Convenience yield is the benefit of actually holding the physical commodity rather than a paper
+claim on it --- for example, a factory that needs the raw material on hand to keep running, or a
+trader who values being able to deliver immediately in a shortage. It works in the opposite direction
+to storage costs: storage costs push futures prices above spot, while convenience yield pulls them
+back down. When the convenience of holding the physical good is high enough, the futures price can
+actually fall below the spot price.
+
+\Q{5. What is convergence at expiry?}
+\A As a futures contract approaches its delivery date, the gap between the futures price and the spot
+price shrinks to almost nothing --- they converge. The reason is that ``three months of storage''
+becomes ``zero months'' as the date arrives, so the cost-of-carry gap disappears. Arbitrage enforces
+it: if the two prices did not line up at delivery, a trader could lock in a riskless profit by buying
+one and selling the other, and that trading itself pulls them together. So at expiry, the futures
+price equals the spot price.
+
+\Q{6. If futures and spot converge at expiry by arbitrage, why doesn't the futures price just track
+spot the whole time?}
+\A Because arbitrage only \emph{forces} them equal at delivery, not before. Before expiry, the gap
+between them reflects the cost of carry and the convenience yield over the time that is still left ---
+storage to be paid, interest given up, the value of holding the physical good. Arbitrage cannot
+collapse that gap early, because to exploit it you would have to actually carry the commodity to the
+delivery date and pay those carrying costs yourself. So the futures price sits above or below spot by
+exactly the carry over the remaining life, and only as that remaining time shrinks to zero does the
+gap shrink to zero. That is why the price curve can slope up (contango) or down (backwardation) right
+up until delivery.
+
+\Q{7. What is the difference between contango and backwardation?}
+\A These describe the shape of futures prices. Contango is the normal case: futures prices for later
+delivery are higher than the spot price, reflecting storage and carrying costs --- the price curve
+slopes up. Backwardation is the opposite: futures prices are lower than spot, which usually signals a
+near-term shortage, where people will pay a premium to have the good \emph{now}. Farm commodities can
+flip into backwardation fairly often around tight harvests. (I have not yet computed the basis in my
+own data, because the pre-ban futures series is still being assembled, so I am not quoting a number
+here.)
+
+\Q{8. How is the fair-value pricing of an equity-index future different from a commodity future?}
+\A Both come from the same ``carry'' framework, but the terms have opposite signs. For a stock index
+the fair futures price is roughly the spot times $e^{(r - q)\,t}$, where $r$ is the interest rate,
+$q$ is the dividend yield (the income the index pays out), and $t$ is the time to expiry --- so the
+dividends the index pays \emph{pull the future below} spot. For a commodity the fair price is roughly
+spot times $e^{(r + u - y)\,t}$, where $u$ is the storage cost and $y$ is the convenience yield ---
+so storage \emph{pushes the future above} spot and convenience yield pulls it back down. Same idea ---
+spot, grown by the net cost of carrying to expiry --- but a stock pays you to hold it (dividends),
+while a commodity charges you to hold it (storage), which is why the two futures sit on opposite
+sides of spot.
+
+\Q{9. What is rollover, and why does it happen?}
+\A Every futures contract has a fixed expiry date, so a contract you are holding will eventually
+expire. If you want to keep your position --- say you want continued exposure to wheat --- you have
+to ``roll'': close out the contract that is about to expire and open the equivalent position in the
+next contract month. Rollover happens simply because contracts expire and you cannot hold a single
+one forever. Traders typically roll a few days before expiry, as the expiring contract loses
+liquidity.
+
+\Q{10. What is roll cost or roll yield?}
+\A When you roll, the expiring contract and the next one usually trade at slightly different prices,
+and that gap costs or earns you something. In contango, the next contract is more expensive, so you
+sell low and buy high each time you roll --- that is a negative roll yield, a drag on returns. In
+backwardation it is the reverse: you sell high and buy low, earning a positive roll yield. So just
+holding a commodity position over time, with no change in the spot price, can still make or lose money
+purely through rolling.
+
+\Q{11. Does rolling \emph{create} the negative roll yield, or just realize a loss that already
+existed?}
+\A It realizes it; it does not create it. In contango the far contract is \emph{already} priced
+higher than the near one --- that loss is baked into the shape of the curve before you do anything. By
+rolling, you simply crystallize the gap that was already sitting there. People often assume that if
+the spot price never moves they are safe, but that is the trap: even with a flat spot, you are forced
+to trade up the curve at every expiry (sell the cheaper expiring contract, buy the pricier next one),
+so the embedded cost gets realized over and over. The curve, not the roll itself, is where the cost
+lives.
+
+\Q{12. Why does building a continuous price series need a roll convention --- and how did that come up
+in your work?}
+\A A single futures contract only lives for a few months, so to get a long price history you have to
+stitch many expiring contracts together into one continuous series. But \emph{how} you stitch matters
+--- which day you switch from the expiring contract to the next, and whether you adjust for the price
+jump at the splice --- and different choices give different numbers. So you need a fixed, documented
+rule, a roll convention. In my project I had to reverse-engineer the data vendor's rule directly from
+the data, by spotting the days where the front-month series suddenly adopted the next contract's
+price. Their rule was: hold the front contract to its last trading day, switch the next session, and
+leave the splice unadjusted. Knowing that let me build my own series the same way, so my
+cross-commodity comparisons were not contaminated by inconsistent construction.
+
+\Q{13. How do commodity futures trade differently from stocks, mechanically?}
+\A Several ways. Stocks trade continuously and you can hold a share forever; commodity futures have
+fixed expiry dates and must be rolled. They are traded on margin and marked-to-market daily (both
+defined in the next answer), which makes them leveraged and settled day by day rather than only when
+you sell. They can end in physical delivery or cash settlement rather than just being sold on. And
+exchanges impose position limits --- caps on how big a position any one trader can hold --- which
+stocks generally do not have in the same way.
+
+\Q{14. What are daily mark-to-market and margin?}
+\A Margin is a good-faith deposit you post with the exchange to open a futures position --- a fraction
+of the contract's full value --- which is what makes futures leveraged. Mark-to-market means that at
+the end of each trading day the exchange calculates your gain or loss for that day and moves cash into
+or out of your margin account accordingly, every single day, rather than letting losses pile up until
+expiry. If your account falls below a threshold you get a margin call and must top it up. This daily
+settlement is the exchange's way of making sure nobody builds up a loss they cannot pay --- it is a
+core risk-control feature that ordinary stock trading does not have.
+
+\Q{15. What are NCDEX and MCX, and which commodities trade where?}
+\A They are India's two main commodity exchanges. NCDEX, the National Commodity and Derivatives
+Exchange, is the main venue for agricultural commodities --- chana, guar, jeera, and the like ---
+which is where most of the foods in my study traded. MCX, the Multi Commodity Exchange, is the larger
+venue for non-agricultural and energy commodities, but it also lists crude palm oil, which is why I
+had to pull palm oil data from MCX separately. They run the trading, set the contract specifications
+(lot sizes, expiry dates, delivery rules), publish the daily settlement prices, and enforce margins
+and position limits. The December 2021 suspension applied to the agricultural contracts on these
+exchanges.
+
+\bigskip
+\hrule
+\medskip
+
+\noindent\textbf{Closing line I can fall back on.} ``The durable asset of this project is a clean,
+reproducible data pipeline with full provenance, plus the economic reasoning behind each test. The
+going hypothesis was that banning futures would \emph{raise} spot volatility by 8--10\%; my analysis
+refutes that --- the point estimate is firmly negative, around $-20\%$, and robust to dropping any
+single commodity, including the one most distorted by government support prices. I'm deliberate about
+the strength of the claim, though: the significance is only borderline once I correct for having a
+handful of commodity groups, the placebo recovers about half the effect, and the timing of the ban
+leaves a mean-reversion threat I can't fully rule out --- so I call it suggestive, not conclusive.
+The part I am proudest of is that this result first failed its stress tests and looked dead, until I
+traced the failure to a measurement bug I had introduced building the volatility series; I caught it,
+fixed it, and the design came out live. A project willing to hunt down a bug that was
+flattering-then-killing its own headline number --- and to state plainly where the evidence is still
+only suggestive, rather than ship the first confident answer --- is doing exactly what good empirical
+work should.''
+
+\end{document}

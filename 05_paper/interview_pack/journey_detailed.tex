@@ -1,0 +1,624 @@
+% =====================================================================
+% journey_detailed.tex - THE COMPLETE JOURNEY, checkpoint by checkpoint.
+% The most detailed document in the pack: a reader who reads only this
+% should understand the work AND everything faced along the way.
+% Style: first person, simple language, every jargon term explained at
+% first use. Compile: pdflatex journey_detailed.tex (twice for TOC).
+% =====================================================================
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{framed}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{4pt}
+
+\newenvironment{checkpoint}[1]
+  {\begin{framed}\noindent\textbf{CHECKPOINT - #1.}\ }
+  {\end{framed}}
+\newenvironment{lesson}
+  {\begin{framed}\noindent\textbf{What this taught me.}\ \itshape}
+  {\end{framed}}
+
+\title{\textbf{The Complete Journey}\\[4pt]
+\large Evaluating India's 2021 Agricultural Derivatives Ban -\\
+every checkpoint, every error, every fix, from first question to final number}
+\author{}\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{How to read this document}
+
+This is the long version of my project story - the one that contains everything. It is
+organised the way the work actually happened, in four parts:
+
+\begin{enumerate}[leftmargin=1.8em,itemsep=1pt]
+  \item \textbf{The question and the rules} - what I set out to test, and the discipline I
+        fixed before touching data.
+  \item \textbf{Data collection} - honestly about half the project. How I got 5.7 million
+        price records out of systems that were never designed to hand them over: the API
+        work, the automation, the network errors, the traps.
+  \item \textbf{Data cleaning} - how raw downloads became an analysis-ready panel, with
+        the actual Python functions that did it.
+  \item \textbf{Execution} - the estimation arc: difference-in-differences, the event
+        study, how my design failed its own tests, the data error that failure exposed,
+        the fix, the honest inference, and the comparison-group revision that changed my
+        answer.
+\end{enumerate}
+
+I use technical terms freely but explain each one in plain words the first time it
+appears. That is deliberate: being able to say things simply is part of knowing them.
+
+% =====================================================================
+\section{Part 1 - The question and the rules}
+
+\subsection{The policy and the question}
+
+In December 2021, India's market regulator SEBI suspended futures trading in seven
+agricultural commodities - wheat, paddy (rice), chana (chickpea), mustard, soybean, moong,
+and crude palm oil. A \textbf{futures contract} is an agreement to buy or sell a commodity
+at a fixed price on a future date; farmers and traders use futures to lock in prices, and
+the futures price doubles as everyone's best public forecast of where the market is going.
+The government's premise was that speculation in these contracts was inflating actual
+market prices - so switching them off should calm things down.
+
+That premise is testable. The ban is a sharp, dated event that hit some commodities and
+not others, which sets up a natural comparison:
+
+\begin{checkpoint}{The research question}
+Did spot-price volatility - the day-to-day jumpiness of real wholesale (\textbf{mandi})
+prices - fall for the banned commodities after the ban, relative to comparable commodities
+whose futures kept trading? And whatever the answer, what did the ban cost in market
+function?
+\end{checkpoint}
+
+Two vocabulary items used throughout. The \textbf{spot price} is the price for immediate
+delivery - what the commodity actually sells for in a mandi today (as opposed to the
+futures price, which is for later delivery). \textbf{Volatility} here means realized
+volatility: take daily percentage price changes, compute their standard deviation over a
+rolling 30-day window, and scale it to an annual figure. High volatility = prices jumping
+around; low = stable.
+
+\subsection{The rules I fixed before starting}
+
+Empirical work is easy to fool yourself in, so I locked five rules up front:
+
+\begin{enumerate}[leftmargin=1.8em,itemsep=1pt]
+  \item \textbf{Raw data is immutable.} Every downloaded file is stored exactly as
+        received and never edited. All changes happen in scripts, so any transformation
+        can be inspected and re-run.
+  \item \textbf{Every acquisition is logged.} One row per data series in a provenance log:
+        source, URL, dates, units, known issues.
+  \item \textbf{Pre-registration.} I wrote down the volatility measure, the estimating
+        equation, and explicit pass/fail rules - including falsification tests the design
+        must survive - \emph{before} estimating anything. (Why this matters becomes the
+        centre of the story in Part 4.)
+  \item \textbf{Hard truncation of banned futures} at 20 December 2021 - for a reason I
+        only fully appreciated once I saw the raw exchange data (Part 2.6).
+  \item \textbf{Dated decisions.} Every methodological choice got written down with its
+        rationale when it was made, so the path from first idea to final specification is
+        auditable - including the choices I later had to revise.
+\end{enumerate}
+
+% =====================================================================
+\section{Part 2 - Data collection (half the project)}
+
+There was no ready-made dataset for this question. Every series had to be extracted from
+a system that was not designed to hand it over in bulk. This part is long because the
+work was long.
+
+\subsection{Finding a route to mandi prices}
+
+India's official wholesale price portal, \textbf{Agmarknet}, publishes prices for every
+mandi (regulated wholesale market) - but through web forms designed for a human looking up
+one commodity, one market, one date range at a time. I needed nine years, twenty
+commodities, hundreds of districts. Clicking was not an option, and scraping thousands of
+form submissions is slow and fragile.
+
+The workable route: the Centre for Economic Data and Analysis (\textbf{CEDA}) at Ashoka
+University re-serves the same Ministry of Agriculture data, cleaned, through a documented
+\textbf{API}. An API - Application Programming Interface - is a way for a program to
+request data from a server directly: instead of a human loading a webpage, my script sends
+a structured request to a fixed address (an \textbf{endpoint}) and the server replies with
+structured data. Registration is free for academic use; it issues an \textbf{API key} - a
+long secret string that identifies my account, which my script presents with every
+request. For provenance I cite both CEDA and the underlying Agmarknet source.
+
+\subsection{How the API conversation actually works}
+
+Each request is an \textbf{HTTP POST}: my script sends a small \textbf{JSON} package -
+JavaScript Object Notation, the standard text format for structured data, all curly braces
+and key-value pairs - to the prices endpoint. The request body says what I want:
+
+\begin{verbatim}
+POST https://<host>/v1/agmarknet/prices
+Authorization: Bearer <my API key>          <- the key rides in a request header
+{ "commodity_id": 6,                        <- chana
+  "state_id": 0,                            <- 0 = national
+  "from_date": "2017-01-01",
+  "to_date":   "2026-04-30",
+  "indicator": "price" }
+\end{verbatim}
+
+A \textbf{header} is metadata attached to the request; the \texttt{Authorization: Bearer}
+header is the standard place an API key travels. The server replies with a JSON payload -
+an array of rows (date, market, price) - plus its own \textbf{response headers} and a
+\textbf{status code}: a three-digit summary of how the request went. The ones that shaped
+my life for a week: \texttt{200} (success), \texttt{429} (too many requests - slow down),
+\texttt{403} (forbidden - you look like a bot), \texttt{504} (gateway timeout - the server
+gave up building your answer).
+
+\subsection{Checkpoint: the rate-limit war}
+
+\begin{checkpoint}{The 40-requests-per-hour wall}
+The API allows only 40 requests per hour. My first downloader did not know that: it fired
+requests, got \texttt{429} responses, retried blindly - and every retry \emph{also} counted
+against the quota. It ran 17 minutes and produced zero rows, having silently burned the
+entire hour's allowance on retries.
+\end{checkpoint}
+
+The fix is a small lesson in reading what the network tells you. Rate-limited APIs
+advertise their state in response headers: \texttt{RateLimit-Remaining} (how many requests
+you have left this window), \texttt{RateLimit-Reset} (seconds until the window renews), and
+on a \texttt{429}, \texttt{Retry-After} (how long to wait). I rebuilt the downloader to be
+\textbf{rate-limit aware}: after every response it reads these headers, and when the
+remaining count hits zero it sleeps exactly until the reset instead of hammering the
+server. Polite, and optimal - you extract precisely the allowed 40/hour, no more requests
+wasted on rejections.
+
+\subsection{Checkpoint: architecture for a ten-hour download}
+
+At 40 requests an hour, the full district-level pull - every commodity, every state -
+needs hundreds of requests, meaning \textbf{roughly ten hours} of wall-clock time. Any
+crash, network blip, or laptop sleep must not restart the job from zero. So the
+downloader's architecture:
+
+\begin{itemize}[leftmargin=1.8em,itemsep=1pt]
+  \item \textbf{One JSON file per unit of work} - one commodity x one state - named
+        predictably (\texttt{chana\_\_state8.json}). Before requesting anything, the
+        script checks whether that file already exists; if yes, skip. That single rule
+        makes the whole job \textbf{resumable}: kill it anywhere, relaunch, and it
+        continues where it stopped.
+  \item \textbf{Self-describing files.} Every saved JSON carries a \texttt{\_meta} block -
+        source, commodity id, state, date range, pull date, row count - followed by the
+        raw data array. Months later, any file explains itself without consulting notes.
+  \item \textbf{Transient-error tolerance.} Real networks hiccup: connections reset,
+        sockets time out. The script retries these with escalating pauses - 8 seconds,
+        then 16, then 24, capped at one minute (\textbf{backoff}; the textbook variant
+        that doubles each wait is called exponential backoff) - and only gives up on a
+        request after eight consecutive failures, rather than dying at 3 a.m. on hour
+        seven.
+\end{itemize}
+
+The pull completed across all 396 commodity-state files: \textbf{5.74 million market-day
+rows}, zero dropped. The design also passed a live-fire test I had not planned: the
+terminal crashed mid-run one night. Relaunching cost nothing - every finished file was
+already on disk, the script skipped them and carried on - and afterwards I armed an
+hourly scheduled health-check (a \textbf{cron} job: the standard Unix timer that runs a
+command on a schedule) to restart the download if it ever died unattended again.
+
+\subsection{Checkpoint: the 504 problem, solved by divide and conquer}
+
+\begin{checkpoint}{Big states broke the server}
+For large states like Uttar Pradesh, asking for nine years x all districts in one request
+made the server time out: \texttt{504 Gateway Timeout} - it could not assemble that much
+data before its own internal deadline.
+\end{checkpoint}
+
+The response payload was simply too big, so the fix is to ask for less at a time, adaptively:
+
+\begin{enumerate}[leftmargin=1.8em,itemsep=1pt]
+  \item Request districts in \textbf{batches} (about 15 at a time) instead of a whole state.
+  \item If a batch still times out, \textbf{halve it} and try each half - recursively.
+  \item If even a \emph{single district} times out (Raipur's paddy data was so dense the
+        district overwhelmed the server on its own), switch dimension: \textbf{halve the
+        date range} instead, recursively, until the server can serve each piece.
+\end{enumerate}
+
+This is divide-and-conquer applied to a network problem: keep splitting the request along
+whichever dimension is too big until every piece fits under the server's timeout. No data
+is abandoned; it just arrives in smaller boxes.
+
+\subsection{Checkpoint: three traps in the data itself}
+
+\paragraph{Trap 1 - identifier mismatch.} The API's commodity identifiers do \emph{not}
+match the official portal's identifiers for the same crops (turmeric is 39 in one system
+and 35 in the other; jeera 42 vs 38). If I had assumed they matched, I would have
+downloaded the wrong commodities with full confidence. Fix: query the API's own
+\texttt{/commodities} listing first and verify every identifier by name before pulling.
+
+\paragraph{Trap 2 - the exchange that hates robots.} Crude palm oil trades on the MCX
+exchange, whose website returns \texttt{403 Forbidden} to every non-browser client -
+scripts, command-line tools, everything. Sites detect this mainly through the
+\textbf{User-Agent} header (the string identifying what software is asking) and other
+browser fingerprints. The workaround: drive a \emph{real} browser session and use the
+exchange's own data endpoint - the page's JavaScript revealed exactly which internal
+address it calls for price tables, and calling that from within a genuine browser context
+is indistinguishable from the website's own behaviour. That yielded \textbf{all 64
+palm-oil contracts spanning 2017 to the suspension}, downloaded with zero failures, each
+with traded volume and open interest - fields no vendor provides.
+
+\paragraph{Trap 3 - the ghost prices.} Inside that raw exchange data sat the project's
+most important warning: contracts kept publishing daily ``settlement'' marks for
+\emph{months after the ban} - rows with prices but zero volume, zero trades. They look
+like post-ban futures prices; they are administrative echoes. This is precisely why rule 4
+exists: every banned-commodity futures series is hard-truncated at 20 December 2021 in the
+cleaned data, so no ghost quote can ever masquerade as a market price.
+
+\subsection{Checkpoint: the guar forensics - validate everything against a benchmark}
+
+\begin{checkpoint}{A mislabelled series, caught by correlation}
+I cross-checked every spot series against its own futures series where one existed - two
+views of the same commodity should co-move. Every commodity passed (correlations
+0.92-0.99) except guar: \textbf{0.04}. Essentially uncorrelated with its own futures.
+\end{checkpoint}
+
+Investigation: the series labelled ``Guar'' (identifier 75) silently mixed \textbf{guar
+gum} - a processed derivative roughly \emph{ten times} the price of the raw seed - in with
+guar seed. The blend was meaningless as a price series. The database held a separate,
+correctly-scoped ``Guar Seed'' series (identifier 413); its correlation with guar futures:
+\textbf{0.99}. I switched, and documented both series so the audit trail shows the swap.
+
+\begin{lesson}
+Never trust a label. Every series earns its place by agreeing with an independent
+benchmark. This one check later justified itself many times over.
+\end{lesson}
+
+\subsection{The other sources, briefly}
+
+\begin{itemize}[leftmargin=1.8em,itemsep=1pt]
+  \item \textbf{Vendor futures for comparison commodities} (castor, guar, jeera, turmeric,
+        kapas): the exchange's own public archive turned out to reach back only to July
+        2024 - the first wall the project hit - so these came from a financial-data vendor
+        instead: daily prices back to 2017, pulled as three \textbf{contract legs} - c1
+        (front month), c2 (next), c3 (far) - because liquidity differs along the curve.
+        A continuous futures series is stitched from expiring contracts, and \emph{how}
+        the vendor stitches matters; I \textbf{reverse-engineered their rule from the data}
+        (detect days where the front series suddenly adopts the next contract's previous
+        price - those are roll days). Verdict: hold the front contract through expiry,
+        switch the next session, no adjustment at the splice. Knowing this let me build my
+        own series identically, so constructions are comparable.
+  \item \textbf{SEBI monthly bulletins} (who trades these markets): the listing pages are
+        JavaScript shells with no scrapable links, but the document pages themselves are
+        served to standard web crawlers - so the document URLs were recoverable via search
+        engines and web archives, then downloaded from a frozen list. 33 of 36 months
+        (three are missing on the regulator's own server).
+  \item \textbf{International references}: CBOT wheat futures and the dollar-ringgit
+        exchange rate, via a public financial-data interface.
+  \item \textbf{The policy ledger}: 24 dated interventions (the ban, its extensions,
+        export bans, stock limits, duty changes), 22 of the 24 pinned to a primary
+        government document with the URL recorded. This matters enormously later: the ban
+        did not happen in isolation, and this ledger is how I keep other policies from
+        being mistaken for the ban's effect.
+  \item \textbf{The food-donor extension} (added mid-project for reasons Part 4 explains):
+        barley, maize, jowar pulled at national and district level (bajra's district pass
+        nearly complete); groundnut, sesamum, sunflower, ragi at national level with
+        district downloads still queued behind the rate limit.
+\end{itemize}
+
+% =====================================================================
+\section{Part 3 - Data cleaning: from raw JSON to an analysis panel}
+
+\subsection{The philosophy and the three tiers}
+
+Nothing is ever edited by hand. Data lives in three tiers: \texttt{raw/} (verbatim
+downloads), \texttt{constructed/} (deterministic derivations, like the stitched futures
+series), and \texttt{clean/} (what estimation reads) - and only scripts move data between
+tiers. Every cleaning script prints diagnostics on every run - date span, rows per year,
+largest gap, count of extreme daily moves, price percentiles - so anomalies surface
+immediately rather than hiding inside a CSV.
+
+\subsection{The cleaning rules, and the code that enforces them}
+
+The heart of the pipeline is a handful of small functions - small enough to show.
+
+\paragraph{Parsing the API's JSON.} Step zero is turning each saved JSON file back into
+a table. Verbatim from the panel builder:
+\begin{verbatim}
+blob = json.loads(fp.read_text())     # {'_meta': {...}, 'data': [rows]}
+df = pd.DataFrame(blob["data"])       # list of row-dicts -> DataFrame
+df["date"] = pd.to_datetime(df["date"].str[:10])
+df = df[(df.modal_price > 0) & trading_days_only(df.date)]
+\end{verbatim}
+Three cheap guards stand at the door: dates parsed from the first ten characters of the
+API's timestamp string, non-positive prices dropped, and the weekday filter (whose story
+is below) applied before anything is computed.
+
+\paragraph{Log returns.} Daily price changes are computed as differences of logarithms
+(log returns), the standard because they are symmetric and additive over time:
+\begin{verbatim}
+def log_returns(price):
+    return np.log(price).diff()      # ln(P_t) - ln(P_{t-1})
+\end{verbatim}
+
+\paragraph{Realized volatility.} A rolling 30-day standard deviation of those returns,
+scaled to annual units by $\sqrt{252}$ - because there are about 252 trading days in a
+year:
+\begin{verbatim}
+def realized_vol(returns, window=30, annualize=True):
+    rv = returns.rolling(window, min_periods=int(window*0.8)).std()
+    return rv * np.sqrt(252) if annualize else rv
+\end{verbatim}
+(\texttt{min\_periods} tolerates a few missing days without producing fake gaps.)
+
+\paragraph{Trading days only.} Keep weekday observations before computing anything:
+\begin{verbatim}
+def trading_days_only(dates):
+    return pd.to_datetime(dates).dt.dayofweek < 5   # Mon-Fri
+\end{verbatim}
+This one-line filter exists because of the most important error in the project - the full
+story is in Part 4. I state the rule here because it is now part of cleaning; I found the
+\emph{reason} for it the hard way.
+
+\paragraph{Ban truncation.} The cleaner decides a commodity's ban status from its base
+name, so leg-suffixed files (\texttt{cpo\_c1}) truncate exactly like their parent:
+\begin{verbatim}
+if commodity.lower().split('_')[0] in BANNED:
+    df = df[df.date <= BAN_DATE]     # 2021-12-20; ghost quotes die here
+\end{verbatim}
+
+\paragraph{Robust aggregation.} District-level prices are built as \emph{medians}, not
+means, at two levels: first the median across markets within a district-day, then (for the
+national series) the median across districts. Why medians: a single fat-fingered mandi
+entry - and I found one price recorded around 14 \emph{million} rupees against a median of
+about 4{,}000 - destroys a mean but barely dents a median. The core pandas pattern:
+\begin{verbatim}
+dd = df.groupby(["census_district_id","date"])["modal_price"].median()
+ret = panel.groupby(["state","district"])["price"].transform(log_returns)
+monthly = (panel.set_index("date")
+                .groupby(["commodity","state","district"])
+                .resample("ME")[["rv30"]].mean())      # ME = month-end
+\end{verbatim}
+\texttt{groupby().transform()} applies a function \emph{within} each district's own series
+(so returns never straddle two districts), and \texttt{resample("ME")} collapses daily
+volatility to a monthly panel.
+
+\paragraph{Price-support censoring.} For paddy, \textbf{40.3\%} of daily returns are
+\emph{exactly zero} - because government procurement at the Minimum Support Price
+(\textbf{MSP}, a floor price at which the state buys) pins the market price for weeks at a
+time. ``Volatility'' of an administered price is a measurement artifact, so paddy is
+excluded from the primary analysis; wheat (19.7\% zero returns) stays but carries a
+censoring flag, and results are shown with and without it.
+
+\subsection{The finished panel}
+
+The output of all of this is one file: a commodity x district x month panel of realized
+volatility - \textbf{172{,}381 cells across 16 commodities}, 2017 through October 2025,
+with a \texttt{post} indicator switching on at the ban date. Every number in Part 4 is
+computed from this panel, and the audit on it is clean: zero weekend rows, zero duplicate
+dates, zero non-positive prices, uniform coverage.
+
+% =====================================================================
+\section{Part 4 - Execution: the estimation arc}
+
+\subsection{The design: difference-in-differences, in plain words}
+
+The naive approach - compare banned commodities' volatility before vs after - fails
+because \emph{everything} changed in 2022 (a war, inflation, weather). The fix is a
+control group. \textbf{Difference-in-differences (DiD)} takes two differences: the
+before-to-after change for banned commodities, \emph{minus} the before-to-after change for
+comparison commodities whose futures kept trading. Anything that hit both groups alike -
+the war, the monsoon, fuel costs - subtracts out. Formally:
+\[
+\ln(\mathrm{vol}_{it}) = \alpha_i + \lambda_t + \beta\,(\mathrm{banned}_i \times
+\mathrm{post}_t) + \varepsilon_{it}
+\]
+where $\alpha_i$ are \textbf{unit fixed effects} (one constant per commodity-district,
+absorbing permanent differences - turmeric is just always jumpier than wheat),
+$\lambda_t$ are \textbf{month fixed effects} (absorbing anything common to all commodities
+in a month), and $\beta$ is the answer. Because the outcome is in logs, $\beta$ converts
+to a percentage: effect $= e^{\beta}-1$.
+
+One inference decision mattered enormously: the ban was assigned at the \emph{commodity}
+level, so however many district rows I have, there are really only about a dozen
+independent policy units. Standard errors are therefore \textbf{clustered by commodity} -
+meaning the uncertainty calculation treats each commodity as one correlated block rather
+than pretending thousands of district-months are independent evidence.
+
+\subsection{The falsification battery - designed before estimation, on purpose}
+
+Before running anything, I committed to two tests the design had to survive, with pass/fail
+rules written down in advance. The reasoning: a researcher who decides what counts as
+failure \emph{after} seeing results will always find a reason to keep the result.
+
+\begin{itemize}[leftmargin=1.8em,itemsep=1pt]
+  \item \textbf{The placebo test.} Re-run the entire design pretending the ban happened in
+        \textbf{December 2019} - a date when nothing happened - using only pre-ban data.
+        A trustworthy design should find \emph{nothing}. This is the one test where I am
+        rooting for a null: finding an ``effect'' at a fake date means the machinery
+        manufactures effects.
+  \item \textbf{The pre-trend test.} An \textbf{event study} estimates the banned-vs-control
+        gap month by month around the ban (the months before are called \emph{leads}, after
+        are \emph{lags}). If the groups were already diverging \emph{before} the ban, the
+        parallel-trends assumption is broken. Rule: if the leads are jointly significant,
+        the DiD is dead regardless of how pretty its headline is.
+\end{itemize}
+
+\subsection{Checkpoint: the design fails its own tests}
+
+First proper run on the district panel: the DiD said banned commodities' volatility was
+about \textbf{16\% lower} post-ban ($p=0.029$) - opposite in sign to the popular fear.
+Then the battery:
+
+\begin{checkpoint}{Both alarms fired}
+The fake-2019 placebo returned $\mathbf{-13.6\%}$, $p=0.046$ - statistically significant,
+at a date where nothing happened, and nearly the size of the ``real'' effect. The joint
+pre-trend test rejected ($p=0.033$). By my own pre-registered rules, the design was dead.
+\end{checkpoint}
+
+The tempting move was to soften the rules or quietly drop the placebo. Instead I treated
+the failure as information: something upstream was manufacturing effects at arbitrary
+dates. That points at \emph{measurement}, not economics.
+
+\subsection{Checkpoint: the calendar-grid artifact}
+
+\begin{checkpoint}{The data error the placebo exposed}
+The mandi price series were \textbf{seven-day calendar grids}: across hundreds of
+districts, some market reports on nearly every calendar day, and closed days simply carry
+Friday's price forward - in one series, 28\% of rows were weekend dates. So my ``daily
+returns'' included Fri$\to$Sat$\to$Sun steps computed on carried, unchanged prices (fake
+zero returns and weekend autocorrelation), while my volatility formula annualised by
+$\sqrt{252}$ \emph{trading} days - a units mismatch between the sampling grid and the
+scaling constant. Every volatility number in the panel was contaminated.
+\end{checkpoint}
+
+The fix is the one-line weekday filter shown in Part 3, followed by a full rebuild of the
+panel and every estimate. The proof it was the true cause: after the fix, \textbf{the
+placebo dropped below significance and the pre-trends went parallel} - the design
+survived its own rules - while the headline moved only moderately. (Full honesty: my
+internal audit still graded that placebo \emph{marginal} - insignificant, but recovering
+roughly half the headline's size - a residual worry that only the better comparison
+group of Part 4.8 fully cleared.) And a side-result died honourably: an early
+GARCH fit had shown chana's volatility persistence collapsing from 0.99 to 0.78 post-ban -
+dramatic, quotable, and entirely an artifact of those fake weekend zero-returns. On clean
+data it is roughly flat. I retired it.
+
+\begin{lesson}
+The falsification battery did exactly the job it was designed for - it caught a bug I did
+not know I had, in my own pipeline, before it could reach a headline. Pre-registering the
+tests is what made the failure undeniable.
+\end{lesson}
+
+\subsection{Checkpoint: honest uncertainty with few treated units}
+
+On clean data (and with paddy excluded for MSP censoring) the DiD read $\mathbf{-20.7\%}$.
+The naive clustered $p$-value said 0.008 - but that number leans on large-sample theory
+that needs many clusters, and at this stage I had ten commodity clusters, only five of
+them treated.
+Two corrections give honest uncertainty:
+
+\begin{itemize}[leftmargin=1.8em,itemsep=1pt]
+  \item Refer the cluster-robust $t$-statistic to a $t$ distribution with $G-1$ degrees of
+        freedom (with $G$ = number of clusters) - the small-sample correction. Result:
+        $p \approx 0.026$.
+  \item The \textbf{wild-cluster bootstrap}: impose the null (no effect), then rebuild the
+        outcome thousands of times by randomly flipping the sign of each \emph{whole
+        commodity's} residuals ($\pm1$ with equal probability - Rademacher weights),
+        re-estimating each time (999 draws; $p=(1+\#\{|t^*|\ge|t|\})/(B+1)$). The spread
+        of those fake $t$-statistics is the honest yardstick. Result: $p \approx 0.046$.
+\end{itemize}
+
+So: borderline significant, and reported as such - the 0.008 appears only as a cautionary
+example of fake precision.
+
+\subsection{Checkpoint: the second design layer - synthetic twins}
+
+Because the ban's timing was itself a reaction to high prices (governments ban when
+markets run hot), a lingering worry is \textbf{mean reversion}: hot markets cool on their
+own. Two further estimators attack this by building an explicit counterfactual:
+
+\begin{itemize}[leftmargin=1.8em,itemsep=1pt]
+  \item \textbf{Synthetic control (SCM):} for each banned commodity, find non-negative
+        weights (summing to one) over the comparison commodities so the weighted blend -
+        the ``synthetic twin'' - tracks the banned commodity's \emph{pre-ban} volatility
+        path as closely as possible. The post-ban gap between commodity and twin is the
+        effect. Significance comes from \textbf{in-space placebos}: pretend each comparison
+        commodity was treated, fit its twin, and ask whether the real treated gap stands
+        out from that placebo distribution.
+  \item \textbf{Synthetic DiD:} a hybrid that also reweights \emph{time periods} and adds
+        an intercept, so the twin need only be parallel, not identical - it relaxes SCM's
+        harshest requirement.
+\end{itemize}
+
+An internal audit of this stage caught two inference errors I had made and am glad to own:
+a pooled synthetic-DiD ``$z=-7.7$'' that turned out to measure donor-swap stability rather
+than genuine sampling uncertainty (withdrawn - the honest pooled inference is borderline),
+and a placebo comparison at the district level that compared a mean against single noisy
+units (fixed to like-for-like). Both corrections made the results \emph{weaker} and the
+paper \emph{stronger}.
+
+\subsection{Checkpoint: the comparison group changes the answer}
+
+\begin{checkpoint}{The counterfactual revision - the most important finding}
+My original comparison commodities - castor, guar, cotton, jeera, turmeric - were chosen
+because their futures kept trading. But they are industrial, fibre, and spice crops; the
+banned commodities are food staples. When I extended the data collection to non-banned
+\emph{food} crops (barley, maize, jowar, bajra) and added them as comparisons, the
+estimate \textbf{halved: $-20.7\%$ to $-9.8\%$} - and lost statistical significance
+(few-cluster $p\approx0.145$; bootstrap $0.153$). The food controls' volatility had also
+declined over 2022-25; part of my earlier ``effect'' was simply the difference between
+food and non-food markets.
+\end{checkpoint}
+
+Under the better comparison group the falsification battery got \emph{cleaner} (placebo
+$-6.5\%$, $p\approx0.34$; pre-trends $p\approx0.45$), and the commodity detail became the
+real story: \textbf{chana} is the one commodity with a strong, individually significant
+decline under every estimator (synthetic DiD $-38.7\%$, $z=-2.05$); \textbf{wheat}
+collapsed to approximately zero ($+0.4\%$) - its apparent decline had been the export
+bans, stock limits, and procurement operations that hit wheat simultaneously, exactly what
+the policy ledger existed to flag. Leave-one-commodity-out confirms the pattern: drop
+wheat and the effect \emph{strengthens} to $-15.2\%$ ($p\approx0.003$); drop chana and it
+thins to $-7.4\%$.
+
+\begin{lesson}
+The estimate answers to the quality of its counterfactual. I treat the halving not as an
+embarrassment but as the project's most informative single result - and I would rather
+carry a modest number I can defend than a large one I cannot.
+\end{lesson}
+
+\subsection{The cost side, and the verdict}
+
+Three companion analyses complete the picture:
+
+\begin{itemize}[leftmargin=1.8em,itemsep=1pt]
+  \item \textbf{Who used these markets?} Parsing SEBI's participant tables: in the year
+        before the ban, registered hedgers were about \textbf{1.4\%} of agricultural
+        turnover (42\% proprietary, 57\% client). ``Farmers lost their hedging tool'' is
+        not where the cost lies - direct hedging barely existed.
+  \item \textbf{Market integration.} \textbf{Cointegration} - a statistical test of
+        whether two price series are tied together over the long run, here applied across
+        mandis - shows banned commodities' markets became measurably \emph{less}
+        integrated post-ban (share of cointegrated market pairs fell 0.22 more than for
+        comparisons, one-sided $p\approx0.07$), with slower price-gap correction. The
+        comparisons \emph{improved} over the same years, so this is if anything an
+        understatement.
+  \item \textbf{Volatility dynamics.} A structural-break scan (with the
+        heteroskedasticity-robust detector - the textbook one over-fires on fat-tailed
+        returns) finds \textbf{no volatility-regime break near the ban date} in any banned
+        commodity.
+\end{itemize}
+
+\begin{checkpoint}{The final verdict, honestly stated}
+The feared volatility \emph{rise} is refuted. The measured decline is about $-10\%$,
+statistically insignificant under honest few-cluster inference, and concentrated in chana;
+wheat's decline is confounded and not attributable to the futures ban. The demonstrable
+cost of the ban is informational - reduced spot-market efficiency and integration - not
+lost hedging. Suggestive, not conclusive; and every number above traces to a file in the
+project.
+\end{checkpoint}
+
+% =====================================================================
+\section{The checkpoint map (one-page summary of the journey)}
+
+\begin{center}\small
+\begin{tabular}{p{0.5cm} p{4.6cm} p{9.2cm}}
+\toprule
+\# & Checkpoint & What happened / what it taught \\
+\midrule
+1 & Question + rules fixed & Evaluation question set; raw-immutability, logging, pre-registration, falsification rules locked before data. \\
+2 & Route to mandi prices & Official portal unusable in bulk; documented API route found; provenance dual-cited. \\
+3 & Rate-limit war & Naive puller burned the quota (17 min, 0 rows); rebuilt to read rate-limit headers and sleep to reset. \\
+4 & Resumable architecture & One self-describing JSON per work unit; skip-if-exists; backoff on socket errors; 5.74M rows over $\sim$10 h. \\
+5 & 504 divide-and-conquer & Oversized state requests split by district batches, then halved, then date-halved for one dense district. \\
+6 & Identifier + robot traps & API ids $\ne$ portal ids (verified by name); exchange 403s beaten via a real browser on its own endpoint. \\
+7 & Ghost prices & Post-ban settlement marks with zero volume $\Rightarrow$ hard truncation rule vindicated. \\
+8 & Guar forensics & Series labelled guar correlated 0.04 with guar futures - gum contamination; correct series (0.99) swapped in. \\
+9 & Cleaning pipeline & Log returns, rolling $\sqrt{252}$ volatility, median aggregation, MSP censoring (paddy out, wheat flagged). \\
+10 & First estimates & District DiD $-16.4\%$ ($p=.029$) - opposite of the feared rise. \\
+11 & \textbf{Design fails own tests} & Placebo $-13.6\%$ ($p=.046$) at a fake date; pre-trends reject ($p=.033$). Dead by my own rules. \\
+12 & \textbf{Calendar-grid artifact} & Weekend rows + $\sqrt{252}$ mismatch found and fixed; battery flips to passing; a flashy GARCH result evaporates. \\
+13 & Honest inference & $-20.7\%$ with few-cluster $p\approx.026$, bootstrap $.046$; naive $.008$ demoted to a cautionary tale. \\
+14 & Synthetic twins + audit & SCM/SDID corroborate sign; two of my own inference errors caught and withdrawn. \\
+15 & \textbf{Counterfactual revision} & Food-crop donors halve the estimate to $-9.8\%$, insignificant; chana concentrated; wheat $\approx$ 0 (confounded). \\
+16 & Cost side & 1.4\% hedger share; integration loss ($-0.22$, $p\approx.07$); no volatility-regime break at the ban. \\
+17 & Final verdict & Rise refuted; modest, chana-specific calming; cost = price discovery. Everything documented and reproducible. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}

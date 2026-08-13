@@ -1,0 +1,139 @@
+%==============================================================================
+%  paper.tex  --  master file for the C1/C2 evaluation paper
+%
+%  "Banning the Messenger: Did India's Suspension of Agricultural Derivatives
+%   Deliver Price Stability?"
+%
+%  Build:  pdflatex paper  ->  bibtex paper  ->  pdflatex paper  ->  pdflatex paper
+%
+%  The seven section files live in ./sections/ and are \input below in order.
+%  Bibliography: the section files cite with natbib author-year keys.  There is
+%  no external .bib file in the repo, so a self-contained stub bibliography is
+%  embedded below via filecontents* (one @misc per key actually used in the
+%  sections, with author/year taken from 01_literature/references.md).  This lets
+%  the document compile standalone.  The authoritative, fully annotated reference
+%  ledger -- with URLs, local PDF paths, and conflict-of-interest flags -- is
+%  01_literature/references.md; the embedded stubs are NOT a substitute for it.
+%
+%  NOTE FOR THE RESEARCHER: several sources are cited under two different keys
+%  (e.g. Abadie2010 vs AbadieDiamondHainmueller2010; Arkhangelsky2021 vs
+%  ArkhangelskyEtAl2021; FermanPinto vs FermanPinto2021; Hillebrand vs
+%  Hillebrand2005; CameronGelbachMiller vs CameronGelbachMiller2008;
+%  MacKinnonWebb vs MacKinnonWebb2018; ChabeFerret vs ChabeFerret2015;
+%  InclanTiao vs InclanTiao1994; Sanso vs SansoAragoCarrion2004; Lamoureux1990
+%  vs LamoureuxLastrapes; AshenfelterDip vs Ashenfelter1978).  Both variants are
+%  defined below so the paper compiles, but these key pairs should be unified to
+%  a single key per source before submission.
+%==============================================================================
+\documentclass[11pt]{article}
+
+%------------------------------- preamble -------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage[margin=1in]{geometry}
+\usepackage{natbib}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue}
+\bibliographystyle{plainnat}
+
+% the section files use \rupee for the rupee sign
+\providecommand{\rupee}{\textrm{Rs.}\,}
+
+%---------------- self-contained stub bibliography ----------------------------
+% Generated to match the natbib keys used across the seven section files.
+% Author/year fields follow 01_literature/references.md.  Titles are short
+% stubs; consult references.md for the authoritative citation, URL and PDF path.
+\begin{filecontents*}{paper.bib}
+@article{Working1960,  author = {Working, Holbrook}, year = {1960}, title = {Speculation on hedging markets}, journal = {Food Research Institute Studies}}
+@article{WorkingH1949,  author = {Working, Holbrook}, year = {1949}, title = {The theory of price of storage}, journal = {American Economic Review}}
+@article{Gray1963,  author = {Gray, Roger W.}, year = {1963}, title = {Onions revisited}, journal = {Journal of Farm Economics}}
+@article{Danthine1978,  author = {Danthine, Jean-Pierre}, year = {1978}, title = {Information, futures prices, and stabilizing speculation}, journal = {Journal of Economic Theory}}
+@article{Cox1976,  author = {Cox, Charles C.}, year = {1976}, title = {Futures trading and market information}, journal = {Journal of Political Economy}}
+@article{Turnovsky1979,  author = {Turnovsky, Stephen J.}, year = {1979}, title = {Futures markets, private storage, and price stabilization}, journal = {Journal of Public Economics}}
+@book{Newbery1987,  author = {Newbery, David M. and Stiglitz, Joseph E.}, year = {1981}, title = {The Theory of Commodity Price Stabilization}, publisher = {Oxford University Press}}
+@article{GarbadeSilber1983,  author = {Garbade, Kenneth D. and Silber, William L.}, year = {1983}, title = {Price movements and price discovery in futures and cash markets}, journal = {Review of Economics and Statistics}}
+@article{Ederington1979,  author = {Ederington, Louis H.}, year = {1979}, title = {The hedging performance of the new futures markets}, journal = {Journal of Finance}}
+
+@article{Ashenfelter1978,  author = {Ashenfelter, Orley}, year = {1978}, title = {Estimating the effect of training programs on earnings}, journal = {Review of Economics and Statistics}}
+@misc{AshenfelterDip,  author = {Ashenfelter, Orley}, year = {1978}, title = {Estimating the effect of training programs on earnings (Ashenfelter's dip)}, note = {Review of Economics and Statistics}}
+@article{ChabeFerret2015,  author = {Chab\'{e}-Ferret, Sylvain}, year = {2015}, title = {Analysis of the bias of matching and difference-in-differences under alternative earnings and selection processes}, journal = {Journal of Econometrics}}
+@misc{ChabeFerret,  author = {Chab\'{e}-Ferret, Sylvain}, year = {2015}, title = {Analysis of the bias of matching and difference-in-differences}, note = {Journal of Econometrics}}
+
+@article{AbadieDiamondHainmueller2010,  author = {Abadie, Alberto and Diamond, Alexis and Hainmueller, Jens}, year = {2010}, title = {Synthetic control methods for comparative case studies}, journal = {Journal of the American Statistical Association}}
+@misc{Abadie2010,  author = {Abadie, Alberto and Diamond, Alexis and Hainmueller, Jens}, year = {2010}, title = {Synthetic control methods for comparative case studies}, note = {Journal of the American Statistical Association}}
+@article{AbadieReview,  author = {Abadie, Alberto}, year = {2021}, title = {Using synthetic controls: Feasibility, data requirements, and methodological aspects}, journal = {Journal of Economic Literature}}
+@misc{AbadieVives,  author = {Abadie, Alberto and L'Hour, Jeremy}, year = {2021}, title = {A penalized synthetic control estimator for disaggregated data}, note = {Journal of the American Statistical Association}}
+@article{ArkhangelskyEtAl2021,  author = {Arkhangelsky, Dmitry and Athey, Susan and Hirshberg, David A. and Imbens, Guido W. and Wager, Stefan}, year = {2021}, title = {Synthetic difference-in-differences}, journal = {American Economic Review}}
+@misc{Arkhangelsky2021,  author = {Arkhangelsky, Dmitry and Athey, Susan and Hirshberg, David A. and Imbens, Guido W. and Wager, Stefan}, year = {2021}, title = {Synthetic difference-in-differences}, note = {American Economic Review}}
+@article{FermanPinto2021,  author = {Ferman, Bruno and Pinto, Cristine}, year = {2021}, title = {Synthetic controls with imperfect pretreatment fit}, journal = {Quantitative Economics}}
+@misc{FermanPinto,  author = {Ferman, Bruno and Pinto, Cristine}, year = {2017}, title = {Inference in differences-in-differences with few treated groups and heteroskedasticity}, note = {Review of Economics and Statistics; and Ferman \& Pinto (2021), Quantitative Economics}}
+
+@article{CameronGelbachMiller2008,  author = {Cameron, A. Colin and Gelbach, Jonah B. and Miller, Douglas L.}, year = {2008}, title = {Bootstrap-based improvements for inference with clustered errors}, journal = {Review of Economics and Statistics}}
+@misc{CameronGelbachMiller,  author = {Cameron, A. Colin and Gelbach, Jonah B. and Miller, Douglas L.}, year = {2008}, title = {Bootstrap-based improvements for inference with clustered errors}, note = {Review of Economics and Statistics}}
+@article{MacKinnonWebb2018,  author = {MacKinnon, James G. and Webb, Matthew D.}, year = {2018}, title = {The wild bootstrap for few (treated) clusters}, journal = {Econometrics Journal}}
+@misc{MacKinnonWebb,  author = {MacKinnon, James G. and Webb, Matthew D.}, year = {2018}, title = {The wild bootstrap for few (treated) clusters}, note = {Econometrics Journal}}
+@article{BertrandDufloMullainathan2004,  author = {Bertrand, Marianne and Duflo, Esther and Mullainathan, Sendhil}, year = {2004}, title = {How much should we trust differences-in-differences estimates?}, journal = {Quarterly Journal of Economics}}
+@article{Alvarez2025,  author = {Alvarez, Luis and others}, year = {2025}, title = {Inference with few treated clusters}, journal = {Working paper}}
+@article{deChaisemartinDHaultfoeuille2020,  author = {de Chaisemartin, Cl\'{e}ment and D'Haultf{\oe}uille, Xavier}, year = {2020}, title = {Two-way fixed effects estimators with heterogeneous treatment effects}, journal = {American Economic Review}}
+
+@article{Hillebrand2005,  author = {Hillebrand, Eric}, year = {2005}, title = {Neglecting parameter changes in GARCH models}, journal = {Journal of Econometrics}}
+@misc{Hillebrand,  author = {Hillebrand, Eric}, year = {2005}, title = {Neglecting parameter changes in GARCH models}, note = {Journal of Econometrics}}
+@article{Lamoureux1990,  author = {Lamoureux, Christopher G. and Lastrapes, William D.}, year = {1990}, title = {Persistence in variance, structural change, and the GARCH model}, journal = {Journal of Business and Economic Statistics}}
+@misc{LamoureuxLastrapes,  author = {Lamoureux, Christopher G. and Lastrapes, William D.}, year = {1990}, title = {Persistence in variance, structural change, and the GARCH model}, note = {Journal of Business and Economic Statistics}}
+@article{InclanTiao1994,  author = {Incl\'{a}n, Carla and Tiao, George C.}, year = {1994}, title = {Use of cumulative sums of squares for retrospective detection of changes of variance}, journal = {Journal of the American Statistical Association}}
+@misc{InclanTiao,  author = {Incl\'{a}n, Carla and Tiao, George C.}, year = {1994}, title = {Use of cumulative sums of squares for retrospective detection of changes of variance}, note = {Journal of the American Statistical Association}}
+@article{SansoAragoCarrion2004,  author = {Sans\'{o}, Andreu and Arag\'{o}, Vicent and Carrion, Josep Lluis}, year = {2004}, title = {Testing for changes in the unconditional variance of financial time series}, journal = {Revista de Econom\'{i}a Financiera}}
+@misc{Sanso,  author = {Sans\'{o}, Andreu and Arag\'{o}, Vicent and Carrion, Josep Lluis}, year = {2004}, title = {Testing for changes in the unconditional variance of financial time series}, note = {Revista de Econom\'{i}a Financiera}}
+
+@article{DeyGairola2024,  author = {Dey, Kushankur and Gairola, Gaurav}, year = {2024}, title = {Is suspending agricultural futures justified?}, journal = {Economic and Political Weekly}}
+@misc{AggarwalChatterjeeSehgal2022,  author = {Aggarwal, Nidhi and Chatterjee, Tirtha and Sehgal, Kushankur}, year = {2022}, title = {Assessing the impact of commodity derivatives suspensions}, note = {SSRN WP 4261360}}
+@misc{AggarwalChatterjeeSehgal2023,  author = {Aggarwal, Nidhi and Chatterjee, Tirtha and Sehgal, Kushankur}, year = {2023}, title = {Trading suspensions and food price inflation}, note = {SSRN WP 4407637}}
+@misc{Aggarwal2023,  author = {Aggarwal, Nidhi and Chatterjee, Tirtha and Sehgal, Kushankur}, year = {2023}, title = {Trading suspensions and food price inflation (synthetic control on price levels)}, note = {SSRN WP 4407637}}
+@misc{Aggarwal2014,  author = {Aggarwal, Nidhi and Jain, Sargam and Thomas, Susan}, year = {2014}, title = {Do futures markets help in price discovery and risk management for commodities in India?}, note = {IGIDR WP}}
+@misc{Gaurav2024,  author = {Gaurav, Sarthak and Pandey, Piyush}, year = {2024}, title = {Impact of suspension of commodity derivatives on the agri ecosystem}, note = {NCDEX-commissioned, IIT Bombay}}
+@misc{Rajib2024,  author = {Rajib, Prabina and Barai, Parama and Arora, Rashmi}, year = {2024}, title = {Impact on suspension of commodity derivatives on commodity market ecosystem}, note = {NCDEX-commissioned, BIMTECH/IIT Kharagpur}}
+@misc{PwC2023,  author = {{PricewaterhouseCoopers}}, year = {2023}, title = {Price risk management for agricultural commodities}, note = {Report to NCDEX Investor Protection Fund Trust}}
+
+@article{Sobti2020,  author = {Sobti, Neharika}, year = {2020}, title = {Does ban on futures trading (de)stabilise spot volatility?}, journal = {Journal of Agribusiness in Developing and Emerging Economies}}
+@article{Nath2008,  author = {Nath, Golaka C. and Lingareddy, Tulsi}, year = {2008}, title = {Impact of futures trading on commodity prices}, journal = {Economic and Political Weekly}}
+@article{Babshetti2019,  author = {Babshetti, Vinaya and Basanna, P.}, year = {2019}, title = {Futures trading and agricultural commodity prices in India}, journal = {Working paper}}
+@article{Bose2008,  author = {Bose, Suchismita}, year = {2008}, title = {Commodity futures market in India}, journal = {Money and Finance, ICRA Bulletin}}
+@article{Gupta2016,  author = {Gupta, Aparna and Varma, Parag}, year = {2016}, title = {Impact of futures trading on spot markets: Indian natural rubber}, journal = {Applied Economics Letters}}
+@misc{Singh2012,  author = {Singh, Nirvikar}, year = {2012}, title = {Guar futures and the 2012 episode}, note = {Working paper / commentary}}
+@misc{Soni2013,  author = {Soni, Tarun K.}, year = {2013}, title = {Price discovery and volatility in Indian agricultural commodity markets}, note = {Working paper}}
+@misc{Fernandez2013,  author = {Fern\'{a}ndez, Viviana}, year = {2013}, title = {Commodity futures bans and trading volume recovery}, note = {Working paper}}
+@misc{Bandyopadhyay2022,  author = {Bandyopadhyay, Arindam}, year = {2022}, title = {Export substitution after the 2012 guar suspension}, note = {Working paper}}
+\end{filecontents*}
+
+%------------------------------- front matter ---------------------------------
+\title{Banning the Messenger: Did India's Suspension of Agricultural Derivatives Deliver Price Stability?}
+\author{Naman Karwa\\ Student, Department of Mathematics\\ Indian Institute of Technology, Guwahati}
+\date{}
+
+\begin{document}
+\maketitle
+
+%------------------------------- sections -------------------------------------
+\input{sections/01_abstract_intro.tex}
+\input{sections/02_background.tex}
+\input{sections/03_data.tex}
+\input{sections/04_methodology.tex}
+\input{sections/05_results.tex}
+\input{sections/06_robustness.tex}
+\input{sections/07_discussion_conclusion.tex}
+
+%------------------------------- references -----------------------------------
+\bibliography{paper}
+
+% The bibliography above is built from self-contained stubs so the document
+% compiles standalone.  The authoritative reference ledger -- full citations,
+% URLs, local PDF paths under 01_literature/papers/, and conflict-of-interest
+% flags for the NCDEX-commissioned studies -- is maintained at
+% 01_literature/references.md and should be consulted for any submission-grade
+% bibliography.
+
+\end{document}

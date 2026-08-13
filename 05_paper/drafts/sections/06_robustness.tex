@@ -1,0 +1,68 @@
+\section{Robustness and Falsification}
+\label{sec:robustness}
+
+The current robustness story is a donor-pool sensitivity story. The older clean-core
+specification produced a larger and borderline-significant negative effect; the food-cereal
+rerun produces a smaller, cleaner, but statistically insignificant aggregate estimate.
+That shift is not a nuisance detail. It is the main robustness result.
+
+\subsection{Donor-pool sensitivity}
+
+The clean-core donor pool was castor, guarseed413, cotton, jeera and turmeric. It was
+useful for stress-testing the inherited positive-volatility claim, but it was not a
+satisfactory counterfactual for food staples. Adding available food-cereal donors
+(barley, maize, jowar and bajra) changes the DiD from the earlier clean-core $-20.7\%$
+to the current $-9.8\%$, with CR1 $p=0.145$ and wild-bootstrap $p=0.153$.
+
+The interpretation is straightforward: the inherited positive claim does not survive,
+but neither does the stronger aggregate ``volatility fell by about 20\%'' claim. The
+current paper should lead with the donor sensitivity and with the chana-specific signal.
+
+\subsection{Placebo and pre-trends}
+
+The current fake-ban placebo is $-6.5\%$ and insignificant (analytic $p=0.344$;
+wild-bootstrap $p=0.433$). The joint pre-trend test does not reject ($p=0.445$).
+Compared with the earlier clean-core run, the falsification battery is cleaner.
+
+This cleaner falsification profile comes with the smaller main estimate. That is exactly
+the kind of tradeoff a referee will expect to see reported rather than hidden.
+
+\subsection{Leave-one-commodity-out}
+
+Leave-one-out results reinforce the commodity-level reading. The aggregate negative
+effect weakens when chana is removed (ex-chana $-7.4\%$, CR1 $p=0.294$), while dropping
+wheat produces a stronger and significant result (ex-wheat $-15.2\%$, CR1 $p=0.003$).
+Dropping mustard, soybean or moong leaves negative but insignificant estimates around
+$-8.5$ to $-9.3\%$.
+
+The conclusion is not that all treated commodities moved together. It is that the
+aggregate decline is chana-centered, and that wheat should not be treated as a clean
+source of identification.
+
+\subsection{MSP and bundled-policy confounding}
+
+Paddy remains dropped because its spot price is MSP-censored. Wheat remains flagged:
+under the current food-donor Synthetic DiD it is essentially zero, and its post-2021
+spot behavior is heavily contaminated by MSP/procurement, export restrictions, open-market
+sales and stock limits. Chana remains the cleanest commodity through mid-2024, before
+its own stock-limit interventions enter.
+
+This is also a compound-treatment setting. The derivatives suspension arrives alongside
+commodity-specific trade, tariff, stock-limit and procurement interventions. The current
+result is therefore descriptive/quasi-causal, not a clean treatment effect of futures
+suspension alone.
+
+\subsection{Pending robustness}
+
+The food-donor pull is not complete. Barley, maize and jowar are complete at district
+level; bajra is partial; ragi, groundnut, sesamum and sunflower are not yet in the
+district panel. The oilseed donors are especially important for mustard and soybean.
+The next publishable rerun should finish that pull, rebuild the panel, rerun all C1
+estimators, and then add Honest-DiD and staggered-DiD robustness.
+
+\subsection{Summary}
+
+The robust statement is now narrower and more credible: the suspension did not raise
+spot volatility; the aggregate estimate is negative but not significant under the
+current food-donor counterfactual; chana shows the strongest lower-volatility signal;
+wheat is confounded; and the full donor/inference upgrade remains pending.

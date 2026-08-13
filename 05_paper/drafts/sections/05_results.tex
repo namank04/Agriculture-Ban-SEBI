@@ -1,0 +1,78 @@
+\section{Results}
+\label{sec:results}
+
+This section reports the current C1 estimates after the food-cereal donor rerun. The
+central empirical conclusion is narrower than the earlier clean-core draft: the inherited
+claim that the suspension raised spot volatility by $8$--$10\%$ is refuted, but the
+aggregate estimate is now modest and not statistically robust. The strongest lower-volatility
+signal is concentrated in chana, while wheat no longer supports the headline once a food-staple
+counterfactual is used.
+
+\subsection{Current aggregate result: negative, but not significant}
+\label{sec:results-aggregate}
+
+The current district-panel two-way fixed-effects DiD estimate is
+$\hat\beta=-0.103$, equivalent to a $-9.8\%$ effect on spot realized volatility. With
+14 commodity clusters after adding food-cereal donors, the conventional clustered
+$p$-value is $0.121$; the more relevant few-cluster CR1 $t$ reference gives
+$p=0.145$, and the null-imposed wild-cluster bootstrap gives $p=0.153$. The aggregate
+effect is therefore negative in sign but not statistically significant.
+
+This is a material revision from the earlier clean-core result of $-20.7\%$
+using only industrial/spice donors. The change is substantively important: once the
+counterfactual is moved closer to food staples by adding barley, maize, jowar and
+bajra, the estimated aggregate decline roughly halves and loses significance. The
+paper's honest headline is therefore donor sensitivity, not a settled aggregate
+causal effect.
+
+\input{tables/c1_tables.tex}
+
+\subsection{Where the lower-volatility signal survives: chana}
+\label{sec:results-chana}
+
+Synthetic DiD and synthetic control point to chana as the cleanest remaining
+lower-volatility case. In the current output, per-commodity Synthetic DiD estimates
+chana at $-38.7\%$ with a placebo-based $z=-2.05$. Commodity-level synthetic control
+estimates chana at $-37.3\%$, with the in-space placebo at the resolution floor
+($p=0.100$ with nine donors). This is the only treated commodity that looks strong
+across the current estimator family.
+
+The other treated commodities are weaker. Mustard is negative but not significant in
+Synthetic DiD ($-15.2\%$, $z=-0.68$), soybean is negative but imprecise ($-26.1\%$,
+$z=-1.32$), and moong is smaller and noisy ($-11.5\%$, $z=-0.53$). Wheat collapses to
+approximately zero under Synthetic DiD ($+0.4\%$), consistent with the project-wide
+concern that wheat is dominated by MSP, export-ban and stock-limit confounding rather
+than the futures suspension itself.
+
+\subsection{Falsification improves, but the main effect weakens}
+\label{sec:results-falsification}
+
+The current falsification battery is cleaner than the earlier clean-core run. The fake
+December-2019 placebo returns $-6.5\%$ with analytic $p=0.344$ and wild-bootstrap
+$p=0.433$. The joint pre-trend lead test gives statistic $2.67$ with $p=0.445$. These
+are no longer warning signs in the way the earlier placebo and recent lead bin were.
+
+The tradeoff is that the main aggregate effect is no longer significant. That is the
+right interpretation of the rerun: improving the counterfactual and the falsification
+profile reduces the headline estimate. The result should be framed as ``the suspension
+did not raise spot volatility; lower-volatility evidence is concentrated in chana''
+rather than ``the suspension robustly reduced volatility.''
+
+\subsection{Conditional volatility (C2): no independent support for elevated volatility}
+\label{sec:results-c2}
+
+The ICSS-then-within-regime GARCH exercise remains unchanged in interpretation. Under
+the HAC-corrected Sanso--Arago--Carrion detector, no commodity has an unconditional
+variance break within $\pm 30$ trading days of its suspension date. The only detected
+district-median break is in chana on 2018-09-14, well before the 2021 suspension.
+
+The district-median chana GARCH fit remains partly degenerate, with persistence at the
+IGARCH boundary in the long regime. We therefore do not headline a GARCH persistence
+number. C2 provides no support for the inherited ``elevated volatility'' claim, and the
+volatility evidence rests on the C1 panel and synthetic-control results.
+
+\paragraph{Basis.}
+The inherited post-ban basis-widening arm remains internally impossible as stated:
+banned commodities have no exchange-traded futures after the suspension, so a post-ban
+spot--futures basis cannot be constructed. That arm is deferred to the domestic-spot
+versus international-futures insulation track.

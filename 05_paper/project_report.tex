@@ -1,0 +1,617 @@
+% =====================================================================
+% project_report.tex - Work-submission report
+% Evaluating India's 2021 Agricultural Derivatives Suspension
+% Compile with pdflatex (no special dependencies beyond standard packages).
+% =====================================================================
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{framed}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdfauthor={Naman Karwa}}
+\setlength{\parskip}{4pt}
+
+\newenvironment{keybox}
+  {\begin{framed}\noindent\textbf{Key point.}\ }
+  {\end{framed}}
+
+\title{\textbf{Did India's 2021 Suspension of Agricultural Derivatives\\
+Deliver Price Stability?}\\[6pt]
+\large A Complete Work Report: Data, Methods, Errors, and Findings}
+\author{Naman Karwa\\ Student, Department of Mathematics\\ Indian Institute of Technology, Guwahati}
+\date{July 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent In December 2021 India's securities regulator (SEBI) suspended exchange-traded
+derivatives in seven agricultural commodities, on the premise that futures speculation was
+driving up food prices. This report documents, end to end, an empirical evaluation of that
+policy: how every dataset was collected and cleaned, how the research design evolved, the
+errors I made and how each was caught and corrected, and where the findings currently
+stand. The short version of the result: the fear that switching off futures would make
+cash (spot) markets \emph{more} volatile is not borne out - if anything spot volatility
+was lower afterwards - but the size of that calming effect depends heavily on which
+comparison commodities are used, and under the most economically appropriate comparison
+group the aggregate effect is modest (about $-10\%$) and not statistically significant,
+with the only strong individual case being chana (chickpea). Companion analyses suggest
+the real cost of the suspension lies in price discovery and market integration rather than
+in lost hedging. I present this as an honest, quasi-experimental evaluation - suggestive,
+not conclusive - together with everything needed to check, reproduce, and extend it.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Introduction}
+
+Food inflation is politically sensitive in India, and futures markets are a recurring
+suspect: the claim is that speculation in derivatives inflates the underlying spot
+(``mandi'', i.e.\ wholesale market) price. Economic theory is genuinely ambivalent -
+futures can \emph{stabilise} prices by aggregating information and enabling hedging, or
+can be blamed for destabilising them - and India's policy history reflects that
+ambivalence: commodity futures have been banned and re-permitted repeatedly since the
+1950s, and the 2008 Abhijit Sen Committee found no conclusive evidence that futures raise
+spot volatility.
+
+On 19-20 December 2021, SEBI suspended derivatives trading in seven agricultural
+commodities - wheat, paddy (non-basmati), chana (chickpea), mustard seed and its
+complex, soybean and its complex, crude palm oil, and moong - initially for one year,
+and subsequently extended the suspension repeatedly (at the time of writing, to March
+2027). Two commodities were hit earlier: new positions in chana were barred from
+16~August~2021, and in mustard from 8~October~2021. This is a sharp, dated policy
+intervention that switched off futures for a specific set of commodities while leaving
+others trading - a natural experiment for the question:
+
+\begin{keybox}
+Did the suspension deliver what it promised - calmer spot prices - and what did it
+cost in market function? Concretely: how did the \emph{spot-price volatility} of the
+banned commodities change after the suspension, relative to comparable commodities whose
+futures kept trading?
+\end{keybox}
+
+This report is a complete account of the work: Section~\ref{sec:design} sets out the
+research design; Section~\ref{sec:data} documents the data collection in detail (this was
+the hardest part of the project and the part I document most carefully);
+Section~\ref{sec:cleaning} covers cleaning and quality control;
+Section~\ref{sec:errors} is an explicit register of the errors I made and how each was
+caught and fixed; Section~\ref{sec:methods} explains the methods in plain language;
+Section~\ref{sec:progression} traces how the findings evolved as the data and methods
+improved - the evolution is itself a finding; Section~\ref{sec:results} presents the
+current results; Section~\ref{sec:limits} states the limitations honestly; and
+Section~\ref{sec:repro} explains how to navigate the folder and reproduce every number.
+
+% =====================================================================
+\section{Research design at a glance}
+\label{sec:design}
+
+\paragraph{Treated and comparison commodities.} The seven suspended commodities form the
+treatment group. Commodities whose futures \emph{kept trading} form the comparison
+(``donor'') group: initially castor seed, guar seed, jeera (cumin), turmeric, and cotton;
+later extended - for reasons explained in Section~\ref{sec:progression} - with
+non-banned \emph{food} crops (barley, maize, jowar, bajra, with groundnut, sesamum,
+sunflower and ragi in progress).
+
+\paragraph{Outcome.} Spot-price volatility: the 30-day rolling standard deviation of
+daily log returns of mandi prices, annualised (``realized volatility''), computed at the
+commodity-district level and aggregated monthly. Spot prices are the right outcome
+because the banned commodities have no futures prices after the suspension, and because
+``spot stability'' is precisely what the policy promised.
+
+\paragraph{Design principles fixed in advance.}
+\begin{itemize}[leftmargin=1.6em,itemsep=1pt]
+  \item \emph{Raw data is immutable}: every downloaded file is stored verbatim and never
+        edited; all cleaning happens in scripts, so every transformation is inspectable.
+  \item \emph{Every acquisition is logged}: one row per data series in a provenance log
+        (source, dates, units, known issues).
+  \item \emph{Pre-registered verification}: the volatility measure, the estimating
+        equations, and explicit pass/fail rules (including falsification tests the design
+        must survive) were written down \emph{before} estimation.
+  \item \emph{Banned-commodity futures are hard-truncated} at 20~December~2021 in all
+        cleaned files: exchanges kept publishing stale ``settlement'' quotes for months
+        after the suspension with zero trading, and treating those as prices would
+        fabricate post-ban futures data.
+  \item \emph{Methodological decisions are dated and documented} with their rationale
+        (the full decision history, including choices later revised, is laid out in
+        Sections~\ref{sec:errors} and~\ref{sec:progression} of this report), so the path
+        from first idea to final specification is auditable.
+\end{itemize}
+
+% =====================================================================
+\section{Data: what was collected and how}
+\label{sec:data}
+
+Getting the data was the single hardest part of this project. No single source provides
+what the design needs, several official archives turned out to be unusable for the
+required window, and every workaround forced a documented decision. Table~\ref{tab:data}
+summarises the holdings; the subsections then describe, source by source, how each was
+obtained.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Data holdings at a glance.}
+\label{tab:data}
+\begin{tabular}{p{3.6cm} p{3.4cm} p{2.2cm} p{5.2cm}}
+\toprule
+Series & Source & Period & Volume / notes \\
+\midrule
+Mandi (spot) prices, national & CEDA data portal (Ashoka University), re-serving Govt.\ of India Agmarknet & 2017-Oct 2025 & 20 commodities $\times$ $\sim$3{,}200 daily rows each \\
+Mandi (spot) prices, district & same & 2017-Oct 2025 & $\sim$5.74 million market-day rows (12 commodities) $+$ $\sim$1.2 million (food-donor extension, ongoing) \\
+Futures, comparison commodities & Investing.com (vendor) & 2017-2026 & castor, guar, jeera, turmeric, kapas; three contract legs each (c1/c2/c3) \\
+Futures, crude palm oil (banned) & MCX exchange archive & 2017-2021 & all 64 monthly contracts, with volume and open interest \\
+Futures, cotton & MCX exchange archive & 2017-2026 & both contract generations (77 $+$ 15 contracts) \\
+Participant composition & SEBI monthly bulletins & 2019-2021 & 67 files (33 of 36 months); participant-wise turnover shares \\
+International references & public financial-data API & 2017-2025 & CBOT wheat; USD/MYR exchange rate \\
+Policy timeline & primary documents (SEBI, DGFT, PIB, CBIC) & 2021-2026 & 24 dated interventions, each with a source URL \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Spot (mandi) prices - the core dataset}
+\label{sec:data-spot}
+
+\paragraph{Why it was hard.} India's official wholesale-price portal (Agmarknet) exposes
+prices mandi-by-mandi through web forms that are impractical for a nine-year,
+multi-hundred-district panel. I found that the Centre for Economic Data and Analysis
+(CEDA) at Ashoka University re-serves the same Ministry of Agriculture Agmarknet data,
+cleaned, through a documented programmatic interface (free academic registration). I chose
+that route and cite both CEDA and the underlying Agmarknet source; the data are
+Rs-per-quintal modal (most frequent) transaction prices per market per day.
+
+\paragraph{Traps and how they were handled.}
+\begin{itemize}[leftmargin=1.6em,itemsep=1pt]
+  \item \emph{Rate limit.} The interface allows only 40 requests per hour. A naive
+        first attempt silently exhausted the quota (17 minutes, zero rows). I rebuilt the
+        downloader to read the server's rate-limit headers and sleep to the reset window,
+        and made it fully resumable (one file per unit of work, finished files skipped),
+        so a multi-hour pull survives interruptions. The full district panel -
+        396 state-files, 5.74~million market-day rows - took roughly ten hours of paced
+        requests.
+  \item \emph{Oversized responses.} Large states (e.g.\ Uttar Pradesh) time out when
+        requested whole. The downloader batches districts and, when a single dense
+        district still fails, recursively halves the date range until the server returns
+        it.
+  \item \emph{Commodity-identifier mismatch.} The CEDA commodity identifiers do not match
+        Agmarknet's own identifiers (e.g.\ turmeric is 39 in one and 35 in the other). I
+        verified every commodity identifier against the source's commodity list before
+        pulling.
+  \item \emph{A mislabelled series.} Cross-checking every spot series against its futures
+        counterpart exposed that the series labelled ``Guar'' (id~75) was contaminated
+        with guar \emph{gum} - a processed product roughly ten times the price of guar
+        \emph{seed}. Its correlation with guar-seed futures was 0.04. The separate series
+        ``Guar Seed'' (id~413) correlates 0.99 with the futures and replaced it. This
+        catch is a good illustration of why every series was validated against an
+        independent benchmark before use.
+\end{itemize}
+
+\paragraph{The food-donor extension.} After the first round of results (see
+Section~\ref{sec:progression}), I extended the spot pull to eight non-banned \emph{food}
+commodities - barley, maize, jowar, bajra, ragi, groundnut, sesamum, sunflower - to
+serve as economically comparable controls. At the time of writing the cereals (barley,
+maize, jowar, bajra) are fully or nearly fully downloaded and are \emph{in} the analysis
+panel; the oilseeds and ragi are still downloading under the 40-per-hour limit.
+
+\subsection{Futures prices}
+\label{sec:data-futures}
+
+\paragraph{The archive wall.} The natural source, the NCDEX exchange's public daily-price
+archive, only reaches back to mid-2024 - useless for a 2017-2021 pre-period. Three
+workarounds were used, and one gap remains:
+
+\begin{itemize}[leftmargin=1.6em,itemsep=1pt]
+  \item \emph{Comparison commodities via a vendor.} Investing.com serves daily
+        open-high-low-close back to 2017 for the still-trading commodities. I downloaded
+        each as three separate contract ``legs'' - front month (c1), next (c2), far
+        (c3) - because liquidity and price behaviour differ along the curve. Because a
+        continuous futures series is stitched from expiring contracts, I
+        \emph{reverse-engineered the vendor's stitching rule} from the data itself
+        (detecting days where the front series adopts the next contract's previous price):
+        the vendor holds the front contract through its final trading day, switches the
+        next session, and leaves the splice unadjusted. Knowing the exact convention let
+        me replicate it when constructing series myself, so cross-commodity comparisons
+        are not contaminated by inconsistent construction.
+  \item \emph{Crude palm oil from the exchange itself.} Palm oil trades on MCX, whose
+        website rejects all non-browser access. Working through a real browser session, I
+        used the exchange's own data endpoint to pull \emph{all 64 monthly contracts}
+        from 2017 to the suspension - including traded volume and open interest, which
+        the vendor route lacks - and constructed continuous series replicating the
+        verified vendor convention. A critical discovery in this raw data: contracts kept
+        publishing settlement marks for months \emph{after} the suspension with zero
+        volume. Those stale quotes are exactly why the cleaned data enforce a hard
+        truncation at the ban date.
+  \item \emph{Cotton, both generations.} MCX cotton changed contract specification
+        (a bale-denominated contract until 2022, a candy-denominated one from 2023);
+        both generations were pulled (77 $+$ 15 contracts). The unit break, and cotton's
+        own trading halt in August 2022, are reasons cotton is treated cautiously as a
+        control.
+  \item \emph{The gap.} Pre-ban futures for the six NCDEX-listed banned commodities
+        (wheat, chana, mustard, soybean, paddy, moong) are not publicly available for
+        2017-2021. An academic data request to the exchange was submitted in June 2026
+        and remains pending. This blocks the futures-based hypotheses
+        (Section~\ref{sec:limits}); the spot-based analysis - the core of this report
+ - does not depend on it.
+\end{itemize}
+
+\subsection{Regulator bulletins (who used these markets)}
+SEBI's monthly bulletins carry participant-wise data for the commodity-derivatives
+segment. The bulletin listing pages are dynamically rendered and unlinkable, but the
+underlying document pages are served to standard web crawlers; I recovered the document
+URLs through search and web-archive indexes and downloaded 33 of 36 months for
+2019-2021 (67 files; three months are missing on the regulator's own server). The
+spreadsheet tables in these bulletins are the input for the market-composition analysis
+(Section~\ref{sec:results-companions}). A practical wrinkle documented in the code: the
+relevant table's number and layout drift from month to month, so the parser locates it by
+content, and 10 of 33 bulletins (the twelve months to March 2021) parse cleanly - enough
+for a stable pre-ban composition estimate, with the coverage limitation stated wherever
+the numbers are used.
+
+\subsection{International references and the policy timeline}
+CBOT wheat futures and the dollar-ringgit exchange rate (for palm-oil work) were pulled
+from a public financial-data interface. Separately, I compiled a
+\emph{policy-intervention timeline}: 24 dated events - the suspension itself, its six
+extensions, export bans on wheat and rice, stock limits, edible-oil duty changes - each
+verified against a primary document (SEBI press releases, DGFT notifications, gazette
+orders) with the source URL recorded. This ledger matters because the suspension did not
+happen in isolation: several banned commodities were simultaneously hit by other
+interventions, which is a central confounding concern throughout.
+
+% =====================================================================
+\section{Data organisation, cleaning, and quality control}
+\label{sec:cleaning}
+
+\paragraph{Three tiers.} The data folder has three tiers with strict roles:
+\texttt{raw/} (verbatim downloads, immutable), \texttt{constructed/} (deterministic
+derivations from raw, e.g.\ continuous futures series, built by scripts),
+and \texttt{clean/} (analysis-ready CSVs produced only by the cleaning scripts).
+Nothing is ever hand-edited.
+
+\paragraph{Cleaning rules.} The main ones, each enforced in code:
+\begin{itemize}[leftmargin=1.6em,itemsep=1pt]
+  \item \emph{Trading days only.} Mandi price feeds behave like seven-day calendar grids
+ - across hundreds of districts, some market reports on virtually every calendar
+        day, including weekends, often just carrying Friday's price. Returns are therefore
+        computed on weekday observations only, so that the volatility annualisation
+        (which assumes $\sqrt{252}$ trading days) matches the sampling grid. This rule
+        exists because of an error I initially made; see Section~\ref{sec:errors}.
+  \item \emph{Hard truncation of banned futures} at 20~December~2021 (stale post-ban
+        settlement quotes are not prices).
+  \item \emph{Exclusion of price-support-censored series.} For paddy, 40.3\% of daily
+        returns are \emph{exactly zero} because government procurement at the minimum
+        support price (MSP) pins the market price for long stretches; measured
+        ``volatility'' of an administered price is a mechanical artifact. Paddy is
+        excluded from the primary analysis; wheat (19.7\% zero returns) is retained but
+        flagged, and results are shown with and without it.
+  \item \emph{Independent benchmark checks.} Every spot series was correlated against its
+        futures counterpart where one exists (this is what caught the guar mislabelling),
+        and price levels, spans, gap structure, and extreme returns are printed as
+        diagnostics every time a cleaning script runs.
+\end{itemize}
+
+\paragraph{Audit results.} A full audit of the cleaned data confirms: zero weekend
+observations after the trading-day rule; no duplicate dates; no non-positive prices;
+uniform 2017-October 2025 coverage across series ($\sim$2{,}200-2{,}300 trading days
+each); and sane price levels. The main analysis panel is a commodity $\times$ district
+$\times$ month panel of realized volatility: 172{,}381 cells across 16 commodities;
+the headline regression below uses 146{,}507 observations across 2{,}244
+commodity-district units (14 commodity clusters: 5 treated, 9 comparison).
+
+% =====================================================================
+\section{Errors made, and how each was caught and corrected}
+\label{sec:errors}
+
+Empirical work goes wrong in quiet ways, and I think the most useful thing I can document
+is not that errors occurred but \emph{how the project's own checks caught them}.
+Table~\ref{tab:errors} is the register; the two most consequential are narrated below.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Error register: every substantive error, how it was caught, and its effect.}
+\label{tab:errors}
+\begin{tabular}{p{3.4cm} p{3.1cm} p{3.4cm} p{4.2cm}}
+\toprule
+Error & How it was caught & Correction & Effect on results \\
+\midrule
+Calendar-grid volatility: returns computed across weekend rows carrying Friday's price, while annualising by $\sqrt{252}$ trading days & The design's own falsification tests failed (a fake 2019 ``ban'' showed a significant effect); investigating that failure exposed the grid & Weekday filter before any return/volatility computation; full rebuild and re-estimation & Overturned the falsification failures; every volatility number changed; an apparent GARCH result evaporated \\
+\addlinespace
+Mislabelled guar series (id 75 mixed guar gum into guar seed) & Correlation check of every spot series against its futures (0.04 vs.\ 0.99) & Switched to the correct ``Guar Seed'' series (id 413) & Removed a contaminated control \\
+\addlinespace
+Paddy volatility treated as market volatility despite MSP price-pinning (40.3\% exactly-flat returns) & Flat-run diagnostic across all series & Paddy excluded from primary analysis; wheat flagged & Placebo test became cleaner; headline sharpened \\
+\addlinespace
+Overstated precision: a pooled synthetic-DiD ``$z=-7.7$'' & Internal referee-style audit of the inference code & The statistic measured donor-swap stability, not sampling error; withdrawn. Valid placebo-based inference reported instead & Honest pooled inference is borderline ($z\approx-1.9$ once enough donors exist) \\
+\addlinespace
+Over-optimistic p-value ($p=0.008$) from large-sample clustering with only $\sim$10 clusters & Same audit & Few-cluster inference adopted: cluster-robust $t$ with $G-1$ degrees of freedom, plus wild-cluster bootstrap & Headline significance moved from ``strong'' to borderline (then to insignificant under better donors) \\
+\addlinespace
+Variance-ratio test statistic carried a spurious sample-size factor (companion efficiency analysis) & Monte-Carlo check during audit (statistic's null variance was wrong by $\sqrt{n}$) & Corrected to the textbook form; conclusions re-checked & Point estimates unchanged; a wrong ``test uninterpretable'' caveat was retracted \\
+\addlinespace
+Comparison-group composition: industrial/spice controls (castor, guar, cotton, jeera, turmeric) are not economically comparable to food staples & Anticipated in the pre-registered design critique; confirmed empirically when food-crop controls were added & Food-cereal donors added to the pool; oilseeds in progress & The headline effect halved (from $-20.7\%$ to $-9.8\%$) and lost aggregate significance - see Section~\ref{sec:progression} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{The calendar-grid error (the most important one).} My first corrected estimates
+looked strong but \emph{failed their own pre-registered falsification tests}: a placebo
+``ban'' placed in December 2019 - a date at which nothing happened - produced a
+statistically significant effect ($-13.6\%$, $p=0.046$), and the pre-trend test rejected.
+By the rules I had fixed in advance, that should have retired the design. Rather than
+soften the rules, I investigated the failure and found the cause in the data, not the
+design: the mandi series were seven-day calendar grids (28.5\% of one series' rows fell on
+weekends), so ``daily returns'' were being computed across carried-forward weekend prices
+while the annualisation assumed trading days. Fixing the grid (and excluding
+price-support-censored paddy) flipped both falsification tests to passing. The lesson I
+take from this: the falsification battery did exactly its job - it caught a measurement
+bug I did not know I had.
+
+\paragraph{The comparison-group error (the most consequential for the conclusion).} The
+first credible estimates used the commodities whose futures kept trading as controls -
+castor, guar, cotton, jeera, turmeric. Those are industrial, fibre, and spice crops; the
+banned commodities are food staples. When I added economically comparable \emph{food}
+controls (barley, maize, jowar, bajra), the estimated effect \emph{halved} and lost
+statistical significance - because the food controls' volatility also declined over
+2022-25, meaning part of the earlier ``effect'' was just the difference between food and
+non-food markets. I treat this donor-sensitivity not as an embarrassment but as the
+project's most informative single result: \emph{the estimate answers to the quality of its
+counterfactual.}
+
+% =====================================================================
+\section{Methods, in plain language}
+\label{sec:methods}
+
+\paragraph{Realized volatility.} For each commodity-district, daily log price changes are
+computed on trading days; their 30-day rolling standard deviation, annualised by
+$\sqrt{252}$, is that market's ``realized volatility''; the panel aggregates it monthly.
+The analysis works in logs of this measure, so effects read as percentage changes.
+
+\paragraph{Difference-in-differences (DiD).} Compare the before-vs-after change in banned
+commodities' volatility with the same change in comparison commodities:
+\[
+\ln(\mathrm{vol}_{it}) \;=\; \alpha_i + \lambda_t + \beta\,(\mathrm{banned}_i \times
+\mathrm{post}_t) + \varepsilon_{it},
+\]
+with commodity-district fixed effects $\alpha_i$ (absorbing permanent differences across
+markets) and month fixed effects $\lambda_t$ (absorbing anything common to all
+commodities in a month - e.g.\ the 2022 Ukraine shock). $\beta$ converts to a percentage
+effect as $e^{\beta}-1$. Because chana and mustard were suspended earlier than the rest,
+per-commodity treatment dates are used in the commodity-level estimators, and the pooled
+regression was checked against staggered dating (immaterial difference).
+
+\paragraph{Honest uncertainty with few clusters.} Treatment is assigned at the
+\emph{commodity} level, so there are effectively only 14 independent units (5 treated),
+however many district rows exist. Conventional standard errors badly overstate precision
+in this situation. Two corrections are used: a cluster-robust $t$-statistic referred to a
+$t$ distribution with $G-1$ degrees of freedom, and a wild-cluster bootstrap (resampling
+whole commodities with random sign flips under the null). Both are reported everywhere;
+the naive p-value is shown only to demonstrate how over-optimistic it is.
+
+\paragraph{Falsification battery (fixed before estimation).} (i)~\emph{Placebo date}: run
+the same design on pre-ban data with a fake ban in December 2019; a trustworthy design
+should find nothing. (ii)~\emph{Pre-trend test}: event-study ``leads'' should be jointly
+zero before the ban. Failing either retires the design under the pre-registered rules.
+
+\paragraph{Synthetic control (SCM).} For each banned commodity, construct a ``synthetic
+twin'' - a weighted average of comparison commodities chosen to track the banned
+commodity's pre-ban volatility path - and read the effect as the post-ban gap between
+the commodity and its twin. Significance is assessed by in-space placebos (pretending
+each comparison commodity was treated): with nine donors the attainable p-value floor is
+$1/10 = 0.10$, a structural limitation reported alongside the estimates. A district-level
+variant fits one synthetic control per treated district.
+
+\paragraph{Synthetic difference-in-differences (SDID).} A hybrid that both reweights
+comparison commodities (like SCM) and reweights pre-ban time periods, then takes the
+double difference; uncertainty comes from placebo replications. With the enlarged donor
+pool this estimator finally has a valid standard error.
+
+\paragraph{Conditional volatility (GARCH) with break detection.} For the claim that
+volatility \emph{dynamics} changed: rather than naively splitting at the ban date (which
+biases persistence estimates when a variance break is mis-dated), structural variance
+breaks are first located by an ICSS scan (with the heteroskedasticity-robust correction
+appropriate for fat-tailed returns), and GARCH(1,1) is estimated within regimes; the
+question is whether any detected break sits near the suspension date.
+
+\paragraph{Companion designs.} (i)~\emph{Spot-market efficiency and integration}:
+variance-ratio tests of return predictability and cross-mandi cointegration (do prices in
+different markets move together, and how fast do gaps close), before vs.\ after, banned
+vs.\ comparison. (ii)~\emph{Harvest troughs}: seasonal price indices testing whether
+harvest-time price dips deepened once the forward price signal was gone.
+(iii)~\emph{Market composition}: participant-wise turnover shares from regulator
+bulletins, characterising who actually used these markets before the suspension.
+
+% =====================================================================
+\section{How the findings evolved}
+\label{sec:progression}
+
+The findings changed materially - twice - as the data and the comparison group
+improved. I document the progression explicitly because each revision was forced by a
+check working as intended, and because the direction of the revisions is itself
+informative.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Progression of the headline volatility estimate.}
+\label{tab:progression}
+\begin{tabular}{p{3.1cm} p{3.3cm} p{3.4cm} p{4.0cm}}
+\toprule
+Stage & Headline DiD & Falsification & Verdict at that stage \\
+\midrule
+1. Initial hypothesis (from early exploratory work) & $+8$ to $+10\%$ (volatility \emph{rose}) & - & The claim this project set out to verify \\
+\addlinespace
+2. First estimates (calendar-grid data) & $-16.4\%$ ($p=0.029$) & \textbf{Failed}: placebo $-13.6\%$ ($p=0.046$); pre-trends rejected ($p=0.033$) & Design dead by its own rules; cause investigated \\
+\addlinespace
+3. After the trading-day fix and paddy exclusion & $-20.7\%$; few-cluster $p\approx0.026$ / bootstrap $0.045$ & Passed, but marginally: placebo $-11.7\%$ ($\approx$56\% of headline); a late pre-ban lead bin still hot & ``Volatility fell $\sim$20\%'' - borderline significant, industrial/spice controls \\
+\addlinespace
+4. Internal referee-style audit of code and inference & unchanged point estimate & - & Invalid pooled-SDID precision withdrawn; few-cluster inference adopted; leave-one-out added; donor pool flagged as the weak point \\
+\addlinespace
+5. Food-cereal donors added (current) & $-9.8\%$; $p\approx0.145$ / bootstrap $0.153$ (\textbf{not significant}) & \textbf{Clean}: placebo $-6.5\%$ ($p\approx0.34/0.43$); pre-trends $p\approx0.45$, no significant lead bin & Aggregate effect modest and insignificant; signal concentrated in chana; wheat's decline revealed as confounded \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{keybox}
+The two revisions moved the result in the same honest direction: from a strong claim on
+weak foundations to a modest claim on solid ones. The initial ``$+8$-$10\%$ rise''
+hypothesis is refuted at every stage. The ``$-20\%$ fall'' of stage~3 does not survive a
+better comparison group. What survives everything: spot volatility did \emph{not} rise;
+the measured decline is about $-10\%$ and statistically indistinguishable from zero at
+conventional levels; and the one commodity with strong, consistent evidence of calming is
+chana - the cleanest, least policy-contaminated banned commodity.
+\end{keybox}
+
+% =====================================================================
+\section{Current results}
+\label{sec:results}
+
+\subsection{The volatility effect (headline analysis)}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Current estimates of the suspension's effect on spot realized volatility
+(trading-day data; paddy excluded; 5 treated and 9 comparison commodities).}
+\label{tab:results}
+\begin{tabular}{p{4.3cm} p{2.9cm} p{6.4cm}}
+\toprule
+Estimator & Effect & Honest inference \\
+\midrule
+Two-way fixed-effects DiD & $-9.8\%$ & few-cluster $p=0.145$; wild bootstrap $p=0.153$ - \emph{not significant} \\
+Synthetic DiD, pooled & $-19.1\%$ & placebo standard error valid with 9 donors; $z=-1.88$ (borderline) \\
+Synthetic DiD, per commodity & chana $-38.7$; mustard $-15.2$; wheat $+0.4$; soybean $-26.1$; moong $-11.5$ (\%) & chana $z=-2.05$ (significant); all others insignificant; wheat $\approx$ zero \\
+Synthetic control, per commodity & chana $-37.3$; mustard $-28.2$; wheat $-37.8$; soybean $-27.6$; moong $-8.7$ (\%) & chana at the placebo floor ($p=0.100$); others weak ($p=0.3$-$0.6$) \\
+District-level synthetic control & negative for all five & chana/mustard/wheat at the $p=0.100$ floor; the floor itself ($1/10$) precludes 5\%-level claims \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three readings of Table~\ref{tab:results} matter. First, the estimators agree on
+\emph{sign} but their agreement is partly mechanical - they share one panel and one
+treated set - so they are corroboration, not independent confirmations. Second, the
+signal is \emph{concentrated in chana}: it is the only commodity individually significant
+under any estimator, and the leave-one-out analysis below shows the aggregate thins to
+$-7.4\%$ without it. Third, \emph{wheat's} apparent volatility decline collapses to zero
+under the better donors - consistent with its decline having been driven by the export
+ban, stock limits, and support-price operations that hit wheat simultaneously, not by the
+futures suspension.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Falsification and robustness (current panel).}
+\label{tab:falsification}
+\begin{tabular}{p{5.2cm} p{4.2cm} p{4.2cm}}
+\toprule
+Check & Result & Reading \\
+\midrule
+Placebo ``ban'' in Dec.\ 2019 & $-6.5\%$, $p=0.344$ (bootstrap $0.433$) & design finds nothing where nothing happened \\
+Joint pre-trend test & $p=0.445$; no individually significant lead bin & parallel-trends assumption not rejected \\
+Leave-one-commodity-out & sign survives every drop ($-7.4\%$ to $-15.2\%$) & ex-wheat: $-15.2\%$ ($p\approx0.003$, significant); ex-chana: $-7.4\%$ ($p\approx0.29$) \\
+District-liquidity / outlier filters & $-8.7\%$ to $-10.0\%$ & not an artifact of thin, noisy districts \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Volatility dynamics (GARCH)}
+The complementary claim that the ban shifted volatility \emph{dynamics} finds no support:
+the break-detection scan locates no variance break near the suspension date in any
+banned commodity's series (the only detected break in chana sits in September 2018), and
+an early, apparently dramatic GARCH result - chana's volatility persistence falling
+from 0.99 to 0.78 - turned out to be an artifact of the calendar-grid error and is
+roughly flat on clean data. The volatility case therefore rests on the panel analysis
+above, not on GARCH.
+
+\subsection{Companion analyses: the cost side}
+\label{sec:results-companions}
+
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{Who actually used these markets (market composition).} In the year before
+        the suspension, the NCDEX agricultural segment's turnover was $\approx$42\%
+        proprietary and $\approx$57\% client trading, with registered \emph{hedgers at
+        only $\approx$1.4\%}. Direct exchange-based hedging was minimal even before the
+        ban - so ``farmers lost their hedging tool'' is not where the cost mainly lies.
+  \item \textbf{Spot-market efficiency and integration.} After the suspension, banned
+        commodities' spot markets became \emph{less} informationally efficient
+        (variance-ratio deviations grew relative to controls) and \emph{less} spatially
+        integrated: the share of cointegrated market pairs fell by 0.22 more for banned
+        than comparison commodities (one-sided $p\approx0.07$; only 4 banned vs.\ 5
+        comparison commodities, so power is limited), and price gaps between markets
+        closed more slowly. The comparison commodities meanwhile \emph{improved} -
+        so this estimate is, if anything, conservative.
+  \item \textbf{Harvest troughs.} Harvest-season price dips did \emph{not} deepen for
+        banned commodities after the ban (the point estimate goes slightly the other way,
+        $p=0.20$) - no evidence that losing the forward price signal worsened
+        harvest-time price collapses, though the quantity (arrivals) data needed to test
+        the mechanism directly are not available.
+\end{itemize}
+
+\begin{keybox}
+Taken together: the suspension did not destabilise spot prices - and the evidence for
+active \emph{calming} is modest and chana-specific - while the measurable cost shows up
+in \emph{price discovery and market integration}, not in direct hedging (which barely
+existed). ``Stability delivered, information lost'' is a fair one-line summary of where
+the evidence currently points, with both halves held to honest standards of uncertainty.
+\end{keybox}
+
+% =====================================================================
+\section{Interpretation, limitations, and next steps}
+\label{sec:limits}
+
+\paragraph{What can and cannot be claimed.} This is a quasi-experimental evaluation of an
+\emph{endogenous} policy: the suspension was imposed \emph{because} prices had run up, so
+some post-ban calming would be expected from mean reversion alone. The passing placebo
+and pre-trend tests reduce that worry; they do not eliminate it. The defensible claims
+are: (i)~the hypothesis that the ban \emph{raised} spot volatility is refuted;
+(ii)~the aggregate volatility decline is about $-10\%$ and not statistically significant
+under honest inference; (iii)~chana shows a strong, consistent, individually significant
+decline; (iv)~wheat's decline is confounded by simultaneous interventions and should not
+be attributed to the suspension.
+
+\paragraph{Known limitations.}
+\begin{itemize}[leftmargin=1.6em,itemsep=1pt]
+  \item \emph{Few treated units.} Five treated commodities is an irreducible constraint;
+        all inference here is honest about it, but no method fully escapes it.
+  \item \emph{Incomplete donor set.} The oilseed comparison crops (groundnut, sesamum,
+        sunflower) and ragi are still downloading; mustard and soybean results are
+        provisional until they are in.
+  \item \emph{Bundled treatment.} Export bans, stock limits, and support-price operations
+        hit several banned commodities in the same window; commodity-specific attribution
+        is weakest for wheat (and is why chana - least contaminated - carries the
+        evidentiary weight).
+  \item \emph{Missing banned-commodity futures.} The pre-ban NCDEX futures for six banned
+        commodities are unavailable pending an exchange data request; price-discovery and
+        basis analyses that need them are specified but not executed.
+  \item \emph{Planned upgrades not yet run.} A formal pre-trend sensitivity analysis
+        (Rambachan-Roth style), a modern staggered-adoption estimator
+        (Callaway-Sant'Anna), and a bootstrap confidence interval for the headline are
+        specified as next steps.
+\end{itemize}
+
+% =====================================================================
+\section{Reproducibility and folder navigation}
+\label{sec:repro}
+
+Everything in this report can be regenerated from the repository. The layout, the key
+result files, and the exact commands are documented in \texttt{FOLDER\_GUIDE.md} at the
+repository root; in brief:
+
+\begin{itemize}[leftmargin=1.6em,itemsep=1pt]
+  \item \texttt{02\_data/} - raw (immutable), constructed, and clean data tiers;
+        \texttt{00\_admin/data\_log.csv} records the provenance of every series.
+  \item \texttt{00\_code/} - all acquisition, cleaning, construction, and estimation
+        scripts; each estimation script writes its outputs to the matching hypothesis
+        folder under \texttt{04\_empirics/}.
+  \item \texttt{04\_empirics/H1\_volatility/c1\_findings.md} - the canonical results
+        memo (kept in lock-step with the result files); \texttt{output/} folders hold
+        every regression output, placebo, bootstrap, and figure cited here.
+  \item \texttt{05\_paper/drafts/paper.tex} - the academic paper draft;
+        \texttt{make\_paper\_tables.py} regenerates its tables directly from the result
+        files, so paper numbers cannot drift from outputs.
+  \item \texttt{03\_policy\_timeline/policy\_interventions.csv} - the confounder
+        ledger, one primary-sourced row per policy event.
+\end{itemize}
+
+The provenance of every acquired data series - source, access date, coverage, units,
+and known issues - is recorded one row per series in \texttt{00\_admin/data\_log.csv};
+the methodological history (what was decided when, which errors were found, and how the
+estimates evolved) is documented in Sections~\ref{sec:errors} and~\ref{sec:progression}
+of this report.
+
+\end{document}

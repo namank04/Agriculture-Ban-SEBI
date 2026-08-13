@@ -1,0 +1,229 @@
+\section{Institutional Background and Related Literature}
+\label{sec:background}
+
+This section situates India's December 2021 suspension of agricultural derivatives
+within the country's long history of futures bans, summarises the unsettled
+theoretical and empirical debate over whether futures trading destabilises spot
+markets, sets out the minimum-support-price (MSP) and procurement apparatus that
+confounds any naive before--after comparison, and locates our contribution against
+the most directly competing studies. Full citations are collected in
+\texttt{references.md}; throughout we use author--year keys, and we flag conflicts
+of interest where the evidence is industry-commissioned.
+
+\subsection{A recurrent Indian reflex: futures suspensions, 2007--2021}
+\label{sec:background-history}
+
+Suspending or delisting agricultural futures in response to food-price inflation is
+a recurring feature of Indian commodity policy rather than a novel intervention. The
+institutional lineage runs through a sequence of government committees---Dantwala
+(1966), Khusro (1980), Kabra (1994) and the Abhijit Sen Expert Committee
+(2008)---each convened amid inflation anxiety and each cautious about (re)permitting
+futures in politically sensitive staples. The Dantwala Committee warned as early as
+1966 that suppressing futures prices irrespective of spot behaviour destroys the very
+utility of a futures market, anticipating the identification problem at the heart of
+the present evaluation.
+
+The modern episode begins with the 2003 reintroduction of exchange-traded
+commodity futures, followed almost immediately by a wave of delistings: in February
+2007 wheat and rice were delisted, and in 2008 further commodities (including chana,
+urad, tur, potato, soya oil and rubber) were suspended amid the global food-price
+spike \citep{Nath2008, Babshetti2019}. Gulati, Chatterjee and Hussain (2017)
+document roughly fifteen suspensions between 2003 and 2017 and show that suspension
+duration correlates with a commodity's weight in the food basket---direct evidence
+that the policy responds to inflation salience rather than to any market-specific
+diagnostic. A distinct, manipulation-driven episode is the March 2012 guar-seed and
+guar-gum delisting, where the Forward Markets Commission documented genuine
+over-speculation and a price bubble \citep{Singh2012, Soni2013}; this is the one
+suspension in the lineage with a clean manipulation trigger, in contrast to the
+diffuse inflation rationale of 2007--08 and 2021. We treat the manipulation-triggered
+(2012 guar) versus inflation-triggered (2007--08, 2021) distinction as analytically
+important, because it bears on whether the suspended commodities were selected on a
+transitory price shock.
+
+The 2021 episode unfolded in stages. The Securities and Exchange Board of India
+(SEBI), having absorbed the Forward Markets Commission in 2015, first directed the
+National Commodity and Derivatives Exchange (NCDEX) to bar new positions in chana on
+16 August 2021 and in mustard seed and oil on 8 October 2021. On 19--20 December 2021
+SEBI suspended derivatives trading for one year across seven commodities---wheat,
+paddy (non-basmati rice), the soybean complex, crude palm oil (CPO), and
+moong---while continuing the chana and mustard suspensions; existing positions were
+permitted only to square off. The suspension has since been extended six times and
+now runs through 31 March 2027, making it a more-than-five-year halt with no published
+ex-ante rationale and currently under SEBI review. The staggered onset (chana in
+August, mustard in October, the remaining five in December) is consequential for
+identification and motivates our use of commodity-specific treatment dates rather
+than a single pooled event.
+
+A further institutional fact shapes the cost side of the question: the banned
+commodities accounted for the overwhelming majority of NCDEX agricultural turnover,
+so the suspension effectively hollowed out the domestic agri-derivatives market and
+left hedgers without listed instruments \citep{Rajib2024, PwC2023}. We note that the
+two reports documenting this turnover collapse are NCDEX-funded and treat their
+qualitative claims, not their causal magnitudes, as evidence.
+
+\subsection{Do futures destabilise spot prices? Theory is inconclusive}
+\label{sec:background-theory}
+
+The premise underlying a derivatives suspension---that futures trading inflates or
+destabilises the spot price---has no unconditional theoretical warrant. On the
+stabilising side, Working (1949, 1960) and Gray (1963), exploiting the 1958 U.S.
+onion futures ban, find cash-price variability generally \emph{higher} in years
+without futures; Danthine (1978) shows in a rational-expectations setting that
+futures provide forecasts guiding production and storage and so tend to increase spot
+stability; and Cox (1976) argues that futures raise the information content of spot
+prices, so that removing them degrades discovery. The ``onion experiment'' is the
+canonical natural experiment for the proposition that removing futures \emph{raises}
+spot volatility, and it frames our prior.
+
+Against this, equilibrium storage models (Turnovsky 1979; Newbery 1987) establish
+that futures can either stabilise or destabilise spot prices depending on parameters,
+so that the sign of the effect is an empirical, not a theoretical, question. The
+financialisation literature is similarly split: Irwin and Sanders (2011, 2012) find
+little systematic evidence that index-trader positions move returns or volatility,
+whereas Tang and Xiong (2012) document increased co-movement and volatility for
+index-member commodities after 2004; Cheng and Xiong (2014) synthesise this as
+operating through risk-sharing and information channels rather than a simple
+speculation-inflates-prices mechanism. Critically for our design, Gupta and Varma
+(2016) find for Indian rubber that spot volatility is \emph{both} a cause and a
+consequence of trading activity---the precise simultaneity that makes any naive
+comparison of banned commodities before and after suspension hazardous. We therefore
+treat the +8--10\% ``volatility rose'' prior we inherited not as a theoretical
+prediction to confirm but as a claim to stress-test against endogeneity-robust
+evidence.
+
+\subsection{Empirical evidence on Indian suspensions}
+\label{sec:background-empirics}
+
+The Indian evidence base is large but methodologically uneven, and---as our results
+show---its headline conclusions are sensitive to whether a counterfactual is
+constructed.
+
+\paragraph{The naive before--after tradition.} A long line of within-India studies
+compares volatility (or inflation) across pre-futures, with-futures and post-ban
+regimes for the same commodities. Nath and Lingareddy (2008) report higher volatility
+in pulses during futures trading; Sobti (2020), using an augmented E-GARCH with ban
+and relaunch dummies on the 2007--08 episode, finds spot volatility highest during the
+ban phase for most commodities; and, closest to our own outcome, Dey and Gairola
+(2024) report that spot volatility \emph{increased} post-ban for chana and refined soy
+oil after the 2021 suspension. These regime-comparison designs select treatment timing
+on the outcome---commodities are banned \emph{because} their prices ran hot---and so
+are vulnerable to the mean-reversion artifact (Ashenfelter's dip; Chab\'{e}-Ferret
+2015) that our placebo battery is built to detect. We cite this tradition as the
+literature we are stress-testing, not as a benchmark to match. Consistent with the
+artifact interpretation, Sendhil and Ramasundaram (2014) find wheat spot volatility
+\emph{low} during the 2007 ban precisely because it had spiked beforehand and then
+mean-reverted.
+
+\paragraph{The counterfactual tradition.} The most important methodological precedent
+is the synthetic-control work of Aggarwal, Chatterjee and Sehgal (2022, 2023), who
+build synthetic counterfactuals for chana (June 2016 and August 2021) and mustard
+(October 2021) from a donor pool of non-suspended pulses and oilseeds, with predictors
+spanning international prices, production and import shocks, and mandi establishment.
+They find that the synthetic counterfactual tracks actual prices in every episode: the
+suspension neither raised nor lowered \emph{price levels} or inflation. Their donor
+pool, predictor set and per-episode (staggered) treatment map directly onto our
+control-commodity problem, and their null is the result we extend to new margins. The
+gap we fill is explicit: their estimand is the price \emph{level}, whereas our primary
+outcome is spot \emph{realised volatility} (the H1/C1 margin), estimated on a
+disaggregated district panel with modern few-treated inference.
+
+The industry-commissioned reports reinforce this contrast. Gaurav and Pandey (2024),
+in an NCDEX-commissioned study, report that a naive pre/post comparison shows
+volatility up for all banned commodities, yet their own difference-in-differences of
+volatility against domestic and international peer commodities is \emph{null} except
+for soy oil at the twelve-month horizon---a within-study illustration that the
+``volatility rose'' headline is an uncontrolled-comparison artifact. We adopt their
+peer-mapping and the null DiD as corroboration while flagging the NCDEX funding.
+Rajib, Barai and Arora (2024), also NCDEX-funded, measure ``volatility'' as
+cross-mandi price dispersion---a spatial estimand distinct from our time-series
+realised volatility---and document that this dispersion was already rising from April
+2021, well before the December suspension, which supports the policy-endogeneity
+reading of the ban's timing.
+
+Looking back to the 2007--08 episodes, the weight of peer-reviewed Indian evidence is
+that suspensions did not curb inflation of the banned commodities (Babshetti and
+Basanna 2019; Sahoo and Kumar 2009; Singh and Goyal 2011), and the government's own
+Sen Committee (2008) could not establish a causal link from futures trading to
+agricultural price inflation. Bose (2008) further finds that Indian agricultural
+futures indices were informationally weak even before the bans, which tempers how much
+price-discovery loss any suspension can be expected to cause.
+
+\subsection{MSP and procurement as a confounder}
+\label{sec:background-msp}
+
+A first-order threat to any volatility comparison in this setting is administered
+pricing. For commodities subject to a minimum support price backed by Food
+Corporation of India or state-agency procurement, the realised price is pinned at or
+near the support level for long stretches, so measured ``volatility'' reflects the
+procurement regime rather than market conditions. This is not a marginal concern in
+our sample: paddy's daily spot returns are exactly flat 40.3\% of the time, against
+1--6\% for clean (non-administered) commodities, because procurement holds the price at
+the support level; wheat is similarly though less severely censored at 19.7\% flat
+returns. Realised volatility computed on a government-administered price is a
+mechanical artifact, not market volatility. We therefore drop paddy from the primary
+volatility analysis as effectively censored, and retain wheat---one of our core
+treated commodities---only with an MSP flag, reading it as a robustness check rather
+than a clean estimate. More broadly, the MSP/procurement apparatus is a confounder
+that must be carried explicitly in the design (it enters our confounder ledger) rather
+than assumed away, and it interacts with the contemporaneous export bans, stock limits
+and edible-oil duty changes that overlapped the suspension window for several of the
+banned commodities.
+
+\subsection{Where this paper sits}
+\label{sec:background-gap}
+
+This paper occupies a specific and, to our knowledge, unfilled position in the
+literature. First, on \emph{estimand}: the existing counterfactual work measures price
+levels and inflation, while the naive within-India literature measures volatility
+without a counterfactual. We measure spot \emph{realised volatility} against an
+explicitly constructed counterfactual, combining the strengths of both traditions. The
+inherited claim that the suspension raised volatility by roughly 8--10\% does not
+survive. In the current food-donor rerun, the headline two-way fixed-effects
+difference-in-differences on the district panel puts spot realised volatility
+$9.8\%$ lower, not higher, than its counterfactual, but the aggregate estimate is
+not statistically significant (CR1 $p \approx 0.145$; wild-cluster bootstrap
+$p \approx 0.153$). Synthetic difference-in-differences (Arkhangelsky et al. 2021)
+is larger in magnitude, at roughly $-19.1\%$, but remains borderline
+($z \approx -1.88$). The commodity-level signal is concentrated in chana:
+synthetic DiD estimates about $-38.7\%$ and the Abadie synthetic-control estimate is
+about $-37.3\%$, with placebo inference at the attainable floor of the current
+small donor set. Wheat is near zero in the current SDID run and remains heavily
+confounded by MSP procurement and contemporaneous export-policy interventions. We
+therefore frame the result as a \emph{suggestive}, chana-centered quasi-causal
+association rather than a precise aggregate effect: the suspension is associated
+with lower spot volatility in the treated basket, but the pooled food-donor
+estimate is modest and statistically weak.
+
+Second, on \emph{method}: because the design has very few treated clusters (five to
+six treated commodities), a single adoption window, and endogenous treatment timing,
+we draw on the synthetic-control family \citep{Abadie2010, Arkhangelsky2021} and on
+few-treated inference (wild-cluster bootstrap, conformal and Conley--Taber procedures)
+rather than relying on conventional cluster-robust standard errors, which are known to
+be unreliable below roughly thirty clusters \citep{MacKinnonWebb,
+BertrandDufloMullainathan2004}. We also document a methodological correction that
+proved decisive: an earlier version of the design, run on a calendar-grid spot series
+in which mandi data behaved as seven-day grids while realised volatility was annualised
+on a 252-trading-day convention, \emph{failed} its falsification tests (a fake-ban
+placebo at $p=0.046$ and a pre-trend test at $p=0.033$). After a trading-day weekday
+filter, the dropping of MSP-censored paddy, and the food-donor expansion, those
+diagnostics are materially cleaner: the fake-December-2019 placebo is about
+$-6.5\%$ and insignificant (analytic $p \approx 0.344$; wild bootstrap
+$p \approx 0.433$), and the joint pre-trend test does not reject parallel trends
+($p \approx 0.445$). This sequence is itself a caution about the fragility of the
+naive designs that dominate the prior literature.
+
+Third, on the companion volatility-mechanism (C2) margin, we find no support for the
+``elevated volatility'' claim through a different lens: an ICSS-then-within-regime
+procedure with the HAC-corrected Sans\'{o}--Arag\'{o}--Carri\'{o}n detector locates no
+unconditional-variance break near the suspension date, consistent with the structural-
+break literature's warning that an unmodelled level shift inflates apparent GARCH
+persistence \citep{Hillebrand, Lamoureux1990}. The basis arm of the original design
+is internally infeasible as stated---there are no post-ban futures for the banned
+commodities, so no post-ban basis exists---and is accordingly reframed as a
+domestic-versus-international spread question for future work, pending vendor futures
+data. The honest characterisation of the contribution is therefore a both-arms
+evaluation, not advocacy: we test whether the suspension delivered the price stability
+it was implicitly meant to provide, and find that, if anything, banned-commodity spot
+volatility was lower---not higher---under the suspension, while being explicit about
+the limitations (few treated clusters, MSP censoring, the absence of post-ban futures,
+and donor-pool construction still in progress).

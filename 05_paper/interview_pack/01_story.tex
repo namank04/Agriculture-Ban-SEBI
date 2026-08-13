@@ -1,0 +1,136 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+\usepackage{parskip}
+
+\newcommand{\rupee}{\textrm{Rs.}\,}
+
+\title{\textbf{My Summer Project: Did Banning Food Futures Calm the Market?}\\[6pt]
+\large A first-person story of how I built the data, hit walls, and learned to distrust my own headline number}
+\author{}
+\date{June 2026}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status note, 4 July 2026.} This story document predates the
+food-donor rerun and still contains some worked examples from the older clean-core
+estimate. The current C1 headline is: aggregate DiD about $-9.8\%$, not statistically
+significant under few-cluster inference (CR1 $p \approx 0.145$; wild bootstrap
+$p \approx 0.153$), with the strongest negative signal concentrated in chana.
+
+\bigskip
+
+\noindent\textit{What this is: the story of my internship project, in plain language --- the question I chased, the data problems I had to solve, and the honest, slightly surprising answer I arrived at.}
+
+\bigskip
+
+\section*{What the project was, and why it matters}
+
+In December 2021 the Indian government did something dramatic. It switched off \emph{futures} trading in seven important food commodities --- wheat, chana (chickpea), mustard, soybean, non-basmati paddy (rice), moong (a lentil), and crude palm oil (the cooking oil).
+
+A quick word on what a ``future'' is, because everything turns on it. A futures contract is just an agreement made today to buy or sell something later at a price fixed now. Farmers, traders, and food companies use these contracts to lock in prices and protect themselves against nasty surprises. The contracts trade on an exchange, like shares.
+
+For years, futures had been a political punching bag in India. Whenever food prices climbed, the popular accusation was that speculators trading these contracts were \emph{driving up} the everyday cash price of food. So in late 2021, with food inflation high, the regulator (SEBI) suspended futures trading in those seven commodities, on the theory that taking away the ``speculation'' would calm prices down.
+
+That gives a clean question, and it is the one I set out to answer: \textbf{did switching off futures actually calm the cash market --- or not?}
+
+The stakes cut both ways. If banning futures really did steady prices, that defends the policy. But if it did nothing --- or made things worse --- then the government took away a useful tool (the ability for farmers and businesses to lock in prices) for no benefit. People's grocery bills and farmers' incomes are on the other end of this question.
+
+\section*{What I set out to measure}
+
+I focused on \textbf{volatility} --- which just means \emph{how much a price jumps around from day to day}. Not whether a price is high or low, but how jumpy it is. A price that drifts gently from \rupee 100 to \rupee 102 to \rupee 101 is calm (low volatility). A price that lurches from \rupee 100 to \rupee 112 to \rupee 94 is jumpy (high volatility), even if it ends up in the same place.
+
+I measured volatility in the \emph{spot} market --- the ``spot'' or ``cash'' price is what you actually pay to buy the physical commodity right now in a market (in India, a \emph{mandi}, the local wholesale marketplace). The ban was on futures, but the worry was about the spot price farmers and households face, so the spot price is the right thing to watch.
+
+The trick to measuring the ban's effect honestly is not to look at banned commodities alone. The year 2022 was chaotic for \emph{every} commodity --- the war in Ukraine, an energy-price spike, global food inflation. If wheat got jumpier after the ban, was that the ban or the war? You cannot tell by looking at wheat by itself.
+
+So I compared two groups. The \textbf{banned} commodities, and a \textbf{control} group of similar farm commodities that kept trading futures the whole time (guar seed, castor seed, jeera/cumin, turmeric, cotton). The idea: the control commodities lived through exactly the same chaotic 2022, so whatever the war did shows up in \emph{both} groups. By comparing the \emph{change} in the banned group to the \emph{change} in the control group, the common shocks cancel out, and what is left should be the ban's own footprint. (Economists call this ``difference-in-differences'' --- the difference between two before-and-after differences. I will use the plain idea.)
+
+\section*{The problems I faced, and how I solved them}
+
+This is the real heart of the project. The analysis above sounds tidy, but the hard part --- the part that ate most of my summer --- was simply \emph{getting trustworthy data}. Each obstacle forced me to make a concrete decision. Here are the six that mattered most.
+
+\subsection*{1. The public price archive only went back a year}
+
+To compare ``before'' and ``after'' I needed years of price history --- ideally from 2017, so I had a long, calm run-up to the ban. But the exchange's public archive of daily price files only reached back about a year. Useless for my purpose.
+
+\textbf{The fix:} I found a data vendor (Investing.com) that served daily prices going back to 2017, and I built a script to pull and clean those files. That gave me the long history the public source could not.
+
+\subsection*{2. Stitching expiring contracts into one continuous price}
+
+Futures contracts expire. There is a separate contract for each delivery month, and each one lives for a while and then dies. To get a single, continuous price series I could analyse, I had to \emph{stitch} these short-lived contracts together --- and \emph{how} you stitch them changes the numbers. The vendor had done its stitching with some rule, but never told me what the rule was.
+
+\textbf{The fix:} I reverse-engineered the rule straight from the data. I looked for the days where the ``front'' contract's price (the nearest-to-expiry one, the one I was tracking) suddenly jumped to match the ``next'' contract's price from the day before --- the tell-tale sign of a switch. Those switches clustered right after each month's expiry date. That revealed the rule: hold the nearest contract until its last trading day, switch to the next one the following day, and do not smooth over the seam. Once I knew the rule, I could apply the \emph{same} rule everywhere, so my commodities were all built consistently and could be fairly compared.
+
+\subsection*{3. One exchange blocked automated downloads}
+
+Crude palm oil (the cooking oil) trades on a different exchange (MCX), and that exchange blocked automated scripts from grabbing its data. I needed palm oil --- it is one of the seven banned commodities and carries the whole ``imported cooking oil'' story.
+
+\textbf{The fix:} I drove the exchange's own data page through a real web browser (automated, but behaving like a genuine human session) and pulled all 64 of its monthly palm-oil contracts from 2017 to 2022. As a bonus, this route gave me two extra fields the vendor lacked: \emph{volume} (how much actually traded) and \emph{open interest} (how many contracts were live) --- which turned out to be crucial later (see problem 6).
+
+\subsection*{4. The spot-price service was rate-limited and kept timing out}
+
+For spot (mandi) prices I used CEDA, a cleaned mirror (run by Ashoka University) of the government's official Agmarknet price data, reachable through a web API. Two walls:
+
+\begin{itemize}[leftmargin=1.4em]
+  \item It allowed only \textbf{40 requests per hour}. A naive downloader would blow through that quota in minutes and then silently fail.
+  \item Asking for a big, dense state's worth of data over nine years returned a response too large for the server, which just timed out.
+\end{itemize}
+
+\textbf{The fix:} I built a \emph{polite, resumable, batched} downloader. ``Polite'': it read the service's own rate-limit signals and paused to stay under the limit. ``Resumable'': it saved one file per chunk of work and skipped anything already done, so a crash never meant starting over. ``Batched'': instead of asking for a whole state at once, it asked for a handful of districts at a time, automatically cutting the batch smaller whenever the server still choked. Run as a slow background job, this eventually pulled \textbf{5.74 million market-day price rows} across 396 state files (11 commodities $\times$ 36 states).
+
+\subsection*{5. A control commodity's spot price barely matched its futures --- the guar catch}
+
+My control group leaned on guar. As a sanity check, I compared guar's spot price to guar's futures price: they should track each other closely, since they are the same thing in two markets. Instead they barely moved together --- the correlation was a dismal \textbf{0.04} (where 1.0 is perfect lockstep and 0 is no relationship at all). Something was badly wrong, and a broken control would have quietly poisoned my whole comparison.
+
+\textbf{The fix:} I traced it. The spot series I had grabbed (labelled simply ``Guar'') was secretly a mix of guar \emph{seed} and guar \emph{gum} --- gum is a processed product that costs roughly ten times as much. So my ``guar'' price was an unstable blend of two different things. I switched to the pure ``Guar Seed'' series, and the correlation with futures jumped to \textbf{0.99} --- near-perfect. A tiny labelling trap, caught only because I checked each series against the futures it was supposed to mirror.
+
+\subsection*{6. Banned contracts kept printing fake ``prices'' after the ban}
+
+Here is the subtlest trap, and probably the most important. When I looked at the raw futures data for the banned commodities, I found that the contracts kept publishing a daily ``settlement'' price (the official end-of-day reference price) for \emph{months} after the ban --- even though \emph{zero} contracts were actually trading. The exchange computes a settlement number by formula even when nothing changes hands, so the data \emph{looks} like a live price but is really just an echo of a switched-off market.
+
+If you treat those echo-prices as real, you would compute volatility from numbers that no real trade ever produced --- and get a completely fictional ``post-ban'' result.
+
+\textbf{The fix:} I detected these zero-trade ``settlement-only'' rows and cut the banned series off cleanly at the ban date (20 December 2021), so a fake price could never sneak into a real calculation. No trade, no price, full stop.
+
+\section*{What I found}
+
+Here is the honest arc of the result, and I want to tell it straight, because the way the number \emph{moved} is the most interesting thing I learned.
+
+\textbf{My first estimate looked like a clean, alarming finding.} Early on, a first pass suggested that spot-price volatility \emph{rose} by about 8--10\% in the banned commodities after the ban. Taken at face value, that is a damning verdict: switching off futures would have made the cash market \emph{more} turbulent, the opposite of what the policy intended.
+
+But I did not trust it on sight, and I was right not to. \textbf{As I improved the data and the method, that number refused to hold still.}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item On the broad \emph{national} price series (each commodity's nationwide average), the effect washed out to essentially \textbf{zero} --- a tiny $-1.1\%$ that was statistically indistinguishable from nothing (p $=0.93$, meaning the result is the kind of thing you would see by pure chance almost every time).
+  \item On the much richer \emph{district-level} panel --- the real test, with millions of market-day rows boiled down to a district-by-commodity-by-month panel --- the effect not only failed to be $+8$--$10\%$, it came out \emph{negative}. The latest food-donor rerun estimates about \textbf{$-9.8\%$} lower spot volatility for banned commodities relative to controls. On significance, I want to be careful and honest: the few-cluster corrections do \emph{not} put this aggregate estimate over conventional significance thresholds (CR1 p $\approx 0.145$; wild-cluster bootstrap p $\approx 0.153$). On its face the point estimate says the banned commodities got \emph{calmer}, not jumpier, but the aggregate evidence is suggestive rather than statistically decisive.
+\end{itemize}
+
+So now I had several different answers --- $+8$--$10\%$, then zero, then a negative district-panel effect whose magnitude moved with donor choice --- depending on the data and method. That instability was itself the warning sign. A real effect should not flip its sign when you clean up the measurement. So I stress-tested the design to see whether \emph{any} of these numbers could be believed.
+
+\textbf{The placebo test --- and where it first went wrong.} I ran a deliberately fake experiment: I pretended the ban happened two years \emph{early}, in December 2019, using only data from before the real ban --- a period when, by construction, nothing actually happened. The logic here is a trap worth spelling out: this is the one test where I am \emph{hoping to find nothing}. A trustworthy method should return roughly zero, because there was no ban in 2019 to find --- so finding an effect is the \emph{bad} outcome, the sign that my method conjures results out of thin air. And on my first run, the fake 2019 ``ban'' \emph{did} light up: it produced a sizable, statistically significant ``effect'' (about $-13.6\%$, p $=0.046$), even though there was nothing real to detect. The pre-trend test failed too (more on that below). By my own pre-registered rules, that should have killed the design --- a method that finds a big effect where none can exist cannot be trusted to measure a real one.
+
+\textbf{The pre-trend test.} The whole comparison rests on one assumption: that absent the ban, the banned and control commodities would have drifted in parallel. Here too I am \emph{hoping to find nothing} --- I want no gap opening up \emph{before} the ban. On that same first run I tested it formally and it \emph{failed}: the banned commodities looked like they were already moving differently before the ban (the joint test rejected parallel trends, p $=0.033$). So I had two independent alarms --- a placebo that lit up and a pre-trend that failed --- both screaming that the design was broken. The naive estimate looked dead.
+
+\textbf{Then I chased the failure, and found a bug.} I could have stopped there and retired the design --- that would have been the easy, defensible move. But two checks failing in the same direction made me suspicious that something \emph{mechanical} was contaminating both, rather than the design being fundamentally hopeless. So I dug into how the volatility was actually being computed, and I found the culprit: a \textbf{calendar bug in my own measurement}. My mandi price series carried the last traded price forward over weekends and holidays (markets are shut, so the price just repeats), but I was annualising volatility on the assumption of 252 \emph{trading} days a year. Those repeated weekend prices injected a fake, mechanical smoothness --- spurious autocorrelation --- into every series, and it was \emph{that artifact}, not any real economic divergence, that was tripping both the placebo and the pre-trend test.
+
+\textbf{Fixing the bug improved the verdict, and the food-donor rerun made it cleaner.} I corrected the measurement (filtered to genuine trading days) and dropped paddy, which had a separate problem --- its price is pinned by government procurement (the MSP support price), so for long stretches it does not move at all, and ``volatility'' on a government-administered price is a mechanical artifact, not a market signal. With those fixes and the food-donor expansion, both alarms quieted down. The fake-2019 placebo is small and statistically insignificant (about $-6.5\%$, analytic p $\approx 0.344$, bootstrap p $\approx 0.433$), and the joint pre-trend test no longer rejects overall (p $\approx 0.445$). That makes the design cleaner than the earlier clean-core run, but the aggregate effect is also smaller and no longer statistically significant.
+
+\textbf{Leave-one-out shows where the signal actually lives --- in chana.} I dropped each banned commodity in turn and re-estimated. The sign survives every time (between $-7.4\%$ and $-15.2\%$), and crucially, dropping \emph{wheat} --- the one commodity tangled up in the government support-price (MSP) machinery, the obvious candidate to be driving a spurious result --- makes the effect \emph{stronger and significant} ($-15.2\%$, p $\approx 0.003$). So the non-wheat finding is \emph{not} an artifact of wheat or of MSP price-pinning. The flip side is just as informative: dropping \emph{chana} thins the effect to $-7.4\%$ and far from significance --- the aggregate signal is really a \emph{chana} signal. That decomposition, not a blanket ``it's robust,'' is the honest reading I lead with.
+
+\textbf{Other estimators point the same way --- but I am careful not to over-sell that as ``four independent methods agree.''} I also ran a ``synthetic difference-in-differences,'' which now pools to about $-19\%$ --- and with nine control commodities it finally carries a \emph{valid} standard error ($z \approx -1.9$, borderline) --- plus per-commodity ``synthetic controls.'' The commodity-level detail is the telling part: \emph{chana} is the one case that is individually significant (about $-39\%$, $z \approx -2.05$, and its synthetic control sits at the placebo floor), while \emph{wheat} collapses to essentially zero ($+0.4\%$) once proper food controls are used --- confirming its earlier apparent decline was the MSP/export-ban confound, not the futures ban. Two honest caveats still keep me from calling this clean convergence. First, outside chana the per-commodity inference is insignificant. Second, the apparent ``agreement'' between methods is partly \emph{mechanical}: they use the same panel and the same treated commodities, and the synthetic-DiD weights come out roughly uniform, so it collapses back toward the plain before-and-after. So I read these as \emph{corroboration of the sign, and strong evidence specifically for chana}, not as four independent verdicts.
+
+\textbf{So my honest conclusion is this:} the original fear that switching off futures would make the cash market \emph{more} turbulent --- the $+8$--$10\%$ I first saw --- does not survive contact with clean data. But the size of the calming effect depends on the comparison group, and that dependence is itself my most important finding: against industrial and spice crops the fall looked like $-20\%$ and borderline-significant; against economically comparable \emph{food} crops it is about $-10\%$ and \emph{not} statistically significant, with the genuine signal concentrated in \emph{chana} (the cleanest, least policy-contaminated commodity). I am deliberate about the strength of the claim: it is \emph{suggestive, not conclusive}. The estimator ``agreement'' is partly mechanical, the oilseed controls are still being added, and the ban's timing was itself a reaction to high prices, so part of any fall could be mean-reversion I cannot fully rule out. The defensible statement is the hedged one: the suspension \emph{did not raise} spot volatility --- and where there is positive evidence of calming, it is chana-specific and modest in aggregate. And even that is a stability result, not a vindication of the policy: the same months stripped farmers and businesses of a tool to lock in prices, so the cost side is real even if the volatility fear was not borne out.
+
+The part I am proudest of is the middle of that arc. My first corrected estimate looked dead --- it failed its own falsification tests --- and rather than paper over that or quietly drop the awkward checks, I chased the failure and found a measurement bug in my own pipeline. Catching that bug is what turned a ``dead'' result into a live one --- a robust, leave-one-out-stable point estimate, even if I am careful to call the overall finding suggestive rather than conclusive. Being willing to follow your own checks when they point at \emph{your own} mistake is, to me, exactly what honest empirical work looks like.
+
+\textbf{A word on the volatility model (GARCH), and why I do \emph{not} lean on it.} There is a different family of test worth mentioning, because an interviewer may expect it. Everything above compares banned crops \emph{against} a control group. A GARCH model instead looks \emph{inside a single commodity's own price history} over time, with no control group at all (it lets today's turbulence depend on yesterday's). An early version of this seemed to show chana, the cleanest banned commodity, calming sharply after the ban --- and for a while I thought of it as a solid stand-alone result. But it does \emph{not} survive the same cleaning that fixed the calendar bug: on clean trading-day data chana's volatility is roughly flat, and a formal test that lets the data choose where any break occurred finds \emph{no} volatility break near the ban date at all. So I am explicit about this: the GARCH evidence is \textbf{inconclusive}, and I do not present ``chana got calmer'' as a finding. The volatility verdict rests on the control-group methods above --- chiefly the leave-one-out-robust before-and-after point estimate --- not on GARCH.
+
+\section*{What's next}
+
+The biggest worry left is the one I started with: the ban's timing was a \emph{reaction} to high prices, not a coin flip, so I can never fully rule out that the timing itself --- mean-reversion after a price run-up --- is doing some of the work, and the marginal placebo does not fully rule that out. The placebo and pre-trend tests push back on it but, as I said, only borderline. The synthetic-control designs --- which build a custom comparison crop matched to each banned commodity's own pre-ban path --- are the better-identified methods that should address it, and they point the same way, but right now they lean on a weak donor pool (industrial and spice crops standing in for food staples) and fit poorly. So my honest next steps are concrete: I am pulling a larger, cleaner pool of \emph{food}-commodity ``donor'' crops at the district level; then I want to run the modern inference upgrades I have not done yet --- a Honest-DiD sensitivity analysis (Rambachan--Roth) that asks how big a pre-trend violation it would take to overturn the result, a Callaway--Sant'Anna estimator built for the long, staggered post-period, and a proper wild-bootstrap confidence interval. Those are what would move the result from ``suggestive'' toward ``conclusive.'' That is where I take the project from here.
+
+\end{document}

@@ -1,0 +1,22 @@
+{
+ "symbol": "COTTONCNDY",
+ "method": "Expiry='' half-year sweep",
+ "snapshot_date": "2026-06-12",
+ "expiries": [
+  "28APR2023",
+  "30JUN2023",
+  "31AUG2023",
+  "30NOV2023",
+  "31JAN2024",
+  "28MAR2024",
+  "31MAY2024",
+  "31JUL2024",
+  "30SEP2024",
+  "29NOV2024",
+  "31JAN2025",
+  "31MAR2025",
+  "30MAY2025",
+  "31JUL2025",
+  "30SEP2025"
+ ]
+}
