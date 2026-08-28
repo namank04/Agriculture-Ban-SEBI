@@ -1,175 +1,63 @@
-# Reference Ledger
-**Convention (applies to every document this project cites or relies on):** one entry here with
-full citation, URL(s), date accessed, and the local copy's path under `01_literature/papers/`
-(naming: `author_year_shorttitle.pdf`). If a document cannot be auto-downloaded (login wall,
-paywall), it is marked **[MANUAL]** — fetch it in a browser and drop it in `papers/`, then update
-the entry. Press items are kept as links only unless load-bearing. All accessed 2026-06-10
-unless noted.
+# References
 
-## 1. Empirical studies of the 2021 suspension (direct competitors/complements)
-| Ref | Citation | Link | Local copy |
-|---|---|---|---|
-| ACS2022 | Aggarwal, N., Chatterjee, T. & Sehgal, K. (2022). *Assessing the impact of commodity derivatives suspensions.* SSRN WP 4261360. Uses Synthetic Control Method — overlaps our H1. | [SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4261360) · [Ideas for India summary](https://www.ideasforindia.in/topics/money-finance/do-commodity-derivatives-suspensions-rein-in-food-price-inflation.html) | **[MANUAL]** SSRN 403s scripted downloads — download via browser (free login) → `papers/aggarwal_chatterjee_sehgal_2022_suspensions.pdf` |
-| GP2024 | Gaurav, S. & Pandey, P. (2024). *Impact of Suspension of Commodity Derivatives on the Agri Ecosystem.* NCDEX-commissioned, SJMSOM IIT Bombay (114 pp., Sep 2024). Vol DiD vs domestic+intl peers is NULL (except soy oil 12m). | [NCDEX PDF](https://www.ncdex.com/downloads/Research/casestudies-conceptpaper/Impact%20of%20Suspension%20of%20Commodity%20Derivatives%20on%20the%20Agri%20Ecosystem%20by%20IIT%20Bombay.pdf) · [Krishi Jagran](https://krishijagran.com/industry-news/impact-of-suspension-of-agri-commodities-on-food-prices-and-agri-ecosystem/) | ✅ `papers/Gaurav2024_suspension_agri_ecosystem.pdf` — NCDEX-funded, flag conflict |
-| RAB2024 | Rajib, P., Barai, P. & Arora, R. (2024). *Impact on Suspension of Commodity Derivatives on Commodity Market Ecosystem.* NCDEX-funded, BIMTECH/VGSOM IIT Kgp (34 pp., Nov 2024; data Jan 2016–Apr 2024). "Volatility" = cross-mandi dispersion (different estimand); vol rising from Apr-2021 (pre-ban). | [NCDEX PDF](https://ncdex.com/downloads/Research/casestudies-conceptpaper/Impact%20on%20Suspension%20of%20Commodity%20Derivatives%20on%20Commodity%20Market%20Ecosystem%20by%20BIMTECH.pdf) · [Devdiscourse](https://www.devdiscourse.com/article/business/3157250-bimtech-and-iit-bombay-studies-challenge-commodity-derivatives-suspension-myths) | ✅ `papers/Rajib2024_suspension_market_ecosystem.pdf` — NCDEX-funded, flag conflict |
-| DG2024 | Dey, K. & Gairola, G. (2024). *Is Suspending Agricultural Futures Justified?* Economic & Political Weekly 59(9). Chana/soybean/refined soy oil; spot vol higher post-ban — closest published C1 claim. | [EPW](https://www.epw.in/journal/2024/9/special-articles/suspending-agricultural-futures-justified.html) | **[MANUAL]** EPW paywall — institutional access |
-| ACS2023 | Aggarwal, N., Chatterjee, T. & Sehgal, K. (2023, rev. Aug 2025). *Trading Suspensions and Food Price Inflation.* SSRN WP 4407637, DOI 10.2139/ssrn.4407637. SCM on chana Jun-2016, chana Aug-2021, mustard Oct-2021; donor pool + predictors (intl prices, production, imports, mandis). Supersedes ACS2022; PRICE LEVELS not vol — we fill the vol/basis gap. | [SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4407637) · [Ideas for India 2025 summary](https://www.ideasforindia.in/topics/money-finance/do-commodity-derivatives-suspensions-rein-in-food-price-inflation.html) | **[MANUAL]** SSRN 403s scripted fetch — browser download → `papers/aggarwal_chatterjee_sehgal_2023_suspensions.pdf` |
-| PWC2023 | PricewaterhouseCoopers (2023). *Price Risk Management for Agricultural Commodities.* Report to NCDEX Investor Protection Fund Trust (151 pp., Sep 2023). Confirms controls (castor/guar/turmeric) stayed listed/liquid through the ban; hedging-vacuum mechanism. No econometrics. | [NCDEX PDF](https://ncdex.com/downloads/Research/casestudies-conceptpaper/Price%20Risk%20Management%20for%20Agricultural%20Commodities%20-%20By%20PwC.pdf) | ✅ `papers/PwC2023_price-risk-management-agri.pdf` — NCDEX-IPFT-funded |
+## Core Indian Literature and Policy
 
-## 2. Committee & policy reports
-| Ref | Citation | Link | Local copy |
-|---|---|---|---|
-| SEN2008 | Expert Committee on Futures Trading (Chair: Abhijit Sen) (2008). *Report on the Effect of Futures Trading on Agricultural Commodity Prices.* Govt of India. Found no conclusive evidence futures trading raised spot volatility. | [PIB release](https://www.pib.gov.in/newsite/erelcontent.aspx?relid=38244&reg=3&lang=2) · [Scribd copy](https://www.scribd.com/doc/44212450/Abhijit-Sen-Report) · [Yumpu copy](https://www.yumpu.com/en/document/view/30069802/abhijit-sen-committee-report-fmc) | **[MANUAL]** only login-walled mirrors — grab via Scribd/Yumpu in browser |
-| ICRIER383 | Gulati, A., Chatterjee, T. & Hussain, S. (2017). *Supporting Indian Farmers: Price Support or Direct Income/Investment Support?* / linking farmers to futures — ICRIER WP 383. | [PDF](https://icrier.org/pdf/Working_Paper_383.pdf) | ✅ `papers/icrier_wp383_gulati_farmers_futures.pdf` (41 pp — verify exact title/authors on first read; reading_list cites it as "Linking farmers to futures") |
-| DES2022 | DES/MoA&FW (2021-22). *Futures Market for Agricultural Commodities in India* = Jha, B. & Chakravarty, S. (2021), IEG/AERU, Jun 2021. **NOW LOCATED.** Pre-ban govt assessment; institutional context for policy-endogeneity. | [desagri PDF](https://desagri.gov.in/wp-content/uploads/2024/04/2021-22-Futures-Market-for-Agriculture-Commodities-in-India.pdf) | ✅ `papers/Jha2021_futures-market-agri-commodities.pdf` (SSL fault on host — fetch with cert-check disabled) |
+1. Gaurav, S., & Pandey, P. (2024). *Impact of Suspension of Commodity Derivatives on the Agri Ecosystem.* Shailesh J. Mehta School of Management, IIT Bombay.
 
-## 3. Earlier Indian ban studies (post-2008 suspensions)
-| Ref | Citation | Link | Local copy |
-|---|---|---|---|
-| AJT2014 | Aggarwal, N., Jain, S. & Thomas, S. (2014). *Do futures markets help in price discovery and risk management for commodities in India?* IGIDR WP-2014-020. | [IGIDR](http://www.igidr.ac.in/pdf/publication/WP-2014-020.pdf) | ✅ `papers/Aggarwal2014_futures-price-discovery-india.pdf` |
-| SOBTI2020 | Sobti, N. (2020). *Does Ban on Futures trading (de)stabilise spot volatility?* South Asian J. of Business Studies 9(2):145-166, DOI 10.1108/SAJBS-07-2018-0084. Augmented E-GARCH with ban+relaunch dummies — direct C2 template. | [Emerald](https://www.emerald.com/sajbs/article-abstract/9/2/145/455197/) | **[MANUAL]** Emerald wall |
-| NL2008 | Nath, G. C. & Lingareddy, T. (2008). *Commodity Derivative Market and its Impact on Spot Market.* SSRN 1087904 (longer version of EPW 43(03) commentary). Canonical pro-ban naive before/during/after — cite-and-rebut. | [SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1087904) · [EPW](https://www.epw.in/journal/2008/03/commentary/impact-futures-trading-commodity-prices.html) | ✅ `papers/Nath2008_commodity-derivative-spot-market.pdf` |
-| LINGA2008 | Lingareddy, T. (2008). *Expert Committee on Commodity Futures: Agreements and Disagreements.* EPW 43(34). Sen Committee dissent. | [EPW](https://www.epw.in/journal/2008/34/insight/) | **[MANUAL]** EPW wall |
-| BOSE2008 | Bose, S. (2008). *Commodity Futures Market in India: Notional Multi-Commodity Indices.* Money & Finance (ICRA Bulletin); SSRN 1262742. Agri indices informationally weak even pre-ban. | [SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1262742) | ✅ `papers/Bose2008_notional_multicommodity_indices.pdf` |
-| BOSE2009 | Bose, S. (2009). *The Role of Futures Market in Aggravating Commodity Price Inflation….* Money & Finance (ICRA Bulletin). | [SemanticScholar](https://www.semanticscholar.org/paper/1f7ea25cdd3b68227af6edeec199dd104ef89cb1) | ✅ `papers/Bose2009_futures_aggravating_inflation.pdf` |
-| LOKARE2007 | Lokare, S. M. (2007). *Commodity Derivatives and Price Risk Management: An Empirical Anecdote from India.* RBI Occasional Papers 28(2):27-77. Per-commodity basis-risk benchmarks for C2. | [RBI](https://www.rbi.org.in/scripts/PublicationsView.aspx?id=10204) | ✅ `papers/Lokare2007_commodity_derivatives_risk.pdf` |
-| SAHI2006 | Sahi, G. S. & Raizada, G. (2006). *Commodity Futures Market Efficiency in India and Effect on Inflation.* SSRN 949161. Pre-Feb-2007 wheat delisting evidence. | [SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=949161) | **[MANUAL]** SSRN wall |
-| MUKH2011 | Mukherjee, K. N. (2011). *Impact of Futures Trading on Indian Agricultural Commodity Market.* MPRA 29290 (NIBM); SSRN 1763910. GARCH/VAR spillover map covers treated + donors. | [MPRA](https://mpra.ub.uni-muenchen.de/29290/) | ✅ `papers/Mukherjee2011_impact_futures_indian_agri.pdf` |
-| SEND2014 | Sendhil, R. & Ramasundaram, P. (2014). *Performance and Relevance of Wheat Futures Market in India.* AAEA / AgEcon 174839. India-CBOT non-integration; "low vol during ban" = mean-reversion artifact. | [EconPapers](https://econpapers.repec.org/paper/agsaaea14/174839.htm) | ✅ `papers/Sendhil2014_wheat-futures-market-india.pdf` |
-| FERN2013 | Fernandez, C. P. S. (2013). *Futures Trading in Agricultural Commodities: Effects of the Ban….* Artha J. of Social Sciences 12(4):61-87. Catalogue of pre-2013 episodes; wheat liquidity never recovered. | [Christ Univ.](https://journals.christuniversity.in/index.php/artha/article/view/718) | ✅ `papers/Fernandez2013_futures-ban-commodities-india.pdf` |
-| CHHAJ2013 | Chhajed, I. & Mehta, S. (2013). *Market Behavior and Price Discovery in Indian Agriculture Commodity Market.* IJSRP 3(3). | [IJSRP PDF](https://www.ijsrp.org/research-paper-0313/ijsrp-p15144.pdf) | ✅ `papers/Chhajed2013_price-discovery-agri-commodity.pdf` |
-| BABSH2019 | Babshetti, V. & Basanna, P. (2019). *Impact of Commodity Futures on Inflation: Perception and Reality.* Indian J. of Research in Capital Markets 6(2):29-39. Cleanest null on 2007-08 episodes; lit-review hub. | [IJRCM](https://www.indianjournalofcapitalmarkets.com/index.php/ijrcm/article/view/146593) | ✅ `papers/Babshetti2019_commodity-futures-inflation.pdf` |
-| DATTA2017 | Datta, B. (2017). *Role of Commodity Futures Trading … Potato.* Pacific Business Review International. Four-regime per-commodity template (deflated + nonparametric); bumper-crop supply confounder. | [PBR](https://www.pbr.co.in/2017/febTweleve.aspx) | **[MANUAL]** PBR landing |
-| GUPTA2016 | Gupta, A. & Varma, P. (2016). *Impact of Futures Trading on Spot Markets: Rubber in India.* Eastern Economic Journal 42(3):373-386, DOI 10.1057/eej.2014.64. "Vol is both cause and consequence of trading activity" = endogeneity mechanism. | [Springer](https://link.springer.com/article/10.1057/eej.2014.64) | ✅ `papers/Gupta2016_futures-spot-rubber-india.pdf` |
-| SHARMA2015 | Sharma, D. K. & Malhotra, M. (2015). *Impact of futures trading on volatility of spot market — guar seed.* Agricultural Finance Review 75(3):416-431, DOI 10.1108/AFR-03-2014-0005. Expected/unexpected volume decomposition; strongest pro-ban; guar = our donor (2012 contamination). | [Emerald](https://www.emerald.com/afr/article-abstract/75/3/416/22556/) | **[MANUAL]** Emerald wall |
-| SONI2013 | Soni, T. K. & Singla, H. K. (2013). *Efficiency and Unbiasedness in NCDEX: Guar Gum.* Indian J. of Finance 7(11):28-37. Corroborates 2012 guar as genuine market failure. | [IJF](https://www.indianjournaloffinance.co.in/index.php/IJF/article/view/72070) | ✅ `papers/Soni2013_efficiency-unbiasedness-guar-gum.pdf` |
-| BAND2022 | Bandyopadhyay, A., Bhowmik, S. & Rajib, P. (2022). *Wavelet-based analysis of guar futures … did we kill the golden goose?* JADEE 12(1):104-125, DOI 10.1108/JADEE-09-2020-0200. Persistent real-side (export) costs; wavelet vol alternative. | [Emerald](https://www.emerald.com/jadee/article-abstract/12/1/104/197095/) | **[MANUAL]** Emerald wall |
-| SINGH2012 | Singh, K. / Madhyam (2012). *Excessive Speculation and Market Manipulation: India's Commodity Futures Markets.* Madhyam Briefing Paper. Guar-2012 timeline + FMC delisting (27-Mar-2012). | [Madhyam PDF](https://www.madhyam.org.in/wp-content/uploads/2014/07/Excessive-Speculation-and-Market-Manipulation.pdf) | ✅ `papers/Singh2012_excessive-speculation-guar.pdf` |
-| ICRIER349 | Gulati, A., Chatterjee, T. & Hussain, S. (2017). *Agricultural Commodity Futures: Searching for Potential Winners.* ICRIER WP 349. Suspension-chronology table (15 since 2003) + food-sensitivity scoring → RF-SC covariate. Distinct from ICRIER383. | [ICRIER](https://icrier.org/publications/agricultural-commodity-futures-searching-for-potential-winners/) | ✅ `papers/Gulati2017_agri-futures-potential-winners.pdf` |
-| SAHOO2009 | Sahoo, P. & Kumar, R. (2009). *Efficiency and Futures Trading-Price Nexus in Indian Commodity Futures Markets.* Global Business Review 10(2):187-201. Counter-evidence on chana + soy oil specifically. | [SAGE](https://journals.sagepub.com/doi/10.1177/097215090901000204) | **[MANUAL]** SAGE wall |
-| BKUMAR2009 | Kumar, Brajesh (2009). *Effect of Futures Trading on Spot Market Volatility.* SSRN 1364231 (IIMA). VAR volume/OI → vol channel for CPO. | [SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1364231) | **[MANUAL]** SSRN wall |
-| SINGH2011 | Singh, M. & Goyal, A. (2011). *Impact of trading in the commodity futures market on inflation.* Elixir Management 31:1876-1879. spot→futures dominance = endogeneity. | [Academia](https://www.academia.edu/41613787/) | **[MANUAL]** login wall |
-| UNCTAD2009 | UNCTAD Study Group (2009). *Development Impacts of Commodity Exchanges in Emerging Markets.* UNCTAD/DITC/COM/2008/9. India MCX/NCDEX post-2007-ban environment. | [UN digital library](https://digitallibrary.un.org/record/674963?ln=en) | ✅ `papers/UNCTAD2009_commodity-exchanges-emerging-markets.pdf` |
-| KABI2023 | Kabi, R., Panda, P. & Chari, L. (2023). *Price Discovery … A Case of Cotton.* Management and Labour Studies 48(4):478-496. Lead-lag-flip design (COVID halt); cotton matters (MCX cotton own halt). | [SAGE](https://journals.sagepub.com/doi/10.1177/0258042X231158408) | **[MANUAL]** SAGE wall |
-| DUBEY2023 | Dubey, P. & Dey, S. (2023). *Inflationary Effect of Agricultural Commodity Futures Market in India.* Vision (SAGE), DOI 10.1177/09722629231168692. AGRIDEX-vol-vs-CPI composition warning. | [SAGE](https://journals.sagepub.com/doi/10.1177/09722629231168692) | **[MANUAL]** SAGE wall |
-| SUMA2023 | Sumalatha, B. S. & Nirmal Roy, V. P. (2023). *Agricultural Commodity Futures Market in India.* EPW 58(52), Commentary. Suspension history catalogue. | [EPW](https://www.epw.in/journal/2023/52/commentary/) | **[MANUAL]** EPW wall |
-| SNEAG2022 | Sneagen, S. (2022). *Essays on Indian Futures Markets.* PhD thesis, Univ. of Essex. NCDEX wheat suspension at contract level (Ch.2 episode UNVERIFIED). | [Essex repo](https://repository.essex.ac.uk/32813/) | **[MANUAL]** PDF fetch timed out; verify Ch.2 episode |
-| NAIK2008 | IIM Bangalore (Naik group) (2008). *Performance of Futures Market … Wheat, Chana, Sugar, Guar seed, Urad, Tur.* FMC-commissioned. Regulator's own evaluation — basis risk small for guar/tur. | secondary cite (IEG) | **[MANUAL]** hunt FMC archive (sebi.gov.in/sebi_data/fmcfiles/) |
+   **Local file:** `Gaurav2024_suspension_agri_ecosystem.pdf`
 
-## 4. Methodology — causal identification (annotated verdicts in `ban_literature_review.md` §4)
+2. Aggarwal, N., Chatterjee, T., & Sehgal, K. (2023, revised 2025). *Trading Suspensions and Food Price Inflation.* SSRN Working Paper 4407637. https://doi.org/10.2139/ssrn.4407637
 
-### 4a. Synthetic-control family + SCM/few-treated inference
-| Ref | Citation | Link | Local copy |
-|---|---|---|---|
-| ADH2010 | Abadie, Diamond & Hainmueller (2010). *Synthetic Control Methods for Comparative Case Studies.* JASA 105(490):493-505. | [T&F](https://www.tandfonline.com/doi/abs/10.1198/jasa.2009.ap08746) | ✅ `papers/AbadieDiamondHainmueller2010_synthetic_control_tobacco.pdf` |
-| ABADIE2021 | Abadie (2021). *Using Synthetic Controls: Feasibility, Data Requirements, Methodological Aspects.* JEL 59(2):391-425. The C1 pre-registration checklist. | [AEA](https://www.aeaweb.org/articles?id=10.1257/jel.20191450) | ✅ `papers/Abadie2021_using_synthetic_controls.pdf` |
-| AVB2022 | Abadie & Vives-i-Bastida (2022). *Synthetic Controls in Action.* arXiv 2203.06279. High-vol-outcome overfit warning = SCM operating manual. | [arXiv](https://arxiv.org/abs/2203.06279) | ✅ `papers/Abadie2022_synthetic_controls_in_action.pdf` |
-| BMFR2021 | Ben-Michael, Feller & Rothstein (2021). *The Augmented Synthetic Control Method.* JASA 116(536):1789-1803. Primary C1 robustness (imperfect pre-fit, multiple treated). | [T&F](https://www.tandfonline.com/doi/abs/10.1080/01621459.2021.1929245) | ✅ `papers/BenMichael2021_augmented_synthetic_control.pdf` |
-| SDID2021 | Arkhangelsky et al. (2021). *Synthetic Difference-in-Differences.* AER 111(12):4088-4118. Co-equal C1; time-weights discount the 2021 run-up. | [AEA](https://www.aeaweb.org/articles?id=10.1257/aer.20190159) | ✅ `papers/Arkhangelsky2021_synthetic_diff_in_diff.pdf` |
-| XU2017 | Xu (2017). *Generalized Synthetic Control Method.* Political Analysis 25(1):57-76. gsynth (interactive FE). | [Cambridge](https://www.cambridge.org/core/journals/political-analysis/article/B63A8BD7C239DD4141C67DA10CD0E4F3) | ✅ `papers/Xu2017_generalized_synthetic_control.pdf` |
-| BAI2009 | Bai (2009). *Panel Data Models With Interactive Fixed Effects.* Econometrica 77(4):1229-1279. Theoretical anchor for gsynth/MC + the FDCD/DCBD loading-homogeneity repair. | [Wiley](https://onlinelibrary.wiley.com/doi/abs/10.3982/ECTA6135) | ✅ `papers/Bai2009_panel_interactive_fixed_effects.pdf` |
-| MC2021 | Athey et al. (2021). *Matrix Completion Methods for Causal Panel Data Models.* JASA 116(536):1716-1730. Nests SCM/IFE; pools all treated+donors. | [T&F](https://www.tandfonline.com/doi/abs/10.1080/01621459.2021.1891924) | ✅ `papers/Athey2021_matrix_completion_causal_panel.pdf` |
-| ALH2021 | Abadie & L'Hour (2021). *A Penalized Synthetic Control Estimator for Disaggregated Data.* JASA 116(536):1817-1834. ADOPT IF C1 run at district level (escape few-cluster trap). | [T&F](https://www.tandfonline.com/doi/abs/10.1080/01621459.2021.1971535) | ✅ `papers/AbadieLHour2021_penalized_synthetic_control.pdf` |
-| DI2016 | Doudchenko & Imbens (2016). *Balancing, Regression, DiD and Synthetic Control: A Synthesis.* NBER 22791. The robustness-grid backbone. | [NBER](https://www.nber.org/papers/w22791) | ✅ `papers/Doudchenko2016_balancing_regression_did_scm.pdf` |
-| SCPI2021 | Cattaneo, Feng & Titiunik (2021). *Prediction Intervals for Synthetic Control Methods.* JASA 116(536):1865-1880 (software scpi, JSS 113(1)). PRIMARY SCM inference engine. | [T&F](https://www.tandfonline.com/doi/abs/10.1080/01621459.2021.1979561) | ✅ `papers/Cattaneo2021_prediction_intervals_synthetic.pdf` |
-| CWZ2021 | Chernozhukov, Wüthrich & Zhu (2021). *An Exact and Robust Conformal Inference Method for Counterfactual and Synthetic Controls.* JASA 116(536):1849-1864. LEAD per-commodity inference (single unit/date). | [T&F](https://www.tandfonline.com/doi/full/10.1080/01621459.2021.1920957) | ✅ `papers/Chernozhukov2021_conformal_inference_synthetic.pdf` |
-| CT2011 | Conley & Taber (2011). *Inference with DiD with a Small Number of Policy Changes.* REStat 93(1):113-125. Few treated, many controls. | [MIT](https://direct.mit.edu/rest/article/93/1/113/57888/) | ✅ `papers/ConleyTaber2011_did_small_policy_changes.pdf` |
-| FP2017 | Ferman & Pinto (2017). *Synthetic Control and Inference.* Econometrics 5(4):52. RMSPE-ratio statistic; raw gap-plot placebos mislead. | [MDPI](https://www.mdpi.com/2225-1146/5/4/52) | ✅ `papers/FermanPinto2017_synthetic_control_inference.pdf` |
-| FP2021 | Ferman & Pinto (2021). *Synthetic Controls with Imperfect Pretreatment Fit.* Quantitative Economics 12(4):1197-1221. CRITICAL — SC still biased under confounding; demeaned-SC variant. | [Wiley](https://onlinelibrary.wiley.com/doi/full/10.3982/QE1596) | ✅ `papers/FermanPinto2021_imperfect_pretreatment_fit.pdf` |
-| FIRPO2018 | Firpo & Possebom (2018). *Synthetic Control Method: Inference, Sensitivity Analysis and Confidence Sets.* J. Causal Inference 6(2):20160026. Sensitivity curve for placebo p-values. | [DeGruyter](https://www.degruyterbrill.com/document/doi/10.1515/jci-2016-0026/html) | **[MANUAL]** collect via institutional access |
-| MW2018 | MacKinnon & Webb (2018). *The Wild Bootstrap for Few (Treated) Clusters.* Econometrics Journal 21(2):114-135. (Studentized-RI lineage = MW 2020, J.Econometrics.) | [OUP](https://academic.oup.com/ectj/article-abstract/21/2/114/5078969) | ✅ `papers/MacKinnonWebb2018_wild_bootstrap_few_clusters.pdf` |
-| IM2010 | Ibragimov & Müller (2010). *t-Statistic Based Correlation and Heterogeneity Robust Inference.* JBES 28(4):453-468. Primary small-cluster inference (q=2-11 groups). | [T&F](https://www.tandfonline.com/doi/abs/10.1198/jbes.2009.08046) | **[MANUAL]** collect via institutional access |
-| ALV2025 | Alvarez, Ferman & Wüthrich (2025). *Inference with Few Treated Units.* arXiv 2504.19841. The C1 inference roadmap (few treated, one date, endogenous timing). | [arXiv](https://arxiv.org/abs/2504.19841) | ✅ `papers/Alvarez2025_inference_few_treated_units.pdf` |
+3. Dey, K., & Gairola, G. (2024). *Is Suspending Agricultural Futures Justified? Empirical Findings and Implications.* Economic & Political Weekly, 59(9), 56–64.
 
-### 4b. DiD: parallel-trends credibility, staggering, the Ashenfelter lineage
-| Ref | Citation | Link | Local copy |
-|---|---|---|---|
-| RR2023 | Rambachan & Roth (2023). *A More Credible Approach to Parallel Trends.* REStud 90(5):2555-2591. Honest DiD — MANDATORY C1 sensitivity given leads reject. | [OUP](https://academic.oup.com/restud/article-abstract/90/5/2555/7039335) | ✅ `papers/RambachanRoth2023_credible_parallel_trends.pdf` |
-| ROTH2022 | Roth (2022). *Pretest with Caution.* AER:Insights 4(3):305-322. Pre-trend tests low-power; pretest bias. | [AEA](https://www.aeaweb.org/articles?id=10.1257/aeri.20210236) | ✅ `papers/Roth2022_pretest_with_caution.pdf` |
-| ROTH2023 | Roth, Sant'Anna, Bilinski & Poe (2023). *What's Trending in Difference-in-Differences?* J. Econometrics 235(2):2218-2244. Decision tree — why staggered-DiD is moot, redirect to SCM+Honest-DiD. | [Elsevier](https://www.sciencedirect.com/science/article/abs/pii/S0304407623001318) | ✅ `papers/Roth2023_whats_trending_did.pdf` |
-| CS2021 | Callaway & Sant'Anna (2021). *Difference-in-Differences with Multiple Time Periods.* J. Econometrics 225(2):200-230. Not-yet-treated comparison for the Aug/Oct/Dec stagger. | [Elsevier](https://www.sciencedirect.com/science/article/abs/pii/S0304407620303948) | ✅ `papers/CallawaySantAnna2021_did_multiple_periods.pdf` |
-| SA2021 | Sun & Abraham (2021). *Estimating Dynamic Treatment Effects in Event Studies with Heterogeneous Treatment Effects.* J. Econometrics 225(2):175-199. Clean leads → interpretation-proof pre-trend test. | [Elsevier](https://www.sciencedirect.com/science/article/abs/pii/S030440762030378X) | ✅ `papers/SunAbraham2021_event_study_heterogeneous.pdf` |
-| DCDH2020 | de Chaisemartin & D'Haultfœuille (2020). *Two-Way Fixed Effects Estimators with Heterogeneous Treatment Effects.* AER 110(9):2964-2996. Negative-weight diagnostic + contaminated-treatment prior art for RF-SC bundling. | [AEA](https://www.aeaweb.org/articles?id=10.1257/aer.20181169) | ✅ `papers/deChaisemartinDHaultfoeuille2020_twfe_heterogeneous.pdf` |
-| GB2021 | Goodman-Bacon (2021). *Difference-in-Differences with Variation in Treatment Timing.* J. Econometrics 225(2):254-277. bacondecomp transparency exhibit. | [Elsevier](https://www.sciencedirect.com/science/article/abs/pii/S0304407621001445) | ✅ `papers/GoodmanBacon2021_did_variation_timing.pdf` |
-| ASHEN1978 | Ashenfelter (1978). *Estimating the Effect of Training Programs on Earnings.* REStat 60(1):47-57. The dip — names our placebo-2019 mechanism. | [IDEAS](https://ideas.repec.org/a/tpr/restat/v60y1978i1p47-57.html) | **[MANUAL]** collect |
-| CHABE2015 | Chabé-Ferret (2015). *Analysis of the Bias of Matching and DiD under Alternative Earnings and Selection Processes.* J. Econometrics 185(1):110-123. THE formal "naive DiD is dead" cite. | [Elsevier](https://www.sciencedirect.com/science/article/abs/pii/S0304407614002437) | **[MANUAL]** collect |
-| HIST1998 | Heckman, Ichimura, Smith & Todd (1998). *Characterizing Selection Bias Using Experimental Data.* Econometrica 66(5):1017-1098. Bias-decomposition language. | [ES](https://www.econometricsociety.org/publications/econometrica/1998/09/01/) | ✅ `papers/HeckmanIchimuraSmithTodd1998_selection_bias.pdf` |
-| MR2015 | Malani & Reif (2015). *Interpreting Pre-Trends as Anticipation.* J. Public Economics 124:1-17. Endogeneity vs anticipation in our pre-trend. | [Elsevier](https://www.sciencedirect.com/science/article/abs/pii/S0047272715000122) | ✅ `papers/MalaniReif2015_pretrends_anticipation.pdf` |
-| BDM2004 | Bertrand, Duflo & Mullainathan (2004). *How Much Should We Trust Differences-in-Differences Estimates?* QJE 119(1):249-275. Serial-correlation inflation — our p-values must be hardened. | [OUP](https://academic.oup.com/qje/article-abstract/119/1/249/1876068) | ✅ `papers/BertrandDufloMullainathan2004_trust_did.pdf` |
+4. Expert Committee to Study the Impact of Futures Trading on Agricultural Commodity Prices (2008). *Report of the Expert Committee to Study the Impact of Futures Trading on Agricultural Commodity Prices.* Government of India. Chair: Abhijit Sen.
 
-### 4c. Other estimators considered (robustness / framing)
-| Ref | Citation | Link | Local copy |
-|---|---|---|---|
-| AI2006 | Athey & Imbens (2006). *Identification and Inference in Nonlinear DiD Models* (Changes-in-Changes). Econometrica 74(2):431-497. Distributional/scale-invariant check. | [Wiley](https://onlinelibrary.wiley.com/doi/10.1111/j.1468-0262.2006.00668.x) | ✅ `papers/AtheyImbens2006_changes_in_changes.pdf` |
-| BROD2015 | Brodersen et al. (2015). *Inferring Causal Impact Using Bayesian Structural Time-Series Models* (CausalImpact). Annals of Applied Statistics 9(1):247-274. Seasonal per-commodity cross-check. | [ProjectEuclid](https://projecteuclid.org/journals/annals-of-applied-statistics/volume-9/issue-1/) | ✅ `papers/Brodersen2015_causal_impact_bsts.pdf` |
-| CASINI2024 | Casini & McCloskey (2024). *Identification and Estimation of Causal Effects in High-Frequency Event Studies.* arXiv 2406.15667. Cite to explain why announcement event-study is WRONG here. | [arXiv](https://arxiv.org/abs/2406.15667) | ✅ `papers/Casini2024_high_frequency_event_studies.pdf` |
-| GH1996 | Gregory & Hansen (1996). *Residual-Based Tests for Cointegration in Models with Regime Shifts.* J. Econometrics 70(1):99-126. Break-robust pre-ban basis cointegration. | [Elsevier](https://www.sciencedirect.com/science/article/pii/0304407669416857) | **[MANUAL]** collect |
-| ZA1992 | Zivot & Andrews (1992). *Further Evidence on the Great Crash, the Oil-Price Shock, and the Unit-Root Hypothesis.* JBES 10(3):251-270. Endogenous-break unit-root test. | [T&F](https://www.tandfonline.com/doi/abs/10.1080/07350015.1992.10509904) | **[MANUAL]** collect |
+5. Rajib, P., Barai, P., & Arora, R. (2024). *Impact on Suspension of Commodity Derivatives on Commodity Market Ecosystem.*
 
-## 4d. Methodology — volatility & basis / price discovery (annotated in `ban_literature_review.md` §5)
-| Ref | Citation | Link | Local copy |
-|---|---|---|---|
-| HILL2005 | Hillebrand (2005). *Neglecting parameter changes in GARCH models.* J. Econometrics 129(1-2):121-138. CENTRAL C2 caveat — unmodelled break inflates persistence. | [RePEc](https://ideas.repec.org/a/eee/econom/v129y2005i1-2p121-138.html) | **[MANUAL]** collect |
-| LL1990 | Lamoureux & Lastrapes (1990). *Persistence in Variance, Structural Change, and the GARCH Model.* JBES 8(2):225-234. ICSS-then-GARCH justification. | [JSTOR](https://www.jstor.org/stable/1391985) | **[MANUAL]** collect |
-| IT1994 | Inclán & Tiao (1994). *Use of Cumulative Sums of Squares for Retrospective Detection of Changes of Variance.* JASA 89(427):913-923. ICSS break-dating engine. | [T&F](https://www.tandfonline.com/doi/abs/10.1080/01621459.1994.10476824) | **[MANUAL]** collect |
-| HFM2024 | Hasanov, Frankel & Mostarac (2024). *Structural breaks and GARCH models of exchange rate volatility.* J. Applied Econometrics 39(7):1403-1407. Current best-practice anchor. | [Wiley](https://onlinelibrary.wiley.com/doi/10.1002/jae.3091) | **[MANUAL]** collect |
-| LAMA2021 | Lama, Jha, Paul & Gurung (2021). *Modeling Agricultural Commodity Price Volatility using GARCH Model with Structural Break.* grey-lit (venue UNCONFIRMED). | [ResearchGate](https://www.researchgate.net/publication/351939126) | **[MANUAL]** 403-blocked; do NOT cite until full text confirmed |
-| NELS1991 | Nelson (1991). *Conditional Heteroskedasticity in Asset Returns* (EGARCH). Econometrica 59(2):347-370. | [JSTOR](https://www.jstor.org/stable/2938260) | ✅ `papers/Nelson1991_egarch_conditional_heteroskedasticity.pdf` |
-| GJR1993 | Glosten, Jagannathan & Runkle (1993). *On the Relation between the Expected Value and the Volatility …* (GJR-GARCH). J. of Finance 48(5):1779-1801. | [Wiley](https://onlinelibrary.wiley.com/doi/10.1111/j.1540-6261.1993.tb05128.x) | ✅ `papers/Glosten1993_gjr_garch_expected_volatility.pdf` |
-| HMP2004 | Haas, Mittnik & Paolella (2004). *A New Approach to Markov-Switching GARCH Models.* J. Financial Econometrics 2(4):493-530. Robustness regime alternative to the ban dummy. | [OUP](https://academic.oup.com/jfec/article-abstract/2/4/493/900480) | **[MANUAL]** collect |
-| CORSI2009 | Corsi (2009). *A Simple Approximate Long-Memory Model of Realized Volatility* (HAR-RV). J. Financial Econometrics 7(2):174-196. ADOPT in modified monthly form on the RV panel. | [OUP](https://academic.oup.com/jfec/article-abstract/7/2/174/856522) | ✅ `papers/Corsi2009_har_rv_long_memory.pdf` |
-| BNS2004 | Barndorff-Nielsen & Shephard (2004). *Power and Bipower Variation with Stochastic Volatility and Jumps.* J. Financial Econometrics 2(1):1-37. POOR FIT (intraday); theoretical motivation only. | [OUP](https://academic.oup.com/jfec/article-abstract/2/1/1/960705) | ✅ `papers/BarndorffNielsen2004_power_bipower_variation.pdf` |
-| HASB1995 | Hasbrouck (1995). *One Security, Many Markets …* (Information Share). J. of Finance 50(4):1175-1199. Pre-ban discovery share. | [Wiley](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1540-6261.1995.tb04054.x) | ✅ `papers/Hasbrouck1995_information_share_price_discovery.pdf` |
-| GG1995 | Gonzalo & Granger (1995). *Estimation of Common Long-Memory Components in Cointegrated Systems.* JBES 13(1):27-35. PT twin of Hasbrouck. | [T&F](https://www.tandfonline.com/doi/abs/10.1080/07350015.1995.10524576) | ✅ `papers/Gonzalo1995_common_long_memory_cointegrated.pdf` |
-| BBTZ2002 | Baillie, Booth, Tse & Zabotina (2002). *Price Discovery and Common Factor Models.* J. of Financial Markets 5(3):309-321. Hasbrouck+Gonzalo-Granger paired reporting. | [Elsevier](https://www.sciencedirect.com/science/article/abs/pii/S1386418102000277) | **[MANUAL]** collect |
-| INANI2018 | Inani (2018). *Price Discovery and Efficiency of Indian Agricultural Commodity Futures Market.* J. of Quantitative Economics 16(1):129-154. Indian template covering treated + donors. | [Springer](https://link.springer.com/article/10.1007/s40953-017-0074-7) | **[MANUAL]** collect |
-| GARG2023 | Garg et al. (2023). *Price Discovery … between National Agriculture Market and NCDEX.* JRFM 16(2):62. eNAM/NCDEX discovery + spillover; which-spot question. | [MDPI](https://www.mdpi.com/1911-8074/16/2/62) | ✅ `papers/Garg2023_price_discovery_enam_ncdex.pdf` |
-| DY2012 | Diebold & Yilmaz (2012). *Better to Give than to Receive: … Volatility Spillovers.* Int. J. of Forecasting 28(1):57-66. Connectedness satellite. | [Elsevier](https://www.sciencedirect.com/science/article/abs/pii/S016920701100032X) | ✅ `papers/DieboldYilmaz2012_volatility_spillovers_directional.pdf` |
-| GS1983 | Garbade & Silber (1983). *Price Movements and Price Discovery in Futures and Cash Markets.* REStat 65(2):289-297. Foundational lead-lag; basis as arbitrage spread (FDCD mechanism). | [RePEc](https://ideas.repec.org/a/tpr/restat/v65y1983i2p289-97.html) | **[MANUAL]** collect |
-| WORK1949 | Working (1949). *The Theory of Price of Storage.* AER 39(6):1254-1262. Pre-ban basis theory. | [JSTOR](https://www.jstor.org/stable/1816601) | **[MANUAL]** collect |
-| FF1987 | Fama & French (1987). *Commodity Futures Prices: … Theory of Storage.* J. of Business 60(1):55-73. Basis = carry + convenience yield + seasonal. | [RePEc](https://ideas.repec.org/a/ucp/jnlbus/v60y1987i1p55-73.html) | **[MANUAL]** collect |
-| BS1992 | Bessembinder & Seguin (1992). *Futures-Trading Activity and Stock Price Volatility.* J. of Finance 47(5):2015-2034. Expected/unexpected volume+OI mechanism (CPO in hand). | [Wiley](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1540-6261.1992.tb04695.x) | **[MANUAL]** collect |
-| GUPRAJ2012 | Gupta & Rajib (2012). *Samuelson Hypothesis & Indian Commodity Derivatives Market.* Asia-Pacific Financial Markets 19(4):331-352. Maturity effect — nuisance to control on CPO contracts. | [Springer](https://link.springer.com/article/10.1007/s10690-012-9152-1) | **[MANUAL]** collect |
-| YEAS2024 | Yeasin, Sharma, Paul, Meena & Anwer (2024). *Understanding Price Volatility and Seasonality in Agricultural Commodities in India.* AERR 36(2):177-188. Harvest-cycle seasonality → MUST deseasonalize. | [ICAR epubs](https://epubs.icar.org.in/index.php/AERR/article/view/150660) | open access (fetch full text) |
-| EDER1979 | Ederington (1979). *The Hedging Performance of the New Futures Markets.* J. of Finance 34(1):157-170. Cost-arm: pre-ban hedging effectiveness forfeited. | [RePEc](https://ideas.repec.org/a/bla/jfinan/v34y1979i1p157-70.html) | ✅ `papers/Ederington1979_hedging_performance_futures.pdf` |
+   **Local file:** `Rajib2024_suspension_market_ecosystem.pdf`
 
-## 4e. Global / theory precedents & Indian policy lineage
-| Ref | Citation | Link | Local copy |
-|---|---|---|---|
-| WORK1960 | Working (1960). *Price Effects of Futures Trading.* Food Research Institute Studies 1(1):3-31. US onion ban precedent (futures REDUCE cash variability). | [AgEcon](https://ageconsearch.umn.edu/record/136163) | ✅ `papers/Working1960_price_effects_futures_trading.pdf` |
-| GRAY1963 | Gray (1963). *Onions Revisited.* J. of Farm Economics 45(2):273-276. Cleanest "futures removed by law" analogue. | [Wiley](https://onlinelibrary.wiley.com/doi/abs/10.2307/1235974) | **[MANUAL]** collect |
-| COX1976 | Cox (1976). *Futures Trading and Market Information.* JPE 84(6):1215-1237. Information channel — bridge to C2/FDCD. | [UChicago](https://www.journals.uchicago.edu/doi/abs/10.1086/260509) | **[MANUAL]** collect |
-| IS2011 | Irwin & Sanders (2011). *Index Funds, Financialization, and Commodity Futures Markets.* AEPP 33(1):1-31. Skeptical-prior framing. | [OUP](https://academic.oup.com/aepp/article-abstract/33/1/1/8102) | **[MANUAL]** collect |
-| IS2012 | Irwin & Sanders (2012). *Testing the Masters Hypothesis in Commodity Futures Markets.* Energy Economics 34(1):256-269. Volatility margin (closer to C1). | [Elsevier](https://www.sciencedirect.com/science/article/abs/pii/S0140988311002362) | **[MANUAL]** collect |
-| TX2012 | Tang & Xiong (2012). *Index Investment and the Financialization of Commodities.* FAJ 68(6):54-74 / NBER 16385. Membership-as-treatment; financialization-matters counterweight. | [T&F](https://www.tandfonline.com/doi/abs/10.2469/faj.v68.n6.5) | ✅ `papers/TangXiong2012_index_investment_financialization.pdf` |
-| CX2014 | Cheng & Xiong (2014). *Financialization of Commodity Markets.* Annu. Rev. Financial Economics 6:419-441. Frame for removing-futures → information/basis; why naive DiD is hazardous. | [AR](https://www.annualreviews.org/content/journals/10.1146/annurev-financial-110613-034432) | ✅ `papers/ChengXiong2014_financialization_commodity_markets.pdf` |
-| DANT1978 | Danthine (1978). *Information, Futures Prices, and Stabilizing Speculation.* J. of Economic Theory 17(1):79-98. Pro-stabilization null. | [Elsevier](https://www.sciencedirect.com/science/article/abs/pii/0022053178901242) | **[MANUAL]** collect |
-| TURN1979 | Turnovsky (1979). *Futures Markets, Private Storage, and Price Stabilization* + Newbery (1987). *When Do Futures Destabilize Spot Prices?* IER 28(2):291-297. Theory genuinely inconclusive. | [Elsevier](https://www.sciencedirect.com/science/article/abs/pii/0047272779900355) | ✅ `papers/Newbery1987_when_futures_destabilize_spot.pdf` (Newbery only) |
-| SEN2008 | Expert Committee (Abhijit Sen) (2008). *Report … Impact of Futures Trading on Agricultural Commodity Prices.* MoCAF&PD. Govt's own committee — no causal link, yet bans recurred. | [PIB](https://www.pib.gov.in/newsite/erelcontent.aspx?relid=38244&reg=3&lang=2) · [Scribd](https://www.scribd.com/doc/44212450/Abhijit-Sen-Report) | **[MANUAL]** login-walled mirrors only |
-| DANTW1966 | Dantwala (1966). *Report of the Forward Markets Review Committee.* GoI. The Dantwala dictum epigraph. | [cloudfront mirror](https://dur682txgv28e.cloudfront.net/pointers/f43139c5-b395-43c8-8f86-2e853c27d876/pdf_doc/ef235826-0e52-4165-9dab-978a00464169_DCR10006.pdf) | ✅ `papers/Dantwala1966_forward_markets_review.pdf` |
-| KHUSRO1980 | Khusro (1980). *Report of the Committee on Forward Markets.* GoI. (Kabra 1994 is the later companion in the lineage.) | [archive.org](https://archive.org/details/dli.ministry.20154) | ✅ `papers/Khusro1980_forward_markets_committee.pdf` (verify Khusro vs Kabra volume on read) |
 
-## 5. Data-source documentation (provenance for the data appendix)
-| Ref | What | Link | Local copy |
-|---|---|---|---|
-| NCDEX2020 | NCDEX AGRIDEX Index Methodology (June 2020) — documents polled-spot averaging used in settlement | [PDF](https://ncdex.com/downloads/indices/NCDEX%20Agridex%20Methodology_08062020.pdf) | ✅ `papers/ncdex_2020_agridex_methodology.pdf` |
-| AGMARK | Agmarknet portal + FAQ — APMC mandis key daily min/max/modal prices + arrivals via AGMARK app | [Portal](https://agmarknet.gov.in/) · [FAQ](https://agmarknet.gov.in/OtherPages/FAQ.aspx) | link only |
-| CEDA | CEDA (Ashoka Univ.) cleaned Agmarknet mirror — candidate bulk source (DECISION NEEDED before use) | [CEDA](https://agmarknet.ceda.ashoka.edu.in/) | link only |
-| ENAM | eNAM trade dashboards — transaction-level e-auction prices | [Dashboard](https://enam.gov.in/web/dashboard/trade-data) | link only |
-| NCDEXSPOT | NCDEX historical polled spot prices page (test download depth — possible stream-4 source) | [Spot](https://www.ncdex.com/markets/spotprices) | link only |
-| AGRIWATCH | Agriwatch — private agri-intelligence; historically a spot-polling agency; fallback edible-oil spot archive | [Site](https://www.agriwatch.com/) | link only |
-| SEBIBULL | SEBI monthly bulletins 2019–2021 (participant-wise OI) — data, logged as SEBI-001 | manifest: `02_data/sources/sebi_bulletin_detail_urls.csv` | ✅ `02_data/raw/sebi_bulletins/` (66 files) |
+## Methodological References
 
-## 6. MSP (confounder ledger support)
-| Ref | Citation | Link | Local copy |
-|---|---|---|---|
-| JHA | Jha, N. et al. *Minimum Support Prices in Indian Agriculture* (WP). | [PDF](https://natashajha.github.io/files/MSP_Paper.pdf) | ✅ `papers/jha_msp_indian_agriculture.pdf` (verify full author list/year on read) |
-| JED2023 | *Does a farmer's knowledge of MSP affect the farm-gate price?* J. of Economics and Development (2023). Knowledge alone ≠ better prices absent procurement. | [Emerald](https://www.emerald.com/insight/content/doi/10.1108/jed-04-2023-0079/full/html) | open access at link |
-| NIAP | ICAR-NIAP procurement coverage stats (~9.6% of wheat farmers sell under MSP) — locate primary report, not the secondary cite. | [secondary](https://www.pmfias.com/msp/) | **[MANUAL]** find NIAP primary |
+6. Abadie, A., Diamond, A., & Hainmueller, J. (2010). *Synthetic Control Methods for Comparative Case Studies: Estimating the Effect of California's Tobacco Control Program.* Journal of the American Statistical Association, 105(490), 493–505.
 
-## 7. Press & commentary (context only — never evidence)
-- [Business Standard (Nov 2024): futures ban failed to cool retail prices](https://www.business-standard.com/markets/news/agri-futures-trading-suspension-had-little-impact-in-cooling-retail-prices-124111201493_1.html)
-- [Business Standard editorial: Rethinking suspension](https://www.business-standard.com/opinion/editorial/rethinking-suspension-futures-trading-is-not-a-source-of-inflation-124111801257_1.html)
-- [Down To Earth: suspension increased inflation instead of curbing it](https://www.downtoearth.org.in/agriculture/suspension-of-futures-trading-in-agricultural-products-increased-inflation-instead-of-curbing-it-study)
-- [IndiaCorpLaw (2023): Revisiting the ban](https://indiacorplaw.in/2023/11/21/revisiting-the-ban-on-futures-trading-of-agri-commodities-in-india/)
-- [Whalesbook: SEBI extends ban to 2027](https://www.whalesbook.com/news/English/commodities/Indias-SEBI-Extends-Agri-Derivatives-Trading-Ban-to-2027/69c6c5fb63d6db8f4b58b530) — **verify the 2027 extension against the actual SEBI circular for the policy timeline**
+   **Local file:** `AbadieDiamondHainmueller2010_synthetic_control_tobacco.pdf`
+
+7. Arkhangelsky, D., Athey, S., Hirshberg, D. A., Imbens, G. W., & Wager, S. (2021). *Synthetic Difference-in-Differences.* American Economic Review, 111(12), 4088–4118.
+
+   **Local file:** `Arkhangelsky2021_synthetic_diff_in_diff.pdf`
+
+8. Bertrand, M., Duflo, E., & Mullainathan, S. (2004). *How Much Should We Trust Differences-in-Differences Estimates?* Quarterly Journal of Economics, 119(1), 249–275.
+
+   **Local file:** `BertrandDufloMullainathan2004_trust_did.pdf`
+
+9. Ferman, B., & Pinto, C. (2017). *Revisiting the Synthetic Control Estimator.* Working paper.
+
+   **Local file:** `FermanPinto2017_synthetic_control_inference.pdf`
+
+10. MacKinnon, J. G., & Webb, M. D. (2018). *The Wild Bootstrap for Few (Treated) Clusters.* The Econometrics Journal, 21(2), 114–135.
+
+    **Local file:** `MacKinnonWebb2018_wild_bootstrap_few_clusters.pdf`
+
+11. Roth, J. (2022). *Pretest with Caution: Event-Study Estimates after Testing for Parallel Trends.* American Economic Review: Insights, 4(3), 305–322.
+
+    **Local file:** `Roth2022_pretest_with_caution.pdf`
+
+
+## Price Discovery Extension
+
+12. Aggarwal, N., Jain, S., & Thomas, S. (2014). *Do Futures Markets Help in Price Discovery and Risk Management for Commodities in India?* IGIDR Working Paper WP-2014-020.
+
+    **Local file:** `Aggarwal2014_futures-price-discovery-india.pdf`
+
+13. Garg, M., Singhal, S., Sood, K., Rupeika-Apoga, R., & Grima, S. (2023). *Price Discovery Mechanism and Volatility Spillover between National Agriculture Market and National Commodity and Derivatives Exchange: The Study of the Indian Agricultural Commodity Market.* Journal of Risk and Financial Management, 16(2), 62. https://doi.org/10.3390/jrfm16020062
+
+    **Local file:** `Garg2023_price_discovery_enam_ncdex.pdf`
+
+14. Hasbrouck, J. (1995). *One Security, Many Markets: Determining the Contributions to Price Discovery.* Journal of Finance, 50(4), 1175–1199.
+
+    **Local file:** `Hasbrouck1995_information_share_price_discovery.pdf`
+
+15. Gonzalo, J., & Granger, C. W. J. (1995). *Estimation of Common Long-Memory Components in Cointegrated Systems.* Journal of Business & Economic Statistics, 13(1), 27–35.
+
+    **Local file:** `Gonzalo1995_common_long_memory_cointegrated.pdf`
