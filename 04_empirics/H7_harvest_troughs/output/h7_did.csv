@@ -1,3 +1,0 @@
-metric,did_2x2_estimate,did_ols_beta_post_x_banned,did_ols_pvalue,n_obs,n_banned_commodities,n_control_commodities,note
-trend-detrended annual trough depth (primary),-0.0211,-0.0211,0.1975,119,4,13,depth = 1 - (annual-min price / centered-12mo-MA trend). +ve DiD = troughs deepened more for banned.
-seasonal-index amplitude (robustness),-0.0321,,,18,4,13,"amp = 1 - min(seasonal factor), pre vs post. harvest-aligned. +ve DiD = troughs deepened more for banned."
