@@ -8,7 +8,7 @@ OUTPUT: 02_data/clean/vol_panel_monthly.csv
             cols: commodity, state, district, date (month-end), rv30, post
         02_data/clean/spot_daily_<slug>_distmed.csv   cols: date, price
             cross-district median of district-day medians — robust national series
-            (feeds run_v0_garch.py via the _distmed suffix)
+
 
 Guar: id 75 ("guar") is gum-contaminated; id 413 ("guarseed413") is the futures
 underlying (probe 2026-06-12, corr 0.99 vs futures). BOTH are built when present —
@@ -66,7 +66,7 @@ def main():
             continue
         panel = panel.sort_values(["district", "date"])
 
-        # robust national daily series: cross-district median (for GARCH)
+        # robust national daily series: cross-district median
         distmed = panel.groupby("date")["price"].median().rename("price")
         distmed.to_csv(OUT / f"spot_daily_{slug}_distmed.csv")
 

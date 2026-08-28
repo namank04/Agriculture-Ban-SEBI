@@ -1,10 +1,9 @@
 """C1 step (H1): synthetic control for the spot-volatility effect of the suspension.
-Pre-registered in 04_empirics/H1_volatility/preregistration_c1.md.
+Final specification documented in 04_empirics/H1_volatility/analysis_protocol_h1.md.
 
-v1 = Abadie synthetic control per treated commodity on the DISTRICT-MEDIAN ln(rv30)
-path (trading-day-corrected panel), with per-commodity (staggered) treatment dates and
-in-space placebo inference. v2 (district-level penalized SCM + Synthetic-DiD) follows
-once the food donors land.
+Abadie synthetic control per treated commodity on the DISTRICT-MEDIAN ln(rv30)
+path (trading-day-corrected panel), using per-commodity staggered treatment dates
+and in-space placebo inference.
 
 INPUT : 02_data/clean/vol_panel_monthly.csv  (commodity x district x month, rv30, trading-day-clean)
 OUTPUT: 04_empirics/H1_volatility/output/{c1_scm_results.csv, c1_scm_<commodity>.png}
@@ -22,25 +21,21 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
+from utils import (
+    FINAL_H1_DONORS,
+    FINAL_H1_TREAT_DATES,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
 PANEL_NAME = sys.argv[1] if len(sys.argv) > 1 else "vol_panel_monthly.csv"
 PANEL = ROOT / "02_data" / "clean" / PANEL_NAME
 SUFFIX = "_national" if "national" in PANEL_NAME else ""
 OUTDIR = ROOT / "04_empirics" / "H1_volatility" / "output"
 
-# Donor pool = Option B (decision_log 2026-06-21). guar id 75 EXCLUDED.
-DONORS = ["castor", "guarseed413", "cotton", "jeera", "turmeric"]   # clean core
-# Food donors (added once acquired+screened); auto-included when present in the panel.
-FOOD_DONORS = ["barley", "maize", "jowar", "bajra", "ragi", "groundnut", "sesamum", "sunflower"]
-# Treated banned commodities with per-commodity suspension dates (staggered).
-TREAT_DATE = {
-    "chana":   pd.Timestamp("2021-08-16"),
-    "mustard": pd.Timestamp("2021-10-08"),
-    "wheat":   pd.Timestamp("2021-12-20"),
-    # paddy DROPPED — MSP price-censored (40.3% flat returns; FCI procurement pins spot); decision_log 2026-06-21
-    "soybean": pd.Timestamp("2021-12-20"),
-    "moong":   pd.Timestamp("2021-12-20"),
-}
+# Frozen final H1 specification.
+DONORS = list(FINAL_H1_DONORS)
+TREAT_DATE = dict(FINAL_H1_TREAT_DATES)
+
 MSP_FLAG = {"wheat"}  # paddy dropped; wheat kept (core trio) but MSP-flagged as a robustness caveat
 
 
@@ -55,13 +50,30 @@ def commodity_series(panel: pd.DataFrame) -> pd.DataFrame:
 def scm_weights(y_pre: np.ndarray, X_pre: np.ndarray) -> np.ndarray:
     """Simplex-constrained least squares: min ||y_pre - X_pre w||^2, w>=0, sum w=1."""
     J = X_pre.shape[1]
-    res = minimize(lambda w: float(np.mean((y_pre - X_pre @ w) ** 2)),
-                   x0=np.full(J, 1.0 / J), method="SLSQP",
-                   bounds=[(0.0, 1.0)] * J,
-                   constraints=({"type": "eq", "fun": lambda w: w.sum() - 1.0},),
-                   options={"maxiter": 500, "ftol": 1e-10})
-    return res.x
 
+    res = minimize(
+        lambda w: float(np.mean((y_pre - X_pre @ w) ** 2)),
+        x0=np.full(J, 1.0 / J),
+        method="SLSQP",
+        bounds=[(0.0, 1.0)] * J,
+        constraints=(
+            {
+                "type": "eq",
+                "fun": lambda w: w.sum() - 1.0,
+            },
+        ),
+        options={
+            "maxiter": 500,
+            "ftol": 1e-10,
+        },
+    )
+
+    if not res.success:
+        raise RuntimeError(
+            f"SCM optimization failed: {res.message}"
+        )
+
+    return res.x
 
 def fit_unit(y: pd.Series, donors: pd.DataFrame, t0: pd.Timestamp):
     """Fit SCM for one treated series y against donor columns, treatment date t0.
@@ -91,10 +103,10 @@ def main():
     OUTDIR.mkdir(parents=True, exist_ok=True)
     panel = pd.read_csv(PANEL, parse_dates=["date"])
     wide = commodity_series(panel)
-    donor_list = [d for d in DONORS + FOOD_DONORS if d in wide.columns]
-    missing = [d for d in DONORS if d not in wide.columns]
+    donor_list = list(DONORS)
+    missing = [d for d in donor_list if d not in wide.columns]
     if missing:
-        raise SystemExit(f"core donors missing from panel: {missing}")
+        raise SystemExit(f"final H1 donors missing from panel: {missing}")
     print(f"panel={PANEL_NAME}  donor pool ({len(donor_list)}): {donor_list}")
 
     rows = []

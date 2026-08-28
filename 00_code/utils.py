@@ -4,6 +4,31 @@ import pandas as pd
 
 BAN_DATE = pd.Timestamp("2021-12-20")
 BANNED = ["wheat", "chana", "cpo", "mustard", "soybean", "paddy", "moong"]
+
+# Frozen final H1 commodity specification.
+# Do not auto-expand these sets when new commodities are added to the raw panel.
+FINAL_H1_TREATED = ["chana", "mustard", "wheat", "soybean", "moong"]
+FINAL_H1_DONORS = [
+    "castor", "guarseed413", "cotton", "jeera", "turmeric",
+    "barley", "maize", "jowar", "bajra",
+]
+FINAL_H1_COMMODITIES = FINAL_H1_TREATED + FINAL_H1_DONORS
+
+# Actual commodity-specific suspension dates used by commodity-level analyses.
+FINAL_H1_TREAT_DATES = {
+    "chana": pd.Timestamp("2021-08-16"),
+    "mustard": pd.Timestamp("2021-10-08"),
+    "wheat": pd.Timestamp("2021-12-20"),
+    "soybean": pd.Timestamp("2021-12-20"),
+    "moong": pd.Timestamp("2021-12-20"),
+}
+
+# Primary aggregate DiD uses a common-exposure design:
+#   <= Jul 2021 : all five treated commodities are untreated
+#   Aug-Dec 2021: staggered transition period, excluded
+#   >= Jan 2022 : all five treated commodities are suspended
+H1_TRANSITION_START = pd.Timestamp("2021-08-01")
+H1_COMMON_POST_START = pd.Timestamp("2022-01-01")
 CORE = ["wheat", "chana", "cpo"]
 CONTROL_CANDIDATES = ["guar", "castor", "turmeric", "jeera", "cotton"]
 # Excluded from the PRIMARY C1 analysis (decision_log 2026-06-21):

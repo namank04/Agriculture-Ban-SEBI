@@ -55,8 +55,7 @@ In particular, the earlier analysis had already revealed:
 
 The protocol was therefore not specified before any data analysis.
 
-It was used to discipline the later H1 stage, particularly the Synthetic Control,
-Synthetic Difference-in-Differences, donor-pool and robustness analyses.
+It was used to discipline the later H1 stage, particularly the Synthetic Control, donor-pool and robustness analyses.
 
 ---
 
@@ -161,6 +160,10 @@ The final comparison group used in the main H1 analysis is:
 
 Bajra has partial coverage in the final district panel.
 
+The final nine-commodity comparison set is frozen for all reported H1 DiD and SCM results.
+The code does not auto-expand the donor pool if additional commodities later appear in the
+underlying panel.
+
 The expansion of the comparison group materially changes the estimated aggregate effect and
 is therefore treated as an important counterfactual-sensitivity result rather than as a
 minor data update.
@@ -194,10 +197,9 @@ date:
 
 This provides one common treatment indicator for the pooled treated group.
 
-### Commodity-level synthetic estimators
+### Commodity-level Synthetic Control
 
-Commodity-level Synthetic Control and commodity-level Synthetic
-Difference-in-Differences use the relevant suspension dates:
+Commodity-level Synthetic Control uses the relevant suspension dates:
 
 | Commodity | Treatment date |
 |---|---|
@@ -221,7 +223,6 @@ The main planned components were:
 
 - district-panel Difference-in-Differences;
 - commodity-level Synthetic Control;
-- Synthetic Difference-in-Differences;
 - placebo tests;
 - pre-treatment diagnostics;
 - commodity-clustered inference;
@@ -279,6 +280,9 @@ treatment assignments.
 
 Inference therefore clusters at the commodity level.
 
+Because the final specification has 14 commodity clusters, the clustered t statistic is also
+evaluated against a **t(G−1)** reference distribution as a small-cluster sensitivity check.
+
 ---
 
 ## 12. Final implemented Synthetic Control analysis
@@ -332,24 +336,7 @@ rather than as standalone conventional significance tests.
 
 ---
 
-## 14. Final implemented Synthetic Difference-in-Differences analysis
-
-Synthetic Difference-in-Differences is implemented as an additional counterfactual method.
-
-Two forms are reported:
-
-1. a pooled treated-group specification using the common 20 December 2021 intervention date;
-2. separate commodity-level specifications using the relevant commodity-specific suspension
-   dates.
-
-Placebo-based uncertainty estimates are used in the reported results.
-
-Synthetic Difference-in-Differences is particularly useful as a comparison with both the
-standard DiD estimate and the commodity-level Synthetic Control results.
-
----
-
-## 15. District-level Synthetic Control
+## 14. District-level Synthetic Control
 
 Synthetic Control was also estimated at the district level.
 
@@ -367,7 +354,7 @@ basis for statistical inference.
 
 ---
 
-## 16. Robustness analysis
+## 15. Robustness analysis
 
 The final H1 analysis evaluates the aggregate DiD estimate under several alternative data
 restrictions.
@@ -386,7 +373,7 @@ districts, extreme volatility observations or a single treated commodity.
 
 ---
 
-## 17. Placebo and pre-treatment validation
+## 16. Placebo and pre-treatment validation
 
 The final specification is evaluated using placebo and pre-treatment exercises.
 
@@ -406,57 +393,49 @@ were already moving differently before the intervention.
 The final specification does not produce statistically significant evidence of differential
 pre-treatment behaviour under the reported joint test.
 
-### Wild-cluster bootstrap
-
-Because treatment is assigned across a relatively small number of commodity clusters,
-wild-cluster bootstrap inference is used as an additional check on the conventional
-clustered inference.
-
-This is particularly important because the large number of district-level observations
-should not be mistaken for a large number of independent treatment units.
-
----
-
-## 18. Changes from the earlier analysis plan
+## 17. Changes from the earlier analysis plan
 
 The final implementation differs from the earlier analysis plan in several important ways.
 
-### 18.1 Comparison group expanded
+### 17.1 Comparison group expanded
 
-The initial industrial/spice-heavy comparison set was expanded to include economically closer
-food-cereal commodities.
+The initial five-commodity industrial/spice-heavy comparison set was expanded with four
+economically closer food-cereal commodities. This progression is retained as a donor-pool
+sensitivity exercise: the estimated aggregate effect moved from approximately −20.7% to
+−9.8%, demonstrating that counterfactual composition materially affects the estimated
+magnitude. The fixed nine-commodity pool is used for the preferred specification.
 
 This change materially reduced the magnitude of the aggregate estimate.
 
-### 18.2 Paddy excluded
+### 17.2 Paddy excluded
 
 Paddy was removed from the primary volatility analysis because of substantial price
 censoring and flat returns.
 
-### 18.3 Guar ID 75 excluded
+### 17.3 Guar ID 75 excluded
 
 The contaminated guar series was replaced by the validated guarseed413 series.
 
-### 18.4 Calendar construction corrected
+### 17.4 Calendar construction corrected
 
 The volatility panel was rebuilt using Monday-to-Friday observations after the earlier
 calendar construction produced problematic falsification results.
 
-### 18.5 Several proposed estimators were not implemented
+### 17.5 Several proposed estimators were not implemented
 
 Augmented SCM, penalized SCM, Honest-DiD, conformal/SCPI inference and other proposed
 staggered-DiD extensions were not part of the final empirical execution.
 
 They are therefore not presented as completed methods.
 
-### 18.6 District SCM retained only as supporting analysis
+### 17.6 District SCM retained only as supporting analysis
 
 District-level Synthetic Control was implemented, but it is interpreted as a heterogeneity
 analysis rather than as a solution to the small-cluster inference problem.
 
 ---
 
-## 19. Interpretation rule
+## 18. Interpretation rule
 
 No H1 conclusion is based on a single estimator.
 
@@ -464,9 +443,7 @@ The final interpretation considers together:
 
 - aggregate Difference-in-Differences;
 - commodity-level Synthetic Control;
-- pooled and commodity-level Synthetic Difference-in-Differences;
 - placebo and pre-treatment diagnostics;
-- wild-cluster inference;
 - donor-pool sensitivity;
 - leave-one-commodity-out robustness;
 - data-construction validation.
@@ -479,19 +456,16 @@ The preferred aggregate estimate and the complete empirical interpretation are g
 
 ---
 
-## 20. Main implementation files
+## 19. Main implementation files
 
 The principal scripts supporting H1 are:
 
 - `00_code/build_volatility_panel.py`
 - `00_code/run_v0_did.py`
 - `00_code/run_v0_placebo.py`
-- `00_code/run_v0_bootstrap.py`
 - `00_code/run_c1_robustness.py`
 - `00_code/run_c1_scm.py`
 - `00_code/run_c1_scm_district.py`
-- `00_code/run_c1_sdid.py`
-- `00_code/run_c2_garch_icss.py`
 
 The main H1 output files are stored in:
 
@@ -500,3 +474,62 @@ The main H1 output files are stored in:
 The final interpretation of these outputs is documented in:
 
 `04_empirics/H1_volatility/c1_findings.md`
+
+## Reproducibility audit update — 28 August 2026
+
+This section records the final independent audit of the H1 panel, sample construction
+and baseline inference used for the final report.
+
+### Panel provenance
+
+The current raw Agmarknet district directory contains **569 JSON files**
+covering 16 commodity slugs. The files contain **7,242,927 raw market-day
+records** in total; 301 state-commodity files are valid but contain no data.
+
+The constructed monthly volatility panel contains **172,381 observations**
+from February 2017 through October 2025, with no duplicate
+commodity-state-district-month keys.
+
+The final H1 treatment/control set contains:
+
+- treated: chana, mustard, wheat, soybean and moong;
+- controls: castor, guarseed413, cotton, jeera, turmeric, barley, maize,
+  jowar and bajra.
+
+This produces **147,616 candidate observations** across 14 commodities.
+
+### Zero-volatility observations
+
+There are **1,109 zero-`rv30` observations** in the final 14-commodity
+candidate sample, approximately **0.75%** of candidate observations. Because
+the regression outcome is `ln(rv30)`, zero values are undefined on the log
+scale and are excluded. The final baseline estimation sample is therefore:
+
+- **146,507 observations**;
+- **2,244 commodity-district units**;
+- **14 commodity clusters**;
+- **5 treated clusters and 9 control clusters**.
+
+### Treatment-month audit
+
+The common treatment date is 20 December 2021, while the estimation outcome is
+monthly. Three treatments of the mixed December-2021 cell were checked:
+
+- December counted as post: **−9.7947%**;
+- December retained as pre, January 2022 onward post: **−9.8291%**;
+- December removed, January 2022 onward post: **−9.9206%**.
+
+The treatment-month convention therefore has negligible effect on the
+aggregate estimate.
+
+### Estimation-window sensitivity
+
+Using January 2022 as the post-period start and dropping December 2021:
+
+- ±12 months: **−20.4525%**, t(G−1)-reference p = **0.0074**;
+- ±24 months: **−10.4751%**, p = **0.1589**;
+- ±36 months: **−4.8437%**, p = **0.5304**.
+
+The full-panel estimate remains approximately **−9.8%**. These results show
+meaningful horizon sensitivity. The ±12-month result is an exploratory
+sensitivity result, not a replacement headline specification.

@@ -15,9 +15,12 @@ suspension: the intervention again removed futures trading from selected agricul
 commodities with the objective of controlling price pressures, but the effect on the
 underlying spot markets remained an empirical question.
 
-The December 2021 suspension therefore provides a useful setting for evaluating whether
-removing futures trading was followed by improved spot-price stability and whether the
-functioning of the remaining spot markets changed.
+The 2021 suspension episode, implemented in stages from August to December, therefore
+provides a useful setting for evaluating whether removing futures trading was followed by
+changes in spot-price stability and in the functioning of the remaining spot markets. Because
+SEBI did not publish a commodity-specific causal rationale for the intervention, the policy is
+treated as an intervention to be evaluated rather than as evidence that futures trading itself
+was responsible for the preceding price pressures.
 
 ---
 
@@ -59,17 +62,17 @@ counterfactual designs.
 
 ### 2.3 Dey and Gairola (2024)
 
-Dey and Gairola examine agricultural-futures suspensions using commodities including chana,
-soybean and refined soy oil. They report higher post-suspension spot-price volatility for
-some commodities, particularly chickpeas and refined soy oil.
+Dey and Gairola examine chana, soybean and refined soy oil using futures and spot-price data
+from the period around the suspension. Their evidence illustrates why the sign of a simple
+pre/post volatility comparison is not uniform across commodities. In their five-month
+annualized-volatility comparison, volatility falls after suspension for chana and soybean but
+rises for refined soy oil. Other variability measures in the paper also differ across
+commodities.
 
-These results are useful as a contrasting empirical benchmark because their volatility
-comparison is primarily based on pre- and post-suspension behaviour. Our analysis asks
-whether such apparent changes remain once banned commodities are compared against
-commodities exposed to the same macroeconomic period but not to the suspension.
-
-The difference in research design is therefore important when comparing conclusions across
-the two studies.
+The study is useful for the present project because it combines evidence on speculation,
+liquidity, price discovery, hedging and volatility, but does not construct the same
+treated-versus-control volatility counterfactual used in H1. We therefore treat it as an
+important empirical benchmark rather than as directly comparable causal evidence.
 
 ### 2.4 Rajib, Barai and Arora (2024)
 
@@ -112,79 +115,104 @@ than interpreting the banned commodities' own pre/post change as the treatment e
 
 ### 3.2 The counterfactual itself must be tested
 
-The project initially showed why merely adding a control group is not sufficient. An
-earlier specification using a narrow industrial/spice-heavy donor set produced an estimated
-volatility decline of approximately **20.7%**. After expanding the comparison set with
-food-cereal commodities that provide a more economically relevant counterfactual, the
-aggregate estimate fell to approximately **9.8% lower volatility** and lost conventional
-statistical significance.
+Merely adding a comparison group is not sufficient; the composition of that comparison group
+matters.
 
-The movement in the estimate is itself an important result: conclusions depend materially
-on the quality of the comparison group.
+An earlier five-donor specification based mainly on industrial and spice commodities produced
+an estimated aggregate volatility decline of approximately **20.7%**. Expanding the donor pool
+to the final nine commodities, including food cereals that provide a more economically relevant
+comparison for the treated staples, reduced the aggregate Difference-in-Differences estimate to
+approximately **10.0% lower volatility**.
 
-The final H1 analysis therefore uses several complementary approaches:
+The movement from roughly **−20.7% to −10.0%** is retained as an important robustness result.
+It shows that the estimated magnitude is materially sensitive to the economic composition of
+the counterfactual.
 
-- Difference-in-Differences on the district-level spot-price panel;
-- commodity-level Synthetic Control;
-- Synthetic Difference-in-Differences;
-- leave-one-out and data-quality robustness checks;
-- placebo-date falsification and pre-trend testing; and
-- few-cluster inference, including a wild-cluster bootstrap.
+The final H1 evidence therefore combines:
 
-These methods are used as alternative views of the same underlying comparison rather than
-as independent confirmations of the result.
+- commodity-level Synthetic Control using the frozen nine-donor pool;
+- a common-exposure Difference-in-Differences benchmark;
+- in-space Synthetic-Control placebos;
+- leave-one-donor-out and leave-one-treated-out sensitivity;
+- treatment-month and post-horizon sensitivity;
+- district-level heterogeneity; and
+- placebo-date and pre-treatment diagnostics.
+
+These are complementary diagnostics of the same research question, not independent
+confirmations of one causal coefficient.
 
 ### 3.3 Identification checks are part of the result
 
-The project's falsification tests materially affected the analysis. An earlier version of
-the panel generated a significant effect at a false 2019 treatment date and showed
-problematic pre-treatment behaviour. Investigation of those failures revealed a
-calendar-grid measurement problem: non-trading-day price observations were being mixed with
-a volatility construction based on trading days.
+The final diagnostic results place an important limit on causal interpretation of the pooled
+Difference-in-Differences estimate.
 
-After rebuilding the panel on trading-day-consistent data and revising the donor set, the
-placebo and pre-trend results became substantially cleaner.
+Using genuine pre-treatment months before the earliest suspension, the joint lead test rejects
+the parallel-pre-trends restriction:
 
-This experience reinforces the methodological concerns emphasized in the DiD literature:
-serial dependence, few treatment clusters, pre-treatment behaviour and counterfactual choice
-can materially change the apparent precision and interpretation of a policy estimate.
+\[
+F(3,13), \qquad p = 0.0029.
+\]
+
+The fake-2019 placebo also produces an economically substantial estimated decline of about
+**9.6%**, although it is statistically insignificant. Its magnitude is close enough to the actual
+approximately **10.0%** DiD estimate to make a causal interpretation especially unsafe.
+
+The final role of DiD is therefore as a transparent treated-versus-control benchmark, not the
+primary causal estimator. Synthetic Control is given greater weight because it constructs a
+commodity-specific counterfactual from the pre-treatment path, while its own limitations are
+assessed through pre-fit quality, donor weights, placebo ranks and sensitivity checks.
+
+This is also why a statistically insignificant coefficient alone is not the conclusion of H1:
+the identification diagnostics, counterfactual sensitivity and commodity heterogeneity are part
+of the substantive result.
 
 ### 3.4 Methodological references
 
-The main methods used in this project are supported by a small set of standard methodological
-papers. Abadie, Diamond and Hainmueller (2010) provide the foundation for **Synthetic Control**,
-while Arkhangelsky et al. (2021) develop **Synthetic Difference-in-Differences**. Bertrand,
-Duflo and Mullainathan (2004) motivate careful inference in Difference-in-Differences with
-correlated panel data, and MacKinnon and Webb (2018) motivate the **wild-cluster bootstrap**
-when the number of treatment clusters is small. Roth (2022) provides guidance on interpreting
-pre-trend tests cautiously, while Ferman and Pinto (2017) discuss important limitations of
-Synthetic Control inference. These references are retained because they directly support
-methods or validation checks used in the final analysis.
+The methodological literature is kept deliberately small and tied to methods actually used in
+the final project.
 
----
+Abadie, Diamond and Hainmueller (2010) provide the foundation for Synthetic Control. Ferman
+and Pinto (2017) examine placebo-based inference for Synthetic Control and motivate caution
+when interpreting finite donor-placebo distributions. Bertrand, Duflo and Mullainathan (2004)
+motivate careful treatment of dependence in Difference-in-Differences, while Roth (2022)
+explains why conventional pre-trend testing should not be treated as automatic validation of
+parallel trends.
+
+For H3, Lo and MacKinlay (1988) provide the variance-ratio framework used to assess departures
+from a random-walk benchmark. Engle and Granger (1987) provide the cointegration and
+error-correction framework underlying the pairwise mandi analysis. Ravallion (1986) is a
+foundational agricultural-market application showing why spatial market integration should be
+studied dynamically rather than through simple static price correlations.
 
 ## 4. Position of this project in the literature
 
 ### 4.1 Spot-price volatility
 
-The main empirical contribution is a district-level evaluation of spot-price volatility
-using roughly 5.7 million raw mandi price observations.
+The main empirical contribution is a district-level evaluation of spot-price volatility built
+from more than **7.2 million raw mandi market-day observations**.
 
-The final food-donor specification does **not** support the inherited hypothesis that spot
-volatility rose by roughly 8–10% after the suspension. The aggregate Difference-in-
-Differences estimate instead implies approximately **9.8% lower volatility**, but this
-aggregate effect is **not statistically significant under the preferred few-cluster
-inference**.
+The final common-exposure Difference-in-Differences benchmark implies approximately **10.0%
+lower volatility** for the treated basket relative to controls:
 
-The negative evidence is heterogeneous across commodities and is strongest for **chana**.
-Wheat is treated cautiously because its post-suspension period coincides with substantial
-additional policy intervention.
+\[
+e^{-0.10586}-1 pprox -10.04\%.
+\]
 
-Accordingly, the project does not interpret the results as evidence that the suspension
-generally and significantly reduced agricultural spot volatility. The defensible conclusion
-is narrower: the hypothesized aggregate volatility increase is not supported, the estimated
-aggregate decline is modest and statistically uncertain, and the strongest commodity-level
-negative signal is concentrated in chana.
+The estimate is statistically insignificant under commodity-clustered inference
+(\(p=0.1235\); \(t(G-1)\) reference \(p=0.1475\)). More importantly, the corrected joint
+pre-trend test strongly rejects parallel pre-trends (\(p=0.0029\)). The pooled DiD estimate is
+therefore **not interpreted causally**.
+
+Commodity-level Synthetic Control generally produces negative post-suspension gaps, but the
+strength of that evidence varies materially with pre-treatment fit and placebo inference.
+Chana provides the strongest suggestive negative result. Soybean has a relatively stable
+negative gap but weak placebo inference. Mustard is weaker, wheat is heavily confounded by
+other policy interventions and poor pre-fit, and moong is comparatively fragile.
+
+The defensible H1 conclusion is therefore narrower than either “the suspension raised
+volatility” or “the suspension reduced volatility.” The data provide **no support for the
+hypothesis that the suspension increased spot volatility**. Negative estimates are common, but
+the evidence is heterogeneous and does not establish a general causal volatility reduction.
 
 ### 4.2 Spot-market efficiency and spatial integration
 
@@ -208,66 +236,53 @@ efficiency and spatial integration**, not a definitive causal result.
 This distinction is also important conceptually: H3 does **not** directly estimate
 futures-versus-spot price discovery.
 
-### 4.3 Conditional-volatility evidence
+### 4.3 Futures-market mechanisms and price discovery — H2 future extension
 
-ICSS and GARCH analysis is retained as a supplementary time-series diagnostic rather than a
-separate headline result. Among the tested series, the analysis does not find evidence of a
-volatility-regime break near the suspension date.
+H2 is deliberately separated from the completed H1 and H3 analyses.
 
-This fails to reproduce the earlier claim of elevated conditional volatility associated
-with the suspension and supports keeping the main volatility conclusion anchored in H1.
+The relevant question is whether futures markets contributed to information incorporation,
+reference pricing and risk management before they were suspended. Indian evidence already
+suggests an informational role for commodity futures. Aggarwal, Jain and Thomas find that
+Indian commodity futures contribute meaningfully to price discovery, although hedging
+effectiveness is more uneven. Garg et al. provide a more recent Indian application studying
+information transmission between agricultural spot and derivatives markets.
 
-### 4.4 Market-participant composition
+A direct extension of this project would require reliable matched historical futures and spot
+series. Cointegration and a Vector Error-Correction Model would first establish the common
+long-run price relationship. Price-discovery contributions could then be summarized using
+standard approaches such as Hasbrouck's Information Share and the Gonzalo-Granger
+permanent-component framework.
 
-SEBI participant data provide descriptive context on the market that was suspended. In the
-available pre-suspension bulletin sample, the explicitly registered hedger category forms a
-small share of reported NCDEX agricultural turnover.
+Participant-category information from SEBI bulletins may also provide institutional context on
+who used the pre-suspension derivatives market. However, participant composition is **not
+treated as a completed empirical result in the present project**. The available category labels
+do not cleanly identify all economic hedging activity, and incomplete bulletin coverage prevents
+a strong composition claim.
 
-This result is interpreted cautiously. The SEBI category is a narrow classification and
-client activity may also contain hedging activity, while the currently parsed bulletins
-cover only part of the desired pre-ban period. The composition analysis is therefore
-supporting institutional context rather than evidence that hedging activity was absent.
-
----
-
-## 5. Price discovery as a future extension
-
-The present project should not equate weaker cross-mandi spot integration with direct
-evidence of a loss of futures-market price discovery.
-
-True price discovery asks how information is incorporated between **futures and spot
-markets** and which market contributes more to the common efficient price. The Indian
-literature of Aggarwal, Jain and Thomas and Garg et al. provides relevant applications,
-while Hasbrouck's Information Share and the Gonzalo-Granger permanent-component approach
-provide standard frameworks for measuring the contribution of competing markets to price
-discovery.
-
-A future extension would require sufficiently reliable historical futures and matched spot
-series and would study the pre-suspension futures-spot relationship using cointegration,
-VECM-based dynamics, Information Share and Component Share measures. Comparable
-still-trading commodities could then provide additional evidence on how the information
-environment evolved through the suspension period.
-
-Until that analysis is executed, the current project makes no direct empirical claim about
-the magnitude of futures-versus-spot price-discovery loss.
-
----
+Accordingly, the project makes no completed H2 claim about the magnitude of price-discovery
+loss, hedging loss, or participant composition. These remain data-dependent extensions rather
+than results used to support H1 or H3.
 
 ## 6. Summary
 
-The Indian literature provides mixed evidence on whether agricultural-futures suspensions
-stabilize underlying spot markets. The most important lesson for this project is that
-uncontrolled pre/post comparisons are insufficient: treatment timing, common commodity
-shocks, commodity-specific interventions and the choice of comparison markets can strongly
-affect the apparent result.
+The literature does not provide a simple theoretical or empirical presumption that suspending
+agricultural futures should stabilize spot markets. The Indian evidence is mixed, and the most
+relevant recent studies show why uncontrolled pre/post comparisons can be misleading.
 
-The completed analysis therefore focuses on explicit counterfactual construction,
-falsification and robustness. Its main finding is that the 2021 suspension is not associated
-with the previously hypothesized increase in spot-price volatility; the final aggregate
-estimate is a modest and statistically insignificant decline, with stronger negative
-evidence concentrated in chana. Supporting analysis provides suggestive, but underpowered,
-evidence of weaker post-suspension spot-market integration and efficiency.
+The final H1 analysis therefore places counterfactual construction and identification
+diagnostics at the centre of the design. The pooled DiD benchmark is approximately **−10.0%**,
+but the parallel-pre-trends restriction is strongly rejected and a fake-2019 placebo is
+economically large. DiD is consequently retained only as a benchmark. Commodity-level
+Synthetic Control provides generally negative but heterogeneous evidence, with the strongest
+suggestive result in chana. Overall, the hypothesized increase in spot volatility is **not
+supported**, while a broad causal reduction in volatility is also not established.
 
-These conclusions leave the futures-versus-spot price-discovery question open as the main
-future extension rather than treating it as something already established by the completed
-analysis.
+H3 asks a separate spot-market-functioning question. Its variance-ratio and cross-mandi
+integration results point in the direction of weaker post-suspension efficiency and spatial
+integration, but the small commodity sample and descriptive pairwise structure require a
+suggestive rather than definitive interpretation.
+
+H2 combines the future price-discovery, hedging and participant-structure questions. It is not
+a completed empirical hypothesis in the current project. Direct futures-versus-spot analysis
+remains the principal extension if sufficiently reliable historical futures data become
+available.

@@ -1,7 +1,7 @@
-PLACEBO (fake ban 2019-12-20, data < 2021-12-20): beta=-0.0667 (-6.5%), p=0.3443
-  pass rule: ~zero and insignificant; a 'significant effect' here means the design finds effects where none can exist.
-  lead_18_13: beta=+0.0401, p=0.7071
-  lead_12_7: beta=+0.1334, p=0.1843
-  lead_6_2: beta=+0.0696, p=0.1653
-JOINT LEAD TEST (3 half-year lead bins = 0): stat=2.67, p=0.4453
-  pre-registered rule: rejection -> DiD dead, synthetic control primary.
+PLACEBO (fake transition Aug-Dec 2019 excluded; fake post Jan 2020; actual-treatment data excluded): beta=-0.1010 (-9.6%), p=0.1569, p_t(G-1)=0.1804
+  pass rule: approximately zero and statistically insignificant; a placebo effect would weaken the design.
+  lead_18_13: beta=-0.2263, p=0.0616
+  lead_12_7: beta=-0.1446, p=0.1655
+  lead_6_2: beta=+0.0412, p=0.6053
+JOINT LEAD TEST (3 half-year lead bins = 0): stat=23.86, p=0.0000, F_ref=7.95, p_F(3,13)=0.0029
+  interpretation: parallel pre-trends are rejected under the small-cluster F reference; the DiD coefficient should not be interpreted causally.

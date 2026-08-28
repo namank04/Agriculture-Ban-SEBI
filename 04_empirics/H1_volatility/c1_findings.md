@@ -15,7 +15,7 @@ not support an aggregate increase in volatility after the suspension.
 ## 2. Data and sample
 
 The analysis uses district-level mandi spot-price data. Daily price series are used to
-construct rolling 30-day realized volatility, which is then aggregated to a monthly panel.
+construct rolling 30-observation realized volatility, which is then aggregated to a monthly panel.
 
 The main outcome is:
 
@@ -47,6 +47,9 @@ The final comparison group consists of nine commodities:
 - maize
 - jowar
 - bajra (partial coverage)
+
+This nine-commodity comparison set is frozen for the final reported H1 results; adding new
+commodities to the underlying data does not automatically change the estimation donor pool.
 
 The estimation panel contains district-level observations, but treatment is assigned at the
 commodity level. Inference therefore accounts for the relatively small number of commodity
@@ -85,14 +88,7 @@ policy-associated change.
 In-space placebo tests are used to evaluate how unusual the treated-unit gap is relative to
 gaps obtained when donor commodities are artificially treated.
 
-### 3.3 Synthetic Difference-in-Differences
-
-Synthetic Difference-in-Differences is used as an additional counterfactual estimator,
-combining features of Difference-in-Differences and Synthetic Control.
-
-Results are reported both for the pooled treated group and separately by commodity.
-
-### 3.4 Validation and robustness
+### 3.3 Validation and robustness
 
 The main estimates are evaluated using:
 
@@ -100,7 +96,6 @@ The main estimates are evaluated using:
 - leave-one-commodity-out specifications;
 - placebo treatment dates;
 - pre-treatment trend tests;
-- wild-cluster bootstrap inference;
 - alternative counterfactual estimators.
 
 These checks are important because the number of independent treatment clusters is small and
@@ -122,7 +117,6 @@ However, the estimate is not statistically significant under commodity-clustered
 - estimated effect: **−9.8%**
 - number of commodity clusters: **14**
 - clustered small-sample p-value: approximately **0.145**
-- wild-cluster bootstrap p-value: approximately **0.153**
 
 Therefore, the main aggregate result should not be interpreted as evidence that the
 suspension significantly reduced volatility.
@@ -135,6 +129,8 @@ increase in spot-price volatility following the suspension**.
 ## 5. Sensitivity to the comparison group
 
 The choice of comparison commodities has an important effect on the estimated magnitude.
+This donor-pool progression is retained as a substantive robustness result because it shows
+how strongly the estimated treatment effect depends on the quality of the counterfactual.
 
 An earlier specification using a narrower comparison group consisting mainly of
 industrial and spice commodities produced an estimated effect of approximately:
@@ -154,43 +150,12 @@ This difference shows that the result is sensitive to the construction of the
 counterfactual. The broader nine-commodity comparison group is therefore used for the final
 interpretation.
 
-The earlier −20.7% estimate remains useful as a robustness and model-development result, but
+The five-donor −20.7% estimate is retained as a donor-sensitivity result, but
 it is not treated as the preferred estimate.
 
 ---
 
-## 6. Synthetic Difference-in-Differences results
-
-The pooled Synthetic Difference-in-Differences estimate is:
-
-**−19.1%**
-
-with a placebo-based z-statistic of approximately:
-
-**−1.88**
-
-This is directionally consistent with the Difference-in-Differences estimate but is not
-strong enough to provide decisive aggregate statistical evidence.
-
-Commodity-level Synthetic Difference-in-Differences estimates are:
-
-| Commodity | Estimated effect | Approx. z-statistic |
-|---|---:|---:|
-| Chana | **−38.7%** | **−2.05** |
-| Mustard | −15.2% | −0.68 |
-| Wheat | +0.4% | +0.02 |
-| Soybean | −26.1% | −1.32 |
-| Moong | −11.5% | −0.53 |
-
-The strongest individual result is obtained for chana.
-
-Wheat produces an estimate close to zero under Synthetic Difference-in-Differences, which
-also indicates that its result is sensitive to estimator choice and should be interpreted
-carefully.
-
----
-
-## 7. Synthetic Control results
+## 6. Synthetic Control results
 
 Commodity-level Synthetic Control produces the following estimated post-suspension effects:
 
@@ -211,7 +176,7 @@ for an individual treated commodity.
 
 ---
 
-## 8. Robustness of the aggregate estimate
+## 7. Robustness of the aggregate estimate
 
 The estimated aggregate effect remains negative under the main data-quality and liquidity
 restrictions.
@@ -242,7 +207,7 @@ interventions.
 
 ---
 
-## 9. Placebo and pre-treatment validation
+## 8. Placebo and pre-treatment validation
 
 The final specification performs substantially better in the main falsification exercises
 than earlier versions of the panel.
@@ -254,7 +219,6 @@ The placebo-date estimate is approximately:
 with:
 
 - conventional placebo p-value ≈ **0.34**
-- wild-cluster bootstrap p-value ≈ **0.43**
 
 The joint pre-treatment trend test gives:
 
@@ -266,7 +230,7 @@ policy intervention.
 
 ---
 
-## 10. Trading-day correction
+## 9. Trading-day correction
 
 During validation, an earlier version of the volatility panel produced a substantial effect
 around a false treatment date and problematic pre-treatment behaviour.
@@ -288,62 +252,58 @@ specification.
 
 ---
 
-## 11. Commodity-level interpretation
+## 10. Commodity-level interpretation
 
-### 11.1 Chana
+### 10.1 Chana
 
 Chana provides the clearest evidence of lower spot-price volatility after the suspension.
 
-- Synthetic DiD: **−38.7%**
 - Synthetic Control: **−37.3%**
 
-The similar magnitude across the two synthetic estimators makes chana the strongest
-commodity-level result in the volatility analysis.
+This is the strongest commodity-level result in the volatility analysis. With nine
+donors, however, the in-space placebo p-value is bounded below by 0.10.
 
 The limited number of donor commodities nevertheless restricts the precision of
 Synthetic-Control placebo inference.
 
-### 11.2 Mustard
+### 10.2 Mustard
 
-Mustard produces negative estimates under both synthetic approaches:
+Mustard's Synthetic Control estimate is negative:
 
-- Synthetic DiD: **−15.2%**
 - Synthetic Control: **−28.2%**
 
 The direction is consistent with lower volatility, but statistical evidence is weak.
 
-### 11.3 Soybean
+### 10.3 Soybean
 
 Soybean also produces negative estimates:
 
-- Synthetic DiD: **−26.1%**
 - Synthetic Control: **−27.6%**
 
-The magnitudes are similar across the two methods, although inference remains weak.
+The estimate is negative, although placebo inference remains weak.
 
-### 11.4 Wheat
+### 10.4 Wheat
 
 Wheat is the most difficult treated commodity to interpret.
 
-Synthetic DiD gives an effect close to zero, while Synthetic Control produces a much larger
-negative estimate.
+- Synthetic Control: **−37.8%**
 
-The disagreement between estimators, together with contemporaneous agricultural and trade
-policy interventions, makes wheat a less reliable commodity for isolating the effect of the
-derivatives suspension.
+Its in-space placebo p-value is **0.60**, so the estimate is not unusually large relative to
+placebo gaps. More importantly, contemporaneous MSP, procurement, export and other policy
+interventions make wheat a less reliable commodity for isolating the effect of the derivatives
+suspension.
 
-### 11.5 Moong
+### 10.5 Moong
 
 Moong produces relatively small negative effects:
 
-- Synthetic DiD: **−11.5%**
 - Synthetic Control: **−8.7%**
 
 The statistical evidence is weak.
 
 ---
 
-## 12. District-level Synthetic Control
+## 11. District-level Synthetic Control
 
 Synthetic Control was also estimated at the district level to examine heterogeneity within
 treated commodities.
@@ -361,16 +321,13 @@ as the primary basis for statistical inference.
 
 ---
 
-## 13. Conditional-volatility evidence
+## 12. Conditional-volatility evidence
 
-A supplementary ICSS/GARCH analysis was used to examine whether the suspension coincided with
-a distinct conditional-volatility regime change.
 
-Among the commodity series tested, ICSS does not identify a volatility break close to the
-suspension date.
 
-The district-median chana GARCH specification is unstable or degenerate and is therefore not
-used as primary evidence.
+
+
+
 
 The conditional-volatility analysis consequently provides no additional evidence of a
 post-suspension increase in volatility. The main conclusion is based on the realized-volatility
@@ -378,7 +335,7 @@ counterfactual analysis.
 
 ---
 
-## 14. Limitations
+## 13. Limitations
 
 Several limitations are important when interpreting the results.
 
@@ -417,7 +374,7 @@ in volatility.
 
 ---
 
-## 15. Conclusion
+## 14. Conclusion
 
 The empirical analysis does not support the hypothesis that India's 2021 suspension of
 agricultural commodity derivatives increased spot-price volatility.
@@ -429,12 +386,12 @@ The most appropriate aggregate conclusion is therefore:
 
 **there is no evidence of an increase in spot-price volatility following the suspension.**
 
-The strongest evidence of lower volatility is concentrated in **chana**, for which both
-Synthetic Difference-in-Differences and Synthetic Control produce effects of approximately
-−37% to −39%.
+The strongest commodity-level evidence of lower volatility is concentrated in **chana**.
+Synthetic Control estimates an effect of approximately **−37.3%**, with an in-space placebo
+p-value of **0.10**.
 
-Results for mustard, soybean and moong are negative but statistically weaker. Wheat is
-particularly sensitive to estimator choice and concurrent policy interventions.
+Results for mustard, soybean and moong are negative but have weaker placebo evidence. Wheat is
+particularly difficult to interpret because of concurrent policy interventions.
 
 The analysis also shows that the estimated magnitude depends materially on the choice of
 counterfactual. Expanding the comparison set from the earlier narrow donor group changes the
@@ -444,3 +401,44 @@ Taken together, the results reject a simple interpretation in which the suspensi
 a broad increase in spot-market volatility. They instead indicate a modest negative aggregate
 estimate with substantial commodity heterogeneity and considerable uncertainty around causal
 attribution.
+
+## 15. Reproducibility and inference audit — 28 August 2026
+
+The final H1 district-panel result was independently reconstructed from the
+current repository before preparation of the final report.
+
+The final 14-commodity candidate sample contains **147,616** monthly
+commodity-district observations. **1,109 observations (0.75%)** have zero
+measured `rv30`; because the main outcome is `ln(rv30)`, these observations
+cannot be logged and are excluded. The resulting estimation sample contains
+**146,507 observations, 2,244 commodity-district units, and 14 commodity
+clusters (5 treated and 9 controls)**.
+
+### Treatment-month sensitivity
+
+The December 2021 monthly cell combines observations from before and after the
+20 December common treatment date. This coding choice is not driving the main
+estimate:
+
+| Treatment-month rule | Estimated change |
+|---|---:|
+| December 2021 counted as post | **−9.79%** |
+| December 2021 retained as pre; post begins January 2022 | **−9.83%** |
+| December 2021 dropped; post begins January 2022 | **−9.92%** |
+
+### Estimation-window sensitivity
+
+The magnitude is more sensitive to the overall estimation horizon:
+
+| Window around December 2021 | Estimated change | t(G−1)-reference p |
+|---|---:|---:|
+| ±12 months | **−20.45%** | **0.0074** |
+| ±24 months | **−10.48%** | **0.1589** |
+| ±36 months | **−4.84%** | **0.5304** |
+| Full available panel | **−9.79%** | **0.1447** |
+
+The shorter-window result is therefore reported as a sensitivity result rather
+than selected as the headline specification. The preferred interpretation is
+that the negative association is strongest relatively close to the suspension
+and attenuates as increasingly distant periods and additional policy changes
+enter the comparison.

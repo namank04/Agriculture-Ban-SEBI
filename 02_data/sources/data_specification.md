@@ -23,13 +23,13 @@ Collect nothing no estimator consumes; promise no estimator data we cannot sourc
 ## The nine streams
 | # | Stream | Variables | Freq | Window | Source | Feeds | Status |
 |---|---|---|---|---|---|---|---|
-| 1 | NCDEX futures bhavcopy (banned 6) | OHLC, vol, value, OI, expiry by contract | daily | 2017–2021 | exchange request / vendor / Wayback | H2 H5 H8 | 🔴 blocked (archive floor Jul 2024) |
+| 1 | NCDEX futures bhavcopy (banned 6) | OHLC, vol, value, OI, expiry by contract | daily | 2017–2021 | exchange request / vendor / Wayback | H2 H5 | 🔴 blocked (archive floor Jul 2024) |
 | 2 | MCX futures bhavcopy (CPO) | same | daily | 2017–2021 | MCX contract-wise endpoint (browser route) | H2 H4 | 🟢 acquired 2026-06-10 (64 contracts incl vol+OI; c1–c3 constructed) |
 | 3 | Controls' futures | same | daily | 2017–2025 | NCDEX bhavcopy (post-Jul-2024 public; earlier same problem as #1) | H1 H5 | 🟡 partial |
 | 4 | Spot prices | mandi modal + exchange polled spot | daily | 2017–2025 | Agmarknet; exchange polled spot archives | H1 H2 H3 H4 H7 | 🟢 public |
 | 5 | Mandi arrivals | qty arrived by mandi | daily/wk | 2017–2025 | Agmarknet | H7 | 🟢 public |
-| 6 | Participant-wise OI | OI by category | monthly | 2019–2021 | SEBI monthly bulletins | H8 | 🟢 public, tedious |
-| 7 | Delivery per expiry | qty delivered | per expiry | 2017–2021 | NCCL circulars / exchange | H8 | 🟡 scattered |
+| 6 | Participant-wise OI | OI by category | monthly | 2019–2021 | SEBI monthly bulletins | H2 (future) | 🟢 public, tedious |
+| 7 | Delivery per expiry | qty delivered | per expiry | 2017–2021 | NCCL circulars / exchange | H2 (future) | 🟡 scattered |
 | 8 | International + FX | CBOT wheat & soy, Bursa FCPO; USD/INR, MYR/INR | daily | 2017–2025 | public vendors; RBI | H4 | 🟢 public |
 | 9 | Structural | state sowing area; CPI/WPI food; MSP + procurement qty; policy-intervention dates | ann/mo | 2015–2025 | DES; MoSPI; OEA; CACP/FCI; confounder ledger | H6 H7 + robustness | 🟢 public |
 

@@ -1,13 +1,12 @@
-"""C1 step (H1), heavy variant: DISTRICT-UNIT synthetic control for the few-cluster escape.
+"""C1 step (H1): district-unit Synthetic Control heterogeneity analysis.
 
-run_c1_scm.py collapses each commodity to ONE district-median path and fits 6 SCMs (one per
-banned commodity) against the donor-commodity medians. That gives only ~6 treated units — the
-"few-cluster" problem for inference. This script instead treats EACH banned-commodity DISTRICT
-as its own treated unit and fits an SCM for each, against the SAME donor pool: the cross-district
-MEDIAN ln(rv30) path of each donor commodity. The result is a distribution of district-level ATTs
-per banned commodity (tens-to-hundreds of treated units), and in-space placebo inference built
-from donor-commodity districts treated as fake-treated. This is the heavier estimator the project
-wants for the few-cluster escape.
+The policy is assigned at the commodity level, so district-level SCM does not create
+additional independent treatment assignments and is not used to solve few-cluster
+inference. It is retained only to describe heterogeneity across treated districts.
+
+Each treated commodity-district series is compared with the same frozen final donor
+pool used by the commodity-level SCM. In-space placebos are constructed from donor
+commodity districts using leave-one-donor-out donor medians.
 
 INPUT : 02_data/clean/vol_panel_monthly.csv  (commodity x district x month, rv30, trading-day-clean)
 OUTPUT: 04_empirics/H1_volatility/output/{c1_scm_district_results.csv, c1_scm_district_dist.png}
@@ -33,25 +32,21 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
+from utils import (
+    FINAL_H1_DONORS,
+    FINAL_H1_TREAT_DATES,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
 PANEL_NAME = sys.argv[1] if len(sys.argv) > 1 else "vol_panel_monthly.csv"
 PANEL = ROOT / "02_data" / "clean" / PANEL_NAME
 SUFFIX = "_national" if "national" in PANEL_NAME else ""
 OUTDIR = ROOT / "04_empirics" / "H1_volatility" / "output"
 
-# Donor pool = Option B (decision_log 2026-06-21). guar id 75 EXCLUDED.
-DONORS = ["castor", "guarseed413", "cotton", "jeera", "turmeric"]   # clean core
-# Food donors (added once acquired+screened); auto-included when present in the panel.
-FOOD_DONORS = ["barley", "maize", "jowar", "bajra", "ragi", "groundnut", "sesamum", "sunflower"]
+# Frozen final donor pool used for all reported H1 SCM results.
+DONORS = list(FINAL_H1_DONORS)
 # Treated banned commodities with per-commodity suspension dates (staggered).
-TREAT_DATE = {
-    "chana":   pd.Timestamp("2021-08-16"),
-    "mustard": pd.Timestamp("2021-10-08"),
-    "wheat":   pd.Timestamp("2021-12-20"),
-    # paddy DROPPED — MSP price-censored (40.3% flat returns; FCI procurement pins spot); decision_log 2026-06-21
-    "soybean": pd.Timestamp("2021-12-20"),
-    "moong":   pd.Timestamp("2021-12-20"),
-}
+TREAT_DATE = dict(FINAL_H1_TREAT_DATES)
 MSP_FLAG = {"wheat"}  # paddy dropped; wheat kept (core trio) but MSP-flagged as a robustness caveat
 
 MIN_PRE, MIN_POST = 12, 6
@@ -111,13 +106,11 @@ def main():
     OUTDIR.mkdir(parents=True, exist_ok=True)
     panel = pd.read_csv(PANEL, parse_dates=["date"])
     med = donor_medians(panel)
-    donor_list = [d for d in DONORS + FOOD_DONORS if d in med.columns]
-    missing = [d for d in DONORS if d not in med.columns]
+    donor_list = list(DONORS)
+    missing = [d for d in donor_list if d not in med.columns]
     if missing:
-        raise SystemExit(f"core donors missing from panel: {missing}")
-    food_present = [d for d in FOOD_DONORS if d in med.columns]
-    print(f"panel={PANEL_NAME}  donor pool ({len(donor_list)}): {donor_list}")
-    print(f"food donors present: {food_present if food_present else 'none yet (clean-core only)'}")
+        raise SystemExit(f"final H1 donors missing from panel: {missing}")
+    print(f"panel={PANEL_NAME}  frozen donor pool ({len(donor_list)}): {donor_list}")
 
     # ----- placebo distribution: donor-commodity districts as fake-treated -----
     # LIKE-FOR-LIKE null (adversarial-review fix 2026-06-21): the treated statistic is a

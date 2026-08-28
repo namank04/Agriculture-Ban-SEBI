@@ -1,7 +1,7 @@
 """Clean CEDA Agmarknet NATIONAL spot prices -> pipeline formats.
 INPUT : 02_data/raw/agmarknet/national/<slug>_national_price_2017_2026.json
         (CEDA API rows: date, commodity_id, min_price, max_price, modal_price; Rs/quintal)
-OUTPUT: 02_data/clean/spot_daily_<slug>.csv          cols: date, price   (feeds run_v0_garch.py)
+OUTPUT: 02_data/clean/spot_daily_<slug>.csv          cols: date, price
         02_data/clean/vol_panel_monthly_national.csv  same schema as vol_panel_monthly.csv
         with state="ALL", district="NATIONAL"        (feeds run_v0_did.py national first pass)
 Spot series are NOT truncated at the ban date (rule 4 applies to futures only — post-ban

@@ -1,6 +1,6 @@
 """Download SEBI monthly bulletins (2019-01 .. 2021-12) -> raw/sebi_bulletins/.
 
-These bulletins carry participant-wise open-interest tables needed for H8.
+These bulletins carry participant-wise market tables that may support a future H2 market-structure extension.
 DOWNLOAD ONLY: this script never parses/extracts/transforms document content.
 
 Discovery note (2026-06-10)
@@ -15,7 +15,7 @@ could not be located and must be fetched manually).
 
 Format note: from 2019 SEBI publishes the bulletin as MSWord (narrative) +
 MSExcel (tables) rather than a single PDF. Both are downloaded per month; a PDF
-is downloaded too whenever the detail page links one. For H8 extraction the
+is downloaded too whenever the detail page links one. For future H2 market-structure work the
 Excel tables file is the one that matters.
 
 Usage:  python download_sebi_bulletins.py
